@@ -1,0 +1,18 @@
+<h2>🥤 Drinks für Runde "{{ roundCode }}"</h2>
+
+<ul>
+  @for (drink of drinks; track drink.id) {
+    <li>
+      {{ drink.drink_name }} – {{ drink.quantity_ml }}ml
+      <button (click)="deleteDrink(drink.id)">🗑️ Löschen</button>
+    </li>
+  }
+</ul>
+
+<hr />
+
+<div class="actions">
+  <button (click)="addManual()">➕ Manuell hinzufügen</button>
+  <button (click)="addByScanner()">📷 Mit Scanner hinzufügen</button>
+  <button (click)="startGame()">🚀 Spiel starten</button>
+</div>

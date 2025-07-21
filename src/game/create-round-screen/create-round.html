@@ -1,0 +1,34 @@
+<h2>🎮 Neue Runde erstellen</h2>
+
+<form [formGroup]="form" (ngSubmit)="createGame()">
+  <label>Runden-Code:</label>
+  <input formControlName="round_code" (blur)="checkCode()" />
+
+  @if (form.get('round_code')?.touched && form.get('round_code')?.hasError('minlength')) {
+    <div class="error">❗ Mindestens 5 Zeichen erforderlich</div>
+  }
+
+  @if (codeAvailable === false) {
+    <div class="error">❌ Code bereits vergeben</div>
+  }
+
+  @if (codeAvailable === true) {
+    <div class="success">✅ Code verfügbar</div>
+  }
+
+  <label>Spieler Team 1:</label>
+  <input type="number" formControlName="num_players_team1" min="1" />
+
+  <label>Spieler Team 2:</label>
+  <input type="number" formControlName="num_players_team2" min="1" />
+
+  <label>Zeit für Team 1 (Sek.):</label>
+  <input type="number" formControlName="time_team1" min="10" />
+
+  <label>Zeit für Team 2 (Sek.):</label>
+  <input type="number" formControlName="time_team2" min="10" />
+
+  <button type="submit" [disabled]="form.invalid || codeAvailable === false || creating">
+    ✅ Nächster Schritt: Drinks Hinzufügen
+  </button>
+</form>
