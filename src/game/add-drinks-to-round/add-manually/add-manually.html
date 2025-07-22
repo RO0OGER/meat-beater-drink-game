@@ -1,0 +1,48 @@
+<h2>➕ Getränk hinzufügen (Runde: {{ roundCode }})</h2>
+
+<div class="section">
+  <h3>🔍 Mit Barcode hinzufügen</h3>
+  <input type="text" [(ngModel)]="barcode" placeholder="Barcode eingeben" />
+  <input type="number" [(ngModel)]="barcodeQuantity" placeholder="Verwendete Menge (ml)" />
+  <button (click)="addByBarcode()">➕ Hinzufügen mit Barcode</button>
+</div>
+
+<hr />
+
+<div class="section">
+  <h3>✍️ Manuell hinzufügen</h3>
+  <input type="text" [(ngModel)]="manualDrinkName" placeholder="Getränkename" />
+  <input type="number" [(ngModel)]="manualQuantity" placeholder="Menge in ml" />
+  <select [(ngModel)]="manualType">
+    <option value="">-- Typ wählen --</option>
+    <option value="mixable">Mischbar</option>
+    <option value="non-mixable">Nicht mischbar</option>
+    <option value="dilution">Verdünnung</option>
+  </select>
+  <button (click)="addManually()">➕ Manuell hinzufügen</button>
+</div>
+
+<hr />
+
+<div class="section">
+  <h3>🧾 Bereits hinzugefügte Getränke</h3>
+  @if (roundDrinks.length > 0) {
+    <ul>
+      @for (drink of roundDrinks; track drink.id) {
+        <li>
+          {{ drink.drink_name }} – {{ drink.quantity_ml }}ml ({{ drink.type }})
+          <button (click)="deleteDrink(drink.id)">🗑️ Löschen</button>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p>Keine Getränke hinzugefügt.</p>
+  }
+</div>
+
+<hr />
+
+<div class="actions">
+  <button (click)="backToOverview()">🔙 Zurück zur Übersicht</button>
+  <button (click)="startGame()">🚀 Spiel starten</button>
+</div>

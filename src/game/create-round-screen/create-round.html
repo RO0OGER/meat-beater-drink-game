@@ -6,14 +6,19 @@
 
   @if (form.get('round_code')?.touched && form.get('round_code')?.hasError('minlength')) {
     <div class="error">❗ Mindestens 5 Zeichen erforderlich</div>
+    <p class="hint">
+      Nur Buchstaben, Zahlen, Bindestrich (-) und Unterstrich (_) erlaubt. Keine Leerzeichen oder Sonderzeichen.
+    </p>
   }
-
   @if (codeAvailable === false) {
     <div class="error">❌ Code bereits vergeben</div>
   }
 
   @if (codeAvailable === true) {
     <div class="success">✅ Code verfügbar</div>
+  }
+  @if (form.get('round_code')?.touched && form.get('round_code')?.hasError('invalidFormat')) {
+    <div class="error">❗ Nur Buchstaben, Zahlen, - und _ erlaubt</div>
   }
 
   <label>Spieler Team 1:</label>

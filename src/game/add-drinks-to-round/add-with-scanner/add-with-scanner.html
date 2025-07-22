@@ -1,0 +1,65 @@
+<h2>📷 Barcode-Scanner Modus (Runde: {{ roundCode }})</h2>
+
+<div>
+  <button (click)="toggleScanner()">
+    {{ scannerActive ? '🛑 Scanner deaktivieren' : '✅ Scanner aktivieren' }}
+  </button>
+  @if (scannerActive) {
+    <p>Scanner ist aktiv – bitte Barcode scannen.</p>
+  } @else {
+    <p>Scanner ist deaktiviert.</p>
+  }
+</div>
+
+<hr />
+
+<div>
+  <h3>Bereits hinzugefügte Getränke</h3>
+
+  @if (roundDrinks.length > 0) {
+    <ul>
+      @for (drink of roundDrinks; track drink.id) {
+        <li>
+          {{ drink.drink_name }} –
+          <input
+            type="number"
+            [value]="drink.quantity_ml"
+            (change)="updateQuantity(drink.id, $any($event.target).value)"
+            min="0"
+          />
+          ml
+
+          <button (click)="deleteDrink(drink.id)">🗑️</button>
+
+          @if (drink.drink_id) {
+            <button (click)="setToFullQuantity(drink.id)">💯</button>
+          }
+        </li>
+      }
+    </ul>
+  } @else {
+    <p>Keine Getränke hinzugefügt.</p>
+  }
+</div>
+
+@if (hasZeroQuantity()) {
+  <p>⚠️ Nicht alle Mengen wurden definiert. Bitte vor dem Start nachtragen.</p>
+}
+
+<hr />
+
+<div>
+  <button
+    (click)="backToOverview()"
+    [disabled]="hasZeroQuantity()"
+  >
+    Zurück zur Übersicht
+  </button>
+
+  <button
+    (click)="startGame()"
+    [disabled]="hasZeroQuantity()"
+  >
+    Spiel starten
+  </button>
+</div>

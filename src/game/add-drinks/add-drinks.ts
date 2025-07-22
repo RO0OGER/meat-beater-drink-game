@@ -14,7 +14,7 @@ import { CommonModule } from '@angular/common';
 })
 export class AddDrinksComponent implements OnInit {
   roundCode = '';
-  drinks: (RoundDrink & { drink_name: string })[] = [];
+  drinks: RoundDrink[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -32,7 +32,7 @@ export class AddDrinksComponent implements OnInit {
       return;
     }
 
-    this.drinks = await this.roundDrinkService.getRoundDrinksWithDrinkNames(roundId);
+    this.drinks = await this.roundDrinkService.getRoundDrinksByRoundId(roundId);
   }
 
   async deleteDrink(drinkId: string) {

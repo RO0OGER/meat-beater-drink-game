@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import {RoundService} from '../../services/round';
+import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { RoundService } from '../../services/round';
 import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
@@ -22,7 +22,14 @@ export class CreateRound {
     private router: Router
   ) {
     this.form = this.fb.group({
-      round_code: ['', [Validators.required, Validators.minLength(5)]],
+      round_code: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(5),
+          this.codeFormatValidator
+        ]
+      ],
       num_players_team1: [1, [Validators.required, Validators.min(1)]],
       num_players_team2: [1, [Validators.required, Validators.min(1)]],
       time_team1: [60, [Validators.required, Validators.min(10)]],
@@ -30,9 +37,17 @@ export class CreateRound {
     });
   }
 
+  codeFormatValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value as string;
+    const isValid = /^[a-zA-Z0-9_-]+$/.test(value);
+    return isValid ? null : { invalidFormat: true };
+  }
+
   async checkCode() {
-    const code = this.form.get('round_code')?.value;
-    if (code.length < 5) return;
+    const control = this.form.get('round_code');
+    const code = control?.value;
+    if (!code || control?.invalid) return;
+
     const existing = await this.roundService.getRoundByCode(code);
     this.codeAvailable = !existing;
   }

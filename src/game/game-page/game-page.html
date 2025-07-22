@@ -1,0 +1,31 @@
+<h2>🏓 Game Page – Runde: {{ roundCode }}</h2>
+
+<div class="section">
+  <h3>⏱️ Verbleibende Zeit</h3>
+  <p>Team 1: {{ remainingTimeTeam1 }} Sekunden</p>
+  <p>Team 2: {{ remainingTimeTeam2 }} Sekunden</p>
+</div>
+
+<div class="section">
+  <h3>🎯 Treffer</h3>
+  <p>Team 1: {{ team1Hits }} Treffer</p>
+  <p>Team 2: {{ team2Hits }} Treffer</p>
+</div>
+
+<div class="section">
+  <h3>👥 Spieleranzahl</h3>
+  <p>Team 1: {{ numPlayersTeam1 }}</p>
+  <p>Team 2: {{ numPlayersTeam2 }}</p>
+</div>
+
+<div class="section">
+  <h3>🖱️ Manuelle Treffer</h3>
+  <button (click)="goToHitPage('team1')">+1 Treffer Team 1</button>
+  <button (click)="goToHitPage('team2')">+1 Treffer Team 2</button>
+</div>
+
+<div class="section">
+  <button (click)="navigateToSettings()">⚙️ Einstellungen</button>
+</div>
+
+<p>Scanner ist aktiv – QR-Code „hit-team1“ oder „hit-team2“ wird erkannt.</p>
