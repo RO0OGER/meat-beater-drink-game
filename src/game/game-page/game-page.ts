@@ -1,6 +1,6 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import {SupabaseService} from '../../services/supabase';
+import { SupabaseService } from '../../services/supabase';
 
 @Component({
   selector: 'app-game-page',
@@ -16,6 +16,7 @@ export class GamePage implements OnInit {
   remainingTimeTeam2 = 0;
   numPlayersTeam1 = 0;
   numPlayersTeam2 = 0;
+  private _scannerBuffer = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -50,10 +51,10 @@ export class GamePage implements OnInit {
   handleScannerInput(event: KeyboardEvent) {
     if (event.key === 'Enter') {
       const value = this._scannerBuffer.trim().toLowerCase();
-      if (value === 'hit-team1') {
-        this.goToHitPage('team1');
-      } else if (value === 'hit-team2') {
-        this.goToHitPage('team2');
+      if (value === 'hitteam1') {
+        this.navigateToHitAnimation('team1');
+      } else if (value === 'hitteam2') {
+        this.navigateToHitAnimation('team2');
       }
       this._scannerBuffer = '';
     } else {
@@ -61,13 +62,11 @@ export class GamePage implements OnInit {
     }
   }
 
-  private _scannerBuffer = '';
-
-  goToHitPage(team: 'team1' | 'team2') {
-    this.router.navigate([`/hit-${team}`, this.roundCode]);
+  navigateToHitAnimation(team: 'team1' | 'team2') {
+    this.router.navigate([`/animation-hit`, team, this.roundCode]);
   }
 
   navigateToSettings() {
-    this.router.navigate(['/round-settings', this.roundCode]);
+    this.router.navigate(['/settings', this.roundCode]);
   }
 }

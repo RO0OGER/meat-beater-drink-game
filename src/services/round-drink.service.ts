@@ -102,4 +102,35 @@ export class RoundDrinkService {
       drink_name: item.drinks?.name ?? 'Unbekannt',
     }));
   }
+  async getRoundDrinkById(id: string): Promise<RoundDrink & { drink_name: string } | null> {
+    const { data, error } = await this.supabaseService.client
+      .from('round_drinks')
+      .select('*, drink_id(name)')
+      .eq('id', id)
+      .single();
+
+    if (error || !data) {
+      console.error('Fehler beim Abrufen von round_drink mit drink_name:', error?.message);
+      return null;
+    }
+
+    return {
+      ...data,
+      drink_name: data.drink_id?.name ?? 'Unbekannt',
+    };
+  }
+
+  async deleteAllRoundDrinksByRoundId(roundId: string): Promise<boolean> {
+    const { error } = await this.supabaseService.client
+      .from('round_drinks')
+      .delete()
+      .eq('round_id', roundId);
+
+    if (error) {
+      console.error('Fehler beim Löschen aller RoundDrinks für Runde:', error.message);
+      return false;
+    }
+
+    return true;
+  }
 }

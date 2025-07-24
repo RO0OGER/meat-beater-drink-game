@@ -4,6 +4,7 @@ import { RoundDrinkService } from '../../services/round-drink.service';
 import { RoundDrink } from '../../model/RoundDrink';
 import { RoundService } from '../../services/round';
 import { CommonModule } from '@angular/common';
+import {DrinkGeneratorService} from '../../services/generate-drink';
 
 @Component({
   selector: 'app-add-drinks',
@@ -20,7 +21,8 @@ export class AddDrinksComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private roundDrinkService: RoundDrinkService,
-    private roundService: RoundService
+    private roundService: RoundService,
+    private drinkGeneratorService: DrinkGeneratorService
   ) {}
 
   async ngOnInit() {
@@ -48,7 +50,20 @@ export class AddDrinksComponent implements OnInit {
     this.router.navigate(['/add-drink-scan', this.roundCode]);
   }
 
-  startGame() {
-    this.router.navigate(['/game', this.roundCode]);
+  async startGame() {
+    const roundId = await this.roundService.getIdByRoundCode(this.roundCode);
+    if (!roundId) {
+      console.error('Runde nicht gefunden');
+      return;
+    }
+
+    const result = await this.drinkGeneratorService.generateDrinks(roundId);
+
+    if (typeof result === 'string') {
+      alert(result); // z. B. "Das gegnerische Team darf den Drink bestimmen"
+      return;
+    }
+
+    this.router.navigate(['/animation/start-round', this.roundCode]);
   }
 }

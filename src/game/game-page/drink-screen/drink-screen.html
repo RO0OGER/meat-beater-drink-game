@@ -1,0 +1,42 @@
+<div class="drink-screen-wrapper">
+  <h1>🍹 Aufgabe für {{ team | uppercase }}</h1>
+
+  <p class="task-line">Aktuelle Aufgabe: <strong>{{ taskLabel }}</strong></p>
+
+  @if (drinksToShow.length === 0) {
+    <p>❌ Es wurden keine Drinks für euch generiert.<br>
+      👉 Das gegnerische Team darf {{ fallbackDrinkCount }} Drinks für euch definieren.</p>
+  } @else {
+    <p>Es wurden {{ drinksToShow.length }} Drinks für euch generiert:</p>
+  }
+  @for (drink of drinksToShow; track drink; let i = $index) {
+    <div class="drink-box">
+      <h3>Drink #{{ i + 1 }}</h3>
+
+      @if (drink.is_mix) {
+        <p>Mischgetränk ({{ drink.total_ml }}ml):</p>
+      } @else {
+        <p>Einzelgetränk ({{ drink.total_ml }}ml):</p>
+      }
+
+      <ul>
+        @for (part of drink.drink_parts_named; track part) {
+          <li>
+            Zutat: <strong>{{ part.name }}</strong> – {{ part.amount }}ml
+          </li>
+        }
+      </ul>
+
+      @if (drink.mix_ratio !== null) {
+        <p>
+          Schnaps: <strong>{{ toTenthFraction(drink.mix_ratio) }}</strong>
+        </p>
+      }
+    </div>
+  }
+
+  <button class="ready-btn" (click)="navigateToCountdown()">
+    ✅ Bereit
+  </button>
+</div>
+

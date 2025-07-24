@@ -3,6 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SupabaseService } from '../../../services/supabase';
 import { FormsModule } from '@angular/forms';
+import {RoundService} from '../../../services/round';
+import {DrinkGeneratorService} from '../../../services/generate-drink';
 
 @Component({
   selector: 'app-add-with-scanner',
@@ -21,7 +23,9 @@ export class AddWithScanner implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private supabase: SupabaseService
+    private supabase: SupabaseService,
+    private roundService: RoundService,
+    private drinkGeneratorService: DrinkGeneratorService
   ) {}
 
   async ngOnInit() {
@@ -106,10 +110,30 @@ export class AddWithScanner implements OnInit {
     this.router.navigate(['/add-drinks', this.roundCode]);
   }
 
-  startGame() {
-    if (this.hasZeroQuantity()) return;
-    this.router.navigate(['/game', this.roundCode]);
+  async startGame() {
+    const roundId = await this.roundService.getIdByRoundCode(this.roundCode);
+    if (!roundId) {
+      console.error('Runde nicht gefunden');
+      return;
+    }
+
+    // ❌ Vorher alle generierten Drinks löschen
+    const deleted = await this.drinkGeneratorService.deleteGeneratedDrinksByRoundId(roundId);
+    if (!deleted) {
+      console.warn('Alte generated_drinks konnten nicht gelöscht werden');
+      // du kannst trotzdem weitermachen oder hier abbrechen
+    }
+
+    const result = await this.drinkGeneratorService.generateDrinks(roundId);
+
+    if (typeof result === 'string') {
+      alert(result); // z. B. "Das gegnerische Team darf den Drink bestimmen"
+      return;
+    }
+
+    this.router.navigate(['/animation/start-round', this.roundCode]);
   }
+
 
   async updateQuantity(roundDrinkId: string, quantity: number) {
     const parsedQuantity = parseInt(quantity as any);

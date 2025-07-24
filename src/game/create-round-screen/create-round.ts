@@ -32,8 +32,8 @@ export class CreateRound {
       ],
       num_players_team1: [1, [Validators.required, Validators.min(1)]],
       num_players_team2: [1, [Validators.required, Validators.min(1)]],
-      time_team1: [60, [Validators.required, Validators.min(10)]],
-      time_team2: [60, [Validators.required, Validators.min(10)]],
+      time_team1_min: [1, [Validators.required, Validators.min(1)]],
+      time_team2_min: [1, [Validators.required, Validators.min(1)]],
     });
   }
 
@@ -57,16 +57,22 @@ export class CreateRound {
 
     this.creating = true;
 
+    const round_code = this.form.value.round_code;
+    const num_players_team1 = this.form.value.num_players_team1;
+    const num_players_team2 = this.form.value.num_players_team2;
+    const time_team1 = this.form.value.time_team1_min * 60; // ⏱ Minuten → Sekunden
+    const time_team2 = this.form.value.time_team2_min * 60;
+
     const success = await this.roundService.createRound(
-      this.form.value.round_code,
-      this.form.value.num_players_team1,
-      this.form.value.num_players_team2,
-      this.form.value.time_team1,
-      this.form.value.time_team2
+      round_code,
+      num_players_team1,
+      num_players_team2,
+      time_team1,
+      time_team2
     );
 
     if (success) {
-      this.router.navigate(['/add-drinks', this.form.value.round_code]);
+      this.router.navigate(['/add-drinks', round_code]);
     }
 
     this.creating = false;

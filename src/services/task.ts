@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Task } from '../model/Task';
-import {SupabaseService} from './supabase';
+import { SupabaseService } from './supabase';
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {
@@ -36,5 +36,20 @@ export class TaskService {
 
     const randomIndex = Math.floor(Math.random() * data.length);
     return data[randomIndex] as Task;
+  }
+
+  async getTaskById(id: string): Promise<Task | null> {
+    const { data, error } = await this.supabaseService.client
+      .from('tasks')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error(`Fehler beim Abrufen der Aufgabe mit ID ${id}:`, error.message);
+      return null;
+    }
+
+    return data as Task;
   }
 }

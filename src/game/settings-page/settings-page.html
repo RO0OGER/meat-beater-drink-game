@@ -1,0 +1,26 @@
+<h2>⚙️ Einstellungen Runde "{{ roundCode }}"</h2>
+
+<div class="nav-actions">
+  <button (click)="goToAddManually()">✍️ Drinks manuell bearbeiten</button>
+  <button (click)="goToAddWithScanner()">📷 Drinks per Scanner hinzufügen</button>
+</div>
+
+<label>Hits Team 1:</label>
+<input type="number" [(ngModel)]="team1Hits" />
+
+<label>Hits Team 2:</label>
+<input type="number" [(ngModel)]="team2Hits" />
+
+<label>Zeit Team 1 (Sekunden):</label>
+<input type="number" [(ngModel)]="remainingTimeTeam1" />
+
+<label>Zeit Team 2 (Sekunden):</label>
+<input type="number" [(ngModel)]="remainingTimeTeam2" />
+
+<label>Spieler Team 1:</label>
+<input type="number" [(ngModel)]="numPlayersTeam1" />
+
+<label>Spieler Team 2:</label>
+<input type="number" [(ngModel)]="numPlayersTeam2" />
+
+<button (click)="saveChanges()">💾 Änderungen speichern</button>

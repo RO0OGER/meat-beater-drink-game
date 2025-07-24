@@ -1,0 +1,7 @@
+<h1>⏳ Zeit: {{ minutes }}:{{ seconds }}</h1>
+
+@if (currentTask) {
+  <p>{{ currentTask.label }}</p>
+}
+
+<button (click)="finishTask()">✅ Aufgabe abschliessen</button>
