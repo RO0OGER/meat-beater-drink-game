@@ -19,6 +19,6 @@ export class AnimationScreenHit implements OnInit {
 
     setTimeout(() => {
       this.router.navigate([`/hit-${this.team}`, this.roundCode]);
-    }, 5000);
+    }, 2500);
   }
 }

@@ -69,4 +69,16 @@ export class GamePage implements OnInit {
   navigateToSettings() {
     this.router.navigate(['/settings', this.roundCode]);
   }
+
+  get remainingTimeTeam1Formatted(): string {
+    const min = Math.floor(this.remainingTimeTeam1 / 60);
+    const sec = this.remainingTimeTeam1 % 60;
+    return `${min}:${sec.toString().padStart(2, '0')}`;
+  }
+
+  get remainingTimeTeam2Formatted(): string {
+    const min = Math.floor(this.remainingTimeTeam2 / 60);
+    const sec = this.remainingTimeTeam2 % 60;
+    return `${min}:${sec.toString().padStart(2, '0')}`;
+  }
 }

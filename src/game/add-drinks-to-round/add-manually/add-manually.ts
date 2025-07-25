@@ -3,8 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../../../services/supabase';
-import {RoundService} from '../../../services/round';
-import {DrinkGeneratorService} from '../../../services/generate-drink';
+import { RoundService } from '../../../services/round';
+import { DrinkGeneratorService } from '../../../services/generate-drink';
 
 type DrinkType = 'mixable' | 'non-mixable' | 'dilution';
 
@@ -26,6 +26,7 @@ export class AddManually implements OnInit {
   roundCode = '';
   roundId = '';
   roundDrinks: any[] = [];
+  roundDrinkChunks: any[][] = [];
 
   constructor(
     private supabase: SupabaseService,
@@ -61,9 +62,18 @@ export class AddManually implements OnInit {
 
     if (!error && data) {
       this.roundDrinks = data;
+      this.roundDrinkChunks = this.chunkArray(data, 2);
     } else {
       console.error('Fehler beim Laden der Getränke:', error?.message);
     }
+  }
+
+  private chunkArray<T>(array: T[], size: number): T[][] {
+    const chunked: T[][] = [];
+    for (let i = 0; i < array.length; i += size) {
+      chunked.push(array.slice(i, i + size));
+    }
+    return chunked;
   }
 
   async addByBarcode() {
@@ -87,7 +97,7 @@ export class AddManually implements OnInit {
         quantity_ml: this.barcodeQuantity,
         used_ml: 0,
         drink_name: data.name,
-        type: data.type, // ← Wird automatisch aus drinks übernommen
+        type: data.type,
       });
 
       this.barcode = '';
@@ -129,20 +139,21 @@ export class AddManually implements OnInit {
       return;
     }
 
-    // 👉 erst aufräumen (egal ob es schon welche gibt)
     const deleted = await this.drinkGeneratorService.deleteGeneratedDrinksByRoundId(roundId);
     if (!deleted) {
-      // kein Hard-Stop nötig – kann trotzdem weitergehen
       console.warn('Konnte vorhandene generated_drinks nicht (vollständig) löschen.');
     }
 
     const result = await this.drinkGeneratorService.generateDrinks(roundId);
 
     if (typeof result === 'string') {
-      alert(result); // z. B. "Das gegnerische Team darf den Drink bestimmen"
+      alert(result);
       return;
     }
 
     this.router.navigate(['/animation/start-round', this.roundCode]);
+  }
+  trackByIndex(index: number, _item: any): number {
+    return index;
   }
 }

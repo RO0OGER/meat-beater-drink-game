@@ -25,6 +25,6 @@ export class AnimationScreenDrinkMixAndAmount implements OnInit {
 
     setTimeout(() => {
       this.router.navigate(['/drink', this.team, this.roundCode, this.taskId]);
-    }, 5000);
+    }, 2110);
   }
 }

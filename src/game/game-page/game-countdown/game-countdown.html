@@ -1,7 +1,9 @@
-<h1>⏳ Zeit: {{ minutes }}:{{ seconds }}</h1>
+<div class="countdown-wrapper app-background-standard">
+  <h1 class="countdown-time">⏳ Zeit: {{ minutes }}:{{ seconds }}</h1>
 
-@if (currentTask) {
-  <p>{{ currentTask.label }}</p>
-}
+  @if (currentTask) {
+    <p class="task-label">{{ currentTask.label }}</p>
+  }
 
-<button (click)="finishTask()">✅ Aufgabe abschliessen</button>
+  <button class="finish-button" (click)="finishTask()">✅ Aufgabe abschliessen</button>
+</div>

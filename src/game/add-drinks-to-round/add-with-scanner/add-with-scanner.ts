@@ -3,8 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SupabaseService } from '../../../services/supabase';
 import { FormsModule } from '@angular/forms';
-import {RoundService} from '../../../services/round';
-import {DrinkGeneratorService} from '../../../services/generate-drink';
+import { RoundService } from '../../../services/round';
+import { DrinkGeneratorService } from '../../../services/generate-drink';
 
 @Component({
   selector: 'app-add-with-scanner',
@@ -17,6 +17,10 @@ export class AddWithScanner implements OnInit {
   roundCode = '';
   roundId = '';
   roundDrinks: any[] = [];
+
+  // neu fuer Listenlogik
+  roundDrinkChunks: any[][] = [];
+
   scannerActive = true;
   scannedBarcode = '';
 
@@ -68,10 +72,9 @@ export class AddWithScanner implements OnInit {
       .single();
 
     if (error || !data) {
-      this.router.navigate(
-        ['/barcode-is-missing', this.roundCode],
-        { queryParams: { barcode, redirect: 'add-drink-scan' } }
-      );
+      this.router.navigate(['/barcode-is-missing', this.roundCode], {
+        queryParams: { barcode, redirect: 'add-drink-scan' },
+      });
     } else {
       await this.supabase.client.from('round_drinks').insert({
         round_id: this.roundId,
@@ -79,7 +82,7 @@ export class AddWithScanner implements OnInit {
         quantity_ml: 0,
         used_ml: 0,
         drink_name: data.name,
-        type: data.type
+        type: data.type,
       });
 
       await this.loadRoundDrinks();
@@ -98,7 +101,21 @@ export class AddWithScanner implements OnInit {
 
     if (!error && data) {
       this.roundDrinks = data;
+      // 8 pro Spalte – passe an, falls du eine andere chunk size willst
+      this.roundDrinkChunks = this.chunkArray(data, 8);
     }
+  }
+
+  private chunkArray<T>(array: T[], size: number): T[][] {
+    const chunked: T[][] = [];
+    for (let i = 0; i < array.length; i += size) {
+      chunked.push(array.slice(i, i + size));
+    }
+    return chunked;
+  }
+
+  trackByIndex(index: number, _item: any): number {
+    return index;
   }
 
   async deleteDrink(id: string) {
@@ -134,9 +151,8 @@ export class AddWithScanner implements OnInit {
     this.router.navigate(['/animation/start-round', this.roundCode]);
   }
 
-
   async updateQuantity(roundDrinkId: string, quantity: number) {
-    const parsedQuantity = parseInt(quantity as any);
+    const parsedQuantity = parseInt(quantity as any, 10);
     if (isNaN(parsedQuantity) || parsedQuantity < 0) return;
 
     await this.supabase.client
@@ -176,4 +192,3 @@ export class AddWithScanner implements OnInit {
     await this.loadRoundDrinks();
   }
 }
-

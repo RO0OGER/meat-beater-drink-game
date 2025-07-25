@@ -1,31 +1,48 @@
-<h2>🏓 Game Page – Runde: {{ roundCode }}</h2>
+<div class="vs-page app-background-game-screen">
+  <!-- Team 1 -->
+  <div class="team-side left">
+    <div class="info-box top-left single-line">
+      <strong>Verbleibende Zeit:</strong>&nbsp;{{ remainingTimeTeam1Formatted }}    </div>
 
-<div class="section">
-  <h3>⏱️ Verbleibende Zeit</h3>
-  <p>Team 1: {{ remainingTimeTeam1 }} Sekunden</p>
-  <p>Team 2: {{ remainingTimeTeam2 }} Sekunden</p>
+    <div class="info-box top-right single-line">
+      <strong>Score:</strong>&nbsp;{{ team2Hits }}
+    </div>
+
+    <div class="info-box center-top">
+      <h3>Spieleranzahl</h3>
+      <p>{{ numPlayersTeam1 }}</p>
+    </div>
+
+    <div class="info-box bottom">
+      <h3>Becher von Team 1 wurde getroffen?</h3>
+      <button class="hit-button team1" (click)="navigateToHitAnimation('team1')">Hit Button</button>
+    </div>
+  </div>
+
+  <!-- Team 2 -->
+  <div class="team-side right">
+    <div class="info-box top-left single-line">
+
+      <strong>Score:</strong>&nbsp;{{ team1Hits }}
+    </div>
+
+    <div class="info-box top-right single-line">
+      <strong>Verbleibende Zeit:</strong>&nbsp;{{ remainingTimeTeam2Formatted }}
+    </div>
+
+    <div class="info-box center-top">
+      <h3>Spieleranzahl</h3>
+      <p>{{ numPlayersTeam2 }}</p>
+    </div>
+
+    <div class="info-box bottom">
+      <h3>Becher von Team 2 wurde getroffen?</h3>
+      <button class="hit-button team2" (click)="navigateToHitAnimation('team2')">Hit Button</button>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div class="settings-button info-box">
+    <button class="settings-btn" (click)="navigateToSettings()">⚙️ Einstellungen</button>
+  </div>
 </div>
-
-<div class="section">
-  <h3>🎯 Treffer</h3>
-  <p>Team 1: {{ team1Hits }} Treffer</p>
-  <p>Team 2: {{ team2Hits }} Treffer</p>
-</div>
-
-<div class="section">
-  <h3>👥 Spieleranzahl</h3>
-  <p>Team 1: {{ numPlayersTeam1 }}</p>
-  <p>Team 2: {{ numPlayersTeam2 }}</p>
-</div>
-
-<div class="section">
-  <h3>🖱️ Manuelle Treffer</h3>
-  <button (click)="navigateToHitAnimation('team1')">+1 Treffer Team 1</button>
-  <button (click)="navigateToHitAnimation('team2')">+1 Treffer Team 2</button>
-</div>
-
-<div class="section">
-  <button (click)="navigateToSettings()">⚙️ Einstellungen</button>
-</div>
-
-<p>Scanner ist aktiv – QR-Code „hit-team1“ oder „hit-team2“ wird erkannt.</p>

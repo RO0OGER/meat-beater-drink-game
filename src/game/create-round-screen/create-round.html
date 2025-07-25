@@ -1,16 +1,18 @@
-<div class="app-background-standard page">
-  <h2 class="title"> NEUE RUNDE ERSTELLEN</h2>
+<div class="app-background-start page">
+  <h2 class="title">NEUE RUNDE ERSTELLEN</h2>
 
   <form [formGroup]="form" (ngSubmit)="createGame()">
-    <label>Runden-Code:</label>
-    <input class="input-field" formControlName="round_code" (blur)="checkCode()" />
+    <label for="round_code">Runden-Code:</label>
+    <input id="round_code" class="input-field" formControlName="round_code" (blur)="checkCode()" />
 
     @if (form.get('round_code')?.touched && form.get('round_code')?.hasError('minlength')) {
       <div class="error">Mindestens 5 Zeichen erforderlich</div>
-      <p class="error">
-        Nur Buchstaben, Zahlen, Bindestrich (-) und Unterstrich (_) erlaubt. Keine Leerzeichen oder Sonderzeichen.
-      </p>
     }
+
+    @if (form.get('round_code')?.touched && form.get('round_code')?.hasError('invalidFormat')) {
+      <div class="error">Nur Buchstaben, Zahlen, - und _ erlaubt</div>
+    }
+
     @if (codeAvailable === false) {
       <div class="error">Code bereits vergeben</div>
     }
@@ -18,25 +20,21 @@
     @if (codeAvailable === true) {
       <div class="success">Code verfügbar</div>
     }
-    @if (form.get('round_code')?.touched && form.get('round_code')?.hasError('invalidFormat')) {
-      <div class="error">Nur Buchstaben, Zahlen, - und _ erlaubt</div>
-    }
 
-    <label>Spieler Team 1:</label>
-    <input class="input-field" type="number" formControlName="num_players_team1" min="1" />
+    <label for="num_players_team1">Spieler Team 1:</label>
+    <input id="num_players_team1" class="input-field" type="number" formControlName="num_players_team1" min="1" />
 
-    <label>Spieler Team 2:</label>
-    <input class="input-field" type="number" formControlName="num_players_team2" min="1" />
+    <label for="num_players_team2">Spieler Team 2:</label>
+    <input id="num_players_team2" class="input-field" type="number" formControlName="num_players_team2" min="1" />
 
-    <label>Zeit für Team 1 (Minuten):</label>
-    <input class="input-field" type="number" formControlName="time_team1_min" min="1" />
+    <label for="time_team1_min">Zeit für Team 1 (Minuten):</label>
+    <input id="time_team1_min" class="input-field" type="number" formControlName="time_team1_min" min="1" />
 
-    <label>Zeit für Team 2 (Minuten):</label>
-    <input class="input-field" type="number" formControlName="time_team2_min" min="1" />
+    <label for="time_team2_min">Zeit für Team 2 (Minuten):</label>
+    <input id="time_team2_min" class="input-field" type="number" formControlName="time_team2_min" min="1" />
 
-    <button class="button-naechsterschritt" type="submit" [disabled]="form.invalid || codeAvailable === false || creating">
-      Nächster Schritt: Drinks Hinzufügen
+    <button type="submit" [disabled]="form.invalid || codeAvailable === false || creating">
+      Nächster Schritt: Drinks hinzufügen
     </button>
   </form>
 </div>
-

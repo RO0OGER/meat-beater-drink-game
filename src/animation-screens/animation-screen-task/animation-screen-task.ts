@@ -20,6 +20,6 @@ export class AnimationScreenTask implements OnInit {
 
     setTimeout(() => {
       this.router.navigate(['/task', this.team, this.roundCode]);
-    }, 5000);
+    }, 2180);
   }
 }

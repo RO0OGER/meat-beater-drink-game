@@ -17,6 +17,6 @@ export class AnimationScreenStartRound implements OnInit{
 
     setTimeout(() => {
       this.router.navigate(['/game', this.roundCode]);
-    }, 5000);
+    }, 2160);
   }
 }

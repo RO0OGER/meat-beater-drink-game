@@ -1,26 +1,44 @@
-<h2>⚙️ Einstellungen Runde "{{ roundCode }}"</h2>
+<div class="settings-page app-background-game-screen">
+  <div class="scroll-wrapper">
+    <h2 class="settings-title">⚙️ Einstellungen Runde "{{ roundCode }}"</h2>
 
-<div class="nav-actions">
-  <button (click)="goToAddManually()">✍️ Drinks manuell bearbeiten</button>
-  <button (click)="goToAddWithScanner()">📷 Drinks per Scanner hinzufügen</button>
+    <div class="nav-actions">
+      <button class="action-button" (click)="goToAddManually()">✍️ Drinks manuell bearbeiten</button>
+      <button class="action-button" (click)="goToAddWithScanner()">📷 Drinks per Scanner hinzufügen</button>
+    </div>
+
+    <div class="form-group">
+      <label for="hits1">Hits Team 1:</label>
+      <input id="hits1" type="number" [(ngModel)]="team1Hits" />
+    </div>
+
+    <div class="form-group">
+      <label for="hits2">Hits Team 2:</label>
+      <input id="hits2" type="number" [(ngModel)]="team2Hits" />
+    </div>
+
+    <div class="form-group">
+      <label for="time1">Zeit Team 1 (Sekunden):</label>
+      <input id="time1" type="number" [(ngModel)]="remainingTimeTeam1" />
+    </div>
+
+    <div class="form-group">
+      <label for="time2">Zeit Team 2 (Sekunden):</label>
+      <input id="time2" type="number" [(ngModel)]="remainingTimeTeam2" />
+    </div>
+
+    <div class="form-group">
+      <label for="players1">Spieler Team 1:</label>
+      <input id="players1" type="number" [(ngModel)]="numPlayersTeam1" />
+    </div>
+
+    <div class="form-group">
+      <label for="players2">Spieler Team 2:</label>
+      <input id="players2" type="number" [(ngModel)]="numPlayersTeam2" />
+    </div>
+
+    <div class="save-wrapper">
+      <button class="save-button" (click)="saveChanges()">💾 Änderungen speichern</button>
+    </div>
+  </div>
 </div>
-
-<label>Hits Team 1:</label>
-<input type="number" [(ngModel)]="team1Hits" />
-
-<label>Hits Team 2:</label>
-<input type="number" [(ngModel)]="team2Hits" />
-
-<label>Zeit Team 1 (Sekunden):</label>
-<input type="number" [(ngModel)]="remainingTimeTeam1" />
-
-<label>Zeit Team 2 (Sekunden):</label>
-<input type="number" [(ngModel)]="remainingTimeTeam2" />
-
-<label>Spieler Team 1:</label>
-<input type="number" [(ngModel)]="numPlayersTeam1" />
-
-<label>Spieler Team 2:</label>
-<input type="number" [(ngModel)]="numPlayersTeam2" />
-
-<button (click)="saveChanges()">💾 Änderungen speichern</button>
