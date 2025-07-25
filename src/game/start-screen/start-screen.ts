@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { LottieComponent } from 'ngx-lottie';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +7,6 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-start-screen',
   standalone: true,
   imports: [
-    LottieComponent,
     CommonModule,
     FormsModule
   ],
