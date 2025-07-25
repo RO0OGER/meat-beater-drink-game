@@ -1,0 +1,90 @@
+$purple: #7b22a2;
+$yellow: #facd05;
+$border: #fd9a00;
+
+.round-end-wrapper {
+  font-family: "Eras Bold ITC", sans-serif;
+
+  text-align: center;
+
+  .warning-text {
+    font-size: 1.4rem;
+    color: red;
+    margin-bottom: 2rem;
+    font-weight: bold;
+  }
+
+  button {
+    font-size: 1.3rem;
+    font-weight: bold;
+    border: 4px solid $border;
+    border-bottom-width: 6px;
+    border-radius: 12px;
+    cursor: pointer;
+    padding: 1rem 2rem;
+    margin: 0.5rem;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+
+  .delete-button {
+    background: $yellow;
+    color: $purple;
+  }
+
+  .extend-toggle-button {
+    background: $yellow;
+    color: $purple;
+  }
+
+  .confirm-box,
+  .extend-box {
+    border-bottom-width: 6px;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    max-width: 100%;
+
+    p {
+      font-size: 1.3rem;
+      margin-bottom: 1.5rem;
+      color: $yellow
+    }
+
+    input {
+      padding: 0.8rem 1rem;
+      font-size: 1.1rem;
+      border: 3px solid $purple;
+      border-radius: 8px;
+      background: $yellow;
+      color: $purple;
+      font-weight: bold;
+      outline: none;
+      width: 80%;
+      max-width: 300px;
+      margin-bottom: 1rem;
+
+      &::placeholder {
+        color: rgba($purple, 0.7);
+      }
+    }
+  }
+
+  .yes-button {
+    background: $yellow;
+    color: $purple;
+  }
+
+  .cancel-button {
+    background: $yellow;
+    color: $purple;
+  }
+
+  .apply-button {
+    background: $yellow;
+    color: $purple;
+  }
+}

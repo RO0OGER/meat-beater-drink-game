@@ -1,0 +1,18 @@
+<div class="round-end-wrapper app-background-standard">
+  <p class="warning-text">⚠️ Diese Aktion löscht die komplette Runde inklusive aller zugehörigen Daten.</p>
+
+  <button class="delete-button" (click)="confirmAndDelete()">🗑️ Runde löschen</button>
+  <button class="extend-toggle-button" (click)="toggleExtend()">⏭️ Weiter?</button>
+
+  <div *ngIf="confirmDelete" class="confirm-box">
+    <p>Bist du sicher, dass du alles löschen willst?</p>
+    <button class="yes-button" (click)="deleteEverything()">✅ Ja, alles löschen</button>
+    <button class="cancel-button" (click)="cancelDelete()">❌ Abbrechen</button>
+  </div>
+
+  <div *ngIf="showExtend" class="extend-box">
+    <p>Wie viele Minuten soll das Team <strong>{{ team }}</strong> zusätzlich erhalten?</p>
+    <input type="number" [(ngModel)]="extraMinutes" min="1" placeholder="Minuten eingeben..." />
+    <button class="apply-button" (click)="applyExtraTime()">✅ Zeit hinzufügen & Aufgabe fortsetzen</button>
+  </div>
+</div>

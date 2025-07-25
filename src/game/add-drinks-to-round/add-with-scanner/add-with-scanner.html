@@ -1,0 +1,87 @@
+<div class="scrollable-wrapper app-background-standard">
+  <h2 class="title">📷 Barcode-Scanner Modus (Runde: {{ roundCode }})</h2>
+
+  <!-- Scanner Steuerung -->
+  <div class="section">
+    <button (click)="toggleScanner()">
+      {{ scannerActive ? '🛑 Scanner deaktivieren' : '✅ Scanner aktivieren' }}
+    </button>
+
+    @if (scannerActive) {
+      <p class="scanner-state active">Scanner ist aktiv – bitte Barcode scannen.</p>
+    } @else {
+      <p class="scanner-state inactive">Scanner ist deaktiviert.</p>
+    }
+  </div>
+
+  <hr class="divider" />
+
+  <!-- Vorhandene Drinks (mit Chunking/Spalten) -->
+  <div class="section drink-list-section">
+    <h3>Bereits hinzugefuegte Getraenke</h3>
+
+    @if (roundDrinkChunks.length > 0) {
+      <div class="drink-columns">
+        @for (chunk of roundDrinkChunks; track trackByIndex) {
+          <div class="drink-column">
+            @for (drink of chunk; track drink.id) {
+              <div class="drink-card">
+                <div class="drink-headline">
+                  <span class="drink-name">{{ drink.drink_name }}</span>
+                  <span class="drink-type">({{ drink.type }})</span>
+                </div>
+
+                <div class="drink-quantity">
+                  <label for="quantity-{{ drink.id }}">Menge (ml)</label>
+                  <input
+                    id="quantity-{{ drink.id }}"
+                    type="number"
+                    [value]="drink.quantity_ml"
+                    (change)="updateQuantity(drink.id, $any($event.target).value)"
+                    min="0"
+                  />
+
+                  @if (drink.drink_id) {
+                    <button class="btn-inline" (click)="setToFullQuantity(drink.id)">💯</button>
+                  }
+                </div>
+
+                <div class="drink-actions">
+                  <button class="btn-delete" (click)="deleteDrink(drink.id)">🗑️ Löschen</button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <p>Keine Getraenke hinzugefuegt.</p>
+    }
+  </div>
+
+  @if (hasZeroQuantity()) {
+    <p class="warning">
+      ⚠️ Nicht alle Mengen wurden definiert. Bitte vor dem Start nachtragen.
+    </p>
+  }
+
+  <hr class="divider" />
+
+  <!-- Aktionen -->
+  <div class="actions">
+    <button
+      (click)="backToOverview()
+      "
+      [disabled]="hasZeroQuantity()"
+    >
+      Zurueck zur Uebersicht
+    </button>
+
+    <button
+      (click)="startGame()"
+      [disabled]="hasZeroQuantity()"
+    >
+      Spiel starten
+    </button>
+  </div>
+</div>

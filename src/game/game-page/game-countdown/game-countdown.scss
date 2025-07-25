@@ -1,0 +1,51 @@
+$purple: #7b22a2;
+$yellow: #facd05;
+$border: #fd9a00;
+
+.countdown-wrapper {
+  height: 100vh;
+  width: 100%;
+  font-family: "Eras Bold ITC", sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-position: center;
+  text-align: center;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.countdown-time {
+  font-size: 3rem;
+  font-weight: bold;
+  color: $yellow;
+  margin-bottom: 2rem;
+}
+
+.task-label {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: $yellow;
+  margin-bottom: 3rem;
+  max-width: 700px;
+}
+
+.finish-button {
+  padding: 1.2rem 2.5rem;
+  font-size: 1.4rem;
+  font-weight: bold;
+  background: $yellow;
+  color: $purple;
+  border: 4px solid $border;
+  border-bottom-width: 6px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+    background: lighten($yellow, 5%);
+  }
+}

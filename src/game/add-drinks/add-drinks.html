@@ -1,0 +1,24 @@
+<div class="scrollable-wrapper app-background-standard">
+  <h2 class="title">Drinks für Runde "{{ roundCode }}"</h2>
+
+  <div class="drink-columns">
+    @for (chunk of drinkChunks; track $index) {
+      <div class="drink-column">
+        @for (drink of chunk; track drink.id) {
+          <div class="drink-card">
+            {{ drink.drink_name }} – {{ drink.quantity_ml }}ml
+            <button (click)="deleteDrink(drink.id)">🗑️</button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <hr />
+
+  <div class="actions">
+    <button (click)="addManual()">Manuell hinzufügen</button>
+    <button (click)="addByScanner()">Mit Scanner hinzufügen</button>
+    <button (click)="startGame()">Spiel starten</button>
+  </div>
+</div>

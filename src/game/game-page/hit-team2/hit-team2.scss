@@ -1,0 +1,64 @@
+$purple: #7b22a2;
+$yellow: #facd05;
+$border: #fd9a00;
+
+.hit-wrapper {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; // vertikal zentriert
+  text-align: center;
+  padding: 2rem;
+  font-family: "Eras Bold ITC", sans-serif;
+}
+
+.hit-title {
+  font-size: 2.8rem;
+  font-weight: bold;
+  color: $yellow;
+  margin-bottom: 1.5rem;
+}
+
+.hit-subtext {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: $yellow;
+  margin-bottom: 2.5rem;
+}
+
+.back-button,
+.show-task-button {
+  padding: 1.2rem 2.4rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border: 4px solid $border;
+  border-bottom-width: 6px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  margin-bottom: 1.5rem;
+  width: max-content;
+}
+
+.back-button {
+  background: $yellow;
+  color: $purple;
+
+  &:hover {
+    transform: scale(1.05);
+    background: #f2f2f2;
+  }
+}
+
+.show-task-button {
+  background: $yellow;
+  color: $purple;
+
+  &:hover {
+    transform: scale(1.05);
+    background: lighten($yellow, 5%);
+  }
+}
+

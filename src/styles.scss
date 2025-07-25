@@ -1,1 +1,36 @@
-/* You can add global styles to this file, and also import other style files */
+.app-background-start {
+  background-image: url('../public/background/catus-and-sign.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+}
+html, body {
+  font-family: "Eras Bold ITC",sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.full-size{
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+.app-background-standard {
+  background-image: url('../public/background/standard.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+}
+
+.app-background-game-screen {
+  background-image: url('../public/background/app-background-gam-screen.png');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+}

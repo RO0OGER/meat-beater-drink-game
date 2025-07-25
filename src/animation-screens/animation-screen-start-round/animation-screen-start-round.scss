@@ -1,0 +1,25 @@
+.hit-animation-wrapper {
+  height: 100vh;
+  display: flex;
+  justify-content: center;    // horizontal
+  align-items: center;        // vertikal
+  font-family: "Eras Bold ITC", sans-serif;
+}
+
+.center-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.hit-animation {
+  width: 80vw;
+  max-width: 1000px;
+}
+
+.hit-title{
+  font-family: "Eras Bold ITC",sans-serif;
+  font-size: 100px;
+  color: #facd05;
+}
