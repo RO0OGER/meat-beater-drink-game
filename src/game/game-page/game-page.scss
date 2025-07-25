@@ -1,0 +1,173 @@
+$purple: #7b22a2;
+$yellow: #facd05;
+$border: #fd9a00;
+
+.vs-page {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  font-family: "Eras Bold ITC", sans-serif;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.team-side {
+  flex: 1;
+  position: relative;
+  padding: 2rem;
+
+  .info-box {
+    position: absolute;
+    border-radius: 16px;
+    text-align: center;
+    font-weight: bold;
+    background: white;
+    border: 4px solid $border;
+    border-bottom-width: 6px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+    width: 300px;
+    padding: 1.2rem 1.8rem;
+
+    h3 {
+      font-size: 1.6rem;
+      margin-bottom: 0.4rem;
+    }
+
+    p {
+      font-size: 1.8rem;
+      margin: 0;
+    }
+
+    &.single-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      height: 60px; // dünner
+      width:500px; // breiter
+    }
+  }
+
+  .hit-button {
+    font-size: 1.3rem;
+    font-weight: bold;
+    padding: 0.8rem 1.6rem;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+
+    &.team1 {
+      background: $purple;
+      color: $yellow;
+    }
+
+    &.team2 {
+      background: $yellow;
+      color: $purple;
+    }
+  }
+
+  &.left {
+    color: $purple;
+
+    .top-left {
+      top: 2rem;
+      left: 2rem;
+      background: $yellow;
+    }
+
+    .top-right {
+      top: 2rem;
+      right: 2rem;
+      background: $yellow;
+    }
+
+    .center-top {
+      top: 38%; // höher für mittige Spieleranzahl
+      left: 2rem;
+      background: $yellow;
+    }
+
+    .center {
+      top: 58%; // weiter nach unten
+      left: 2rem;
+      background: $yellow;
+    }
+
+    .bottom {
+      bottom: 3.5rem;
+      left: 2rem;
+      background: $yellow;
+    }
+  }
+
+  &.right {
+    color: $yellow;
+
+    .top-left {
+      top: 2rem;
+      left: 2rem;
+      background: $purple;
+    }
+
+    .top-right {
+      top: 2rem;
+      right: 2rem;
+      background: $purple;
+    }
+
+    .center-top {
+      top: 38%;
+      right: 2rem;
+      background: $purple;
+    }
+
+    .center {
+      top: 58%;
+      right: 2rem;
+      background: $purple;
+    }
+
+    .bottom {
+      bottom: 3.5rem;
+      right: 2rem;
+      background: $purple;
+    }
+  }
+}
+
+.settings-button {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  text-align: center;
+  border-radius: 16px;
+  background: $yellow;
+
+  border: 4px solid $border;
+  border-bottom-width: 6px;
+
+  .settings-btn {
+    background: $purple;
+    color: $yellow;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    border-radius: 45px;
+
+  }
+}
+

@@ -1,0 +1,75 @@
+.page{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.title{
+  margin-top: 10vh;
+  font-family: "Eras Bold ITC",sans-serif;
+  background: #fbd652;
+  color: #7314a8;
+  padding: 10px;
+  border-radius: 10px;
+  font-weight: 900;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 400px;
+  margin: 2rem auto;
+  align-items: center;
+}
+
+button {
+  padding: 1rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.error {
+  font-family: "Eras Bold ITC",sans-serif;
+  font-size: 15px;
+  color: #ff6a00;
+  max-width: 400px;
+  align-self: start;
+}
+
+.success {
+  font-family: "Eras Bold ITC",sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  color: limegreen;
+}
+.input-field{
+  background-color: #fdd853;
+  border-radius: 25px;
+  border-color: #723a8c;
+  color: #723a8c;
+  font-family: "Eras Bold ITC",sans-serif;
+  font-weight: bold;
+  font-size: 20px;
+  width: 300px;
+  padding: 5px;
+  text-align: center;
+}
+
+label{
+  font-family: "Eras Bold ITC",sans-serif;
+  font-weight: bold;
+  font-size: 24px;
+  align-self: start;
+  color: #fdd12c;
+}
+
+.button-naechsterschritt{
+  color: #723a8c;
+  font-family: "Eras Bold ITC",sans-serif;
+  font-weight: bold;
+  border-radius: 40px;
+}
+
+.button-naechsterschritt:enabled{
+  background-color: #fdd12c;
+}

@@ -1,0 +1,48 @@
+<div class="vs-page app-background-game-screen">
+  <!-- Team 1 -->
+  <div class="team-side left">
+    <div class="info-box top-left single-line">
+      <strong>Verbleibende Zeit:</strong>&nbsp;{{ remainingTimeTeam1Formatted }}    </div>
+
+    <div class="info-box top-right single-line">
+      <strong>Score:</strong>&nbsp;{{ team2Hits }}
+    </div>
+
+    <div class="info-box center-top">
+      <h3>Spieleranzahl</h3>
+      <p>{{ numPlayersTeam1 }}</p>
+    </div>
+
+    <div class="info-box bottom">
+      <h3>Becher von Team 1 wurde getroffen?</h3>
+      <button class="hit-button team1" (click)="navigateToHitAnimation('team1')">Hit Button</button>
+    </div>
+  </div>
+
+  <!-- Team 2 -->
+  <div class="team-side right">
+    <div class="info-box top-left single-line">
+
+      <strong>Score:</strong>&nbsp;{{ team1Hits }}
+    </div>
+
+    <div class="info-box top-right single-line">
+      <strong>Verbleibende Zeit:</strong>&nbsp;{{ remainingTimeTeam2Formatted }}
+    </div>
+
+    <div class="info-box center-top">
+      <h3>Spieleranzahl</h3>
+      <p>{{ numPlayersTeam2 }}</p>
+    </div>
+
+    <div class="info-box bottom">
+      <h3>Becher von Team 2 wurde getroffen?</h3>
+      <button class="hit-button team2" (click)="navigateToHitAnimation('team2')">Hit Button</button>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div class="settings-button info-box">
+    <button class="settings-btn" (click)="navigateToSettings()">⚙️ Einstellungen</button>
+  </div>
+</div>

@@ -1,0 +1,57 @@
+<div class="scrollable-wrapper app-background-standard">
+  <h2 class="title">Getränk hinzufügen (Runde: {{ roundCode }})</h2>
+
+  <!-- Abschnitt: Barcode -->
+  <div class="section">
+    <h3>Mit Barcode hinzufügen</h3>
+    <div class="input-group">
+      <input type="text" [(ngModel)]="barcode" placeholder="Barcode eingeben" />
+      <input type="number" [(ngModel)]="barcodeQuantity" placeholder="Verwendete Menge (ml)" />
+      <p>Anzahl in ML</p>
+    </div>
+    <button (click)="addByBarcode()">Hinzufügen mit Barcode</button>
+  </div>
+
+  <!-- Abschnitt: Manuell -->
+  <div class="section">
+    <h3>Manuell hinzufügen</h3>
+    <div class="input-group">
+      <input type="text" [(ngModel)]="manualDrinkName" placeholder="Getränkename" />
+      <input type="number" [(ngModel)]="manualQuantity" placeholder="Menge in ml" />
+      <select [(ngModel)]="manualType">
+        <option value="">-- Typ wählen --</option>
+        <option value="mixable">Mischbar</option>
+        <option value="non-mixable">Nicht mischbar</option>
+        <option value="dilution">Verdünnung</option>
+      </select>
+    </div>
+    <button (click)="addManually()">Manuell hinzufügen</button>
+  </div>
+
+  <!-- Abschnitt: Vorhandene Drinks -->
+  <div class="section drink-list-section">
+    <h3>Bereits hinzugefügte Getränke</h3>
+    @if (roundDrinkChunks.length > 0) {
+      <div class="drink-columns">
+        @for (chunk of roundDrinkChunks; track trackByIndex) {
+          <div class="drink-column">
+            @for (drink of chunk; track drink.id) {
+              <div class="drink-card">
+                {{ drink.drink_name }} – {{ drink.quantity_ml }}ml ({{ drink.type }})
+                <button (click)="deleteDrink(drink.id)">🗑️</button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <p>Keine Getränke hinzugefügt.</p>
+    }
+  </div>
+
+  <!-- Aktionen -->
+  <div class="actions">
+    <button (click)="backToOverview()">Zurück zur Übersicht</button>
+    <button (click)="startGame()">Spiel starten</button>
+  </div>
+</div>

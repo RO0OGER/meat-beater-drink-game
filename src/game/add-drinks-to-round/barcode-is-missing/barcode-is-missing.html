@@ -1,0 +1,56 @@
+<div class="scrollable-wrapper app-background-standard">
+  <h2 class="title">Barcode nicht gefunden</h2>
+  <p class="subtitle">Du kannst das Getränk hier manuell erfassen.</p>
+
+  <div class="form-wrapper">
+    <div class="form-group">
+      <label>Getränkename</label>
+      <input type="text" [ngModel]="drinkName()" (ngModelChange)="drinkName.set($event)" />
+      @if (errorName()) {
+        <p class="error">{{ errorName() }}</p>
+      }
+    </div>
+
+    <div class="form-group">
+      <label>Verwendete Menge (ml)</label>
+      <input type="number" [ngModel]="quantityMl()" (ngModelChange)="quantityMl.set($event)" />
+      @if (errorQuantity()) {
+        <p class="error">{{ errorQuantity() }}</p>
+      }
+    </div>
+
+    <div class="form-group">
+      <label>Volle Getränkgröße (ml, optional)</label>
+      <input type="number" [ngModel]="fullSizeMl()" (ngModelChange)="fullSizeMl.set($event)" />
+      @if (errorFullSize()) {
+        <p class="error">{{ errorFullSize() }}</p>
+      }
+    </div>
+
+    <div class="form-group">
+      <label>Typ</label>
+      <select [ngModel]="type()" (ngModelChange)="type.set($event)">
+        <option value="">-- auswählen --</option>
+        <option value="mixable">Mischbar</option>
+        <option value="non-mixable">Nicht mischbar</option>
+        <option value="dilution">Verdünnung</option>
+      </select>
+      @if (errorType()) {
+        <p class="error">{{ errorType() }}</p>
+      }
+    </div>
+
+    <div class="form-group">
+      <label>Optional: Barcode</label>
+      <input type="text" [ngModel]="barcode()" (ngModelChange)="barcode.set($event)" />
+    </div>
+
+    <button (click)="addDrink()">➕ Getränk hinzufügen</button>
+
+    @if (statusMessage()) {
+      <p [ngClass]="statusType() === 'error' ? 'error' : 'success'">
+        {{ statusMessage() }}
+      </p>
+    }
+  </div>
+</div>

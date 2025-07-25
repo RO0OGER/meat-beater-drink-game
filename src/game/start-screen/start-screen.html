@@ -1,0 +1,25 @@
+<div class="app-background-start page">
+  <div class="animation-container">
+    <img class="animation" src="/animations/animation-start-screen.gif">
+  </div>
+
+  <div class="button-group">
+    <img class="button" src="/buttons/game-start-button.png" (click)="startGame()">
+    <img class="button" src="/buttons/game-load-button.png" (click)="toggleLoad()">
+  </div>
+
+  @if (showInput) {
+    <div class="load-section">
+      <label class="text" for="code">GAME-CODE:</label>
+      <input id="code" class="code" [(ngModel)]="loadCode" placeholder="z. B. beer_champs_2025" />
+      <button class="ok-button" (click)="confirmLoad()">OK</button>
+    </div>
+  }
+
+  <footer>
+    <p>
+      © 2025 Meat Beater Drinking Game –
+      <a (click)="goToImpressum()" style="cursor: pointer">Impressum</a>
+    </p>
+  </footer>
+</div>

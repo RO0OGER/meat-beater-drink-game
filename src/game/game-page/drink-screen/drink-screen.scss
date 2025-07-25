@@ -1,0 +1,100 @@
+$purple: #7b22a2;
+$yellow: #facd05;
+$border: #fd9a00;
+
+.drink-screen-wrapper {
+  height: 100vh;
+  width: 100%;
+  font-family: "Eras Bold ITC", sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-size: cover;
+  background-position: center;
+
+  .drink-scroll {
+    max-width: 800px;
+    width: 100%;
+    height: 90vh;
+    overflow-y: auto;
+    padding: 2rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  h1 {
+    font-size: 2.6rem;
+    color: $yellow;
+    margin-bottom: 1.5rem;
+  }
+
+  .task-line {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: $yellow;
+
+    strong {
+      color: darken($yellow, 10%);
+    }
+  }
+
+  p {
+    font-size: 1.2rem;
+    color: $yellow;
+    margin: 1rem 0;
+  }
+
+  ul {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 0.5rem;
+
+    li {
+      font-size: 1.1rem;
+      margin: 0.3rem 0;
+    }
+  }
+
+  .drink-box {
+    background: $yellow;
+    border: 4px solid $border;
+    border-bottom-width: 9px;
+    border-radius: 14px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    width: 90%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+
+    h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.6rem;
+      color: $purple;
+    }
+
+    p {
+      margin: 0.3rem 0;
+    }
+  }
+
+  .ready-btn {
+    margin-top: 2rem;
+    padding: 1.2rem 2.5rem;
+    font-size: 1.4rem;
+    font-weight: bold;
+    background: $yellow;
+    color: $purple;
+    border: 4px solid $border;
+    border-bottom-width: 6px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.05);
+      background: lighten($yellow, 5%);
+    }
+  }
+}
