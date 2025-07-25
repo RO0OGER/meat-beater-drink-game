@@ -28,7 +28,7 @@ export class HitTeam2 {
     const currentHits = await this.roundService.getTeam1Hits(id);
     if (currentHits === null) return;
 
-    await this.roundService.updateTeam1Hits(id, currentHits + 1);
+    await this.roundService.updateTeam2Hits(id, currentHits + 1);
 
     this.router.navigate(['/animation/task', this.team, this.roundCode]);
   }
