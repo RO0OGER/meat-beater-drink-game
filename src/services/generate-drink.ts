@@ -72,7 +72,7 @@ export class DrinkGeneratorService {
       const dilution = available.find(d => d.type === 'dilution' && d.available_ml >= 40);
 
       if (mix && dilution) {
-        const mixRatio = Math.random() * (0.45 - 0.2) + 0.2;
+        const mixRatio = Math.random() * (0.30 - 0.2) + 0.2;
         const totalMl = 200;
         const alcoholMl = Math.round(totalMl * mixRatio);
         const dilutionMl = totalMl - alcoholMl;
