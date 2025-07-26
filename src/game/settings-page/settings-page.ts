@@ -52,6 +52,9 @@ export class SettingsPage implements OnInit {
     this.router.navigate(['/game', this.roundCode]);
   }
 
+  beendeRunde(){
+    this.router.navigate(['/round-end/team1', this.roundCode]);  }
+
   goToAddManually() {
     this.router.navigate(['/add-drinks', this.roundCode]);
   }
