@@ -50,6 +50,8 @@ export class RoundService {
         round_code: roundCode,
         team1_name: team1Name,
         team2_name: team2Name,
+        num_players_team1: 0,
+        num_players_team2: 0,
         remaining_time_team1: timeTeam1Seconds,
         remaining_time_team2: timeTeam2Seconds,
         team1_hits: 0,
