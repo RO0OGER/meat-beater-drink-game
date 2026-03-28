@@ -1,0 +1,135 @@
+<!-- LOADING -->
+@if (viewState() === 'loading') {
+  <div class="pgv-center">
+    <div class="pgv-pulse"></div>
+    <p style="color:var(--text-muted)">Lade…</p>
+  </div>
+}
+
+<!-- LOBBY (game not started yet) -->
+@if (viewState() === 'lobby') {
+  <div class="pgv-center">
+    <div class="pgv-pulse"></div>
+    <p class="pgv-status-text">Warte auf Spielstart…</p>
+    <p style="font-size:0.82rem; color:var(--text-muted)">Der Host startet das Spiel</p>
+  </div>
+}
+
+<!-- MY TURN TO SHOOT -->
+@if (viewState() === 'my-turn') {
+  <div class="pgv-shoot-view">
+    <div class="pgv-your-turn-badge">DU BIST DRAN</div>
+    <div class="pgv-team-label">
+      {{ shooterTeam() === 'team1' ? round()?.team1_name : round()?.team2_name }}
+    </div>
+    <div class="pgv-cups">
+      @for (row of [[6,7,8,9],[3,4,5],[1,2],[0]]; track $index) {
+        <div class="pgv-cup-row">
+          @for (i of row; track i) {
+            <div class="pgv-cup">🍺</div>
+          }
+        </div>
+      }
+    </div>
+    <p class="pgv-shoot-hint">Schieß auf die Becher – war es ein Treffer?</p>
+    <div class="pgv-shoot-btns">
+      <button class="btn pgv-hit-btn" (click)="onHit()" [disabled]="acting()">
+        🎯 TREFFER
+      </button>
+      <button class="btn pgv-miss-btn" (click)="onMiss()" [disabled]="acting()">
+        ❌ DANEBEN
+      </button>
+    </div>
+  </div>
+}
+
+<!-- WAITING (someone else is shooting) -->
+@if (viewState() === 'waiting') {
+  <div class="pgv-center">
+    <div class="pgv-shooter-info">
+      <div class="pgv-shooter-name">{{ shooter()?.name ?? '…' }}</div>
+      <div class="pgv-shooter-team">
+        {{ shooterTeam() === 'team1' ? round()?.team1_name : round()?.team2_name }}
+      </div>
+      <p class="pgv-status-text">ist gerade am Schießen…</p>
+      <div class="pgv-aiming-anim">🎯</div>
+    </div>
+  </div>
+}
+
+<!-- I HAVE TO DRINK -->
+@if (viewState() === 'i-drink') {
+  <div class="pgv-drink-view">
+    <div class="pgv-drink-badge">DU MUSST TRINKEN</div>
+
+    @if (task()) {
+      <div class="pgv-task-card">
+        <p class="pgv-task-label">Aufgabe</p>
+        <p class="pgv-task-text">{{ task()!.label }}</p>
+      </div>
+    }
+
+    <div class="pgv-drink-info">
+      <span class="pgv-drink-icon">🍺</span>
+      <p>Trinke dein Getränk und bestätige wenn du fertig bist</p>
+    </div>
+
+    <button class="btn pgv-done-btn" (click)="onDrinkDone()" [disabled]="acting()">
+      ✅ Getrunken!
+    </button>
+  </div>
+}
+
+<!-- SOMEONE ELSE DRINKS -->
+@if (viewState() === 'other-drinks') {
+  <div class="pgv-center">
+    <div class="pgv-target-info">
+      <div class="pgv-target-icon">🍺</div>
+      <div class="pgv-target-name">{{ target()?.name ?? '…' }}</div>
+      <p class="pgv-status-text">muss trinken!</p>
+      @if (task()) {
+        <div class="pgv-task-pill">{{ task()!.label }}</div>
+      }
+    </div>
+  </div>
+}
+
+<!-- GAME ENDED -->
+@if (viewState() === 'ended') {
+  <div class="pgv-center">
+    <div style="font-size:3rem">🏆</div>
+    <h2 class="pgv-end-title">SPIEL BEENDET</h2>
+    <div class="pgv-scores">
+      <div class="pgv-score-item">
+        <span>{{ round()?.team1_name }}</span>
+        <span class="pgv-score-hits">{{ round()?.team1_hits }} Treffer</span>
+      </div>
+      <div class="pgv-score-item">
+        <span>{{ round()?.team2_name }}</span>
+        <span class="pgv-score-hits">{{ round()?.team2_hits }} Treffer</span>
+      </div>
+    </div>
+
+    <div class="pgv-drink-stats">
+      @for (p of team1Players(); track p.id) {
+        <div class="pgv-stat-row">
+          <span>{{ p.name }}</span>
+          <span class="pgv-stat-drinks">🍺 {{ p.drink_count }}×</span>
+        </div>
+      }
+      @for (p of team2Players(); track p.id) {
+        <div class="pgv-stat-row">
+          <span>{{ p.name }}</span>
+          <span class="pgv-stat-drinks">🍺 {{ p.drink_count }}×</span>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- Host controls (floating) -->
+@if (isHost() && viewState() !== 'loading' && viewState() !== 'lobby' && viewState() !== 'ended') {
+  <div class="pgv-host-bar">
+    <button class="btn btn--ghost pgv-end-btn" (click)="endGame()">Spiel beenden</button>
+  </div>
+}

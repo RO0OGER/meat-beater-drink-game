@@ -1,0 +1,133 @@
+<div class="dlg-overlay">
+
+  <!-- Top bar -->
+  <div class="dlg-top">
+    <button class="dlg-back-btn" (click)="prev()">←</button>
+    <div class="dlg-steps">
+      @for (s of steps(); track s; let i = $index) {
+        @if (i > 0) { <span class="dlg-step-line"></span> }
+        <span class="dlg-step-dot"
+              [class.active]="i === stepIdx()"
+              [class.done]="i < stepIdx()">
+          @if (i < stepIdx()) { ✓ } @else { {{ i + 1 }} }
+        </span>
+      }
+    </div>
+    <button class="dlg-close-btn" (click)="cancelled.emit()">✕</button>
+  </div>
+
+  @if (initName() || name()) {
+    <div class="dlg-name">{{ initName() || name() }}</div>
+  }
+  @if (initAlc() != null) {
+    <div class="dlg-alc">{{ initAlc() }}% ABV</div>
+  }
+
+  <!-- Step: Name -->
+  @if (currentStep() === 'name') {
+    <div class="dlg-body">
+      <p class="dlg-step-title">Getränkename</p>
+      <p class="dlg-step-hint">Wie heißt das Getränk?</p>
+      <input class="form-input dlg-text-input" type="text"
+             [ngModel]="name()" (ngModelChange)="name.set($event)"
+             placeholder="z.B. Club Mate" autofocus />
+    </div>
+  }
+
+  <!-- Step: Full size -->
+  @if (currentStep() === 'fullSize') {
+    <div class="dlg-body">
+      <p class="dlg-step-title">Volle Flaschengröße</p>
+      <p class="dlg-step-hint">Wie groß ist eine volle Flasche / Dose dieses Getränks?</p>
+      <div class="dlg-fullsize-row">
+        <input class="form-input dlg-fullsize-input" type="number"
+               [ngModel]="fullSize()" (ngModelChange)="fullSize.set(+$event || null)"
+               placeholder="z.B. 330" min="1" />
+        <span class="dlg-unit">ml</span>
+      </div>
+    </div>
+  }
+
+  <!-- Step: Quantity (used) -->
+  @if (currentStep() === 'quantity') {
+    <div class="dlg-body">
+      <p class="dlg-step-title">Verwendete Menge</p>
+      @if (effectiveFullSize()) {
+        <p class="dlg-step-hint">
+          Wie viel bringst du mit? Eine volle
+          <strong>{{ initName() || name() }}</strong> hat
+          <strong>{{ effectiveFullSize() }} ml</strong> –
+          schiebe den Regler nach links wenn du nur einen Teil davon dabei hast.
+        </p>
+        <div class="dlg-big-value">{{ quantity() }} ml</div>
+        <input class="dlg-slider" type="range"
+               [min]="1" [max]="effectiveFullSize()!"
+               [ngModel]="quantity()" (ngModelChange)="quantity.set(+$event)" />
+        <div class="dlg-slider-bounds">
+          <span>1 ml</span>
+          <span>{{ effectiveFullSize() }} ml (voll)</span>
+        </div>
+      } @else {
+        <p class="dlg-step-hint">Wie viel ml verwendest du für diese Runde?</p>
+        <div class="dlg-fullsize-row">
+          <input class="form-input dlg-fullsize-input" type="number"
+                 [ngModel]="quantity()" (ngModelChange)="quantity.set(+$event || null)"
+                 placeholder="z.B. 330" min="1" />
+          <span class="dlg-unit">ml</span>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Step: Type -->
+  @if (currentStep() === 'type') {
+    <div class="dlg-body">
+      <p class="dlg-step-title">Getränketyp</p>
+      <p class="dlg-step-hint">Wie wird dieses Getränk im Spiel eingesetzt?</p>
+      <div class="type-btns">
+        <button class="type-btn" [class.type-btn--active]="type() === 'mixable'"
+                (click)="type.set('mixable')">
+          <span class="type-btn-icon">🥃</span>
+          <span class="type-btn-name">Mischbar</span>
+          <span class="type-btn-sub">Schnaps, Spirituosen</span>
+        </button>
+        <button class="type-btn" [class.type-btn--active]="type() === 'non-mixable'"
+                (click)="type.set('non-mixable')">
+          <span class="type-btn-icon">🍺</span>
+          <span class="type-btn-name">Pur trinken</span>
+          <span class="type-btn-sub">Bier, Wein, Sekt</span>
+        </button>
+        <button class="type-btn" [class.type-btn--active]="type() === 'dilution'"
+                (click)="type.set('dilution')">
+          <span class="type-btn-icon">🧃</span>
+          <span class="type-btn-name">Mischgetränk</span>
+          <span class="type-btn-sub">Saft, Wasser, Softdrink</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Step: Alc % -->
+  @if (currentStep() === 'alc') {
+    <div class="dlg-body">
+      <p class="dlg-step-title">Alkoholgehalt</p>
+      <p class="dlg-step-hint">Wie viel Prozent Alkohol hat dieses Getränk? (Optional – kann übersprungen werden)</p>
+      <div class="dlg-fullsize-row">
+        <input class="form-input dlg-fullsize-input" type="number"
+               [ngModel]="alc()" (ngModelChange)="alc.set($event != null && $event !== '' ? +$event : null)"
+               placeholder="z.B. 4.8" min="0" max="100" step="0.1" />
+        <span class="dlg-unit">%</span>
+      </div>
+    </div>
+  }
+
+  <div class="dlg-footer">
+    @if (currentStep() === 'alc') {
+      <button class="btn btn--ghost dlg-skip-btn" (click)="alc.set(null); submit()">Überspringen</button>
+    }
+    <button class="btn btn--primary" (click)="next()" [disabled]="!canProceed()">
+      @if (isLast()) { ✓ Hinzufügen } @else { Weiter → }
+    </button>
+  </div>
+
+</div>

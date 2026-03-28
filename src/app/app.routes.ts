@@ -31,6 +31,11 @@ import { AnimationScreenTask } from '../animation-screens/animation-screen-task/
 import { AnimationScreenHit } from '../animation-screens/animation-screen-hit/animation-screen-hit';
 import { AnimationScreenDrinkMixAndAmount } from '../animation-screens/animation-screen-drink-mix-and-amount/animation-screen-drink-mix-and-amount';
 
+// Multiplayer (public – no auth required)
+import { JoinRoundPage } from '../game/join-round/join-round';
+import { RoundLobbyPage } from '../game/round-lobby/round-lobby';
+import { PlayerGameView } from '../game/player-game-view/player-game-view';
+
 // Misc
 import { Impressum } from './impressum/impressum';
 
@@ -38,6 +43,9 @@ export const routes: Routes = [
   // Public
   { path: 'login', component: AuthPage },
   { path: 'impressum', component: Impressum },
+  { path: 'join/:roundCode',          component: JoinRoundPage },
+  { path: 'round/:roundId/lobby',     component: RoundLobbyPage },
+  { path: 'round/:roundId/personal',  component: PlayerGameView },
 
   // Protected: default redirect
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },

@@ -1,0 +1,74 @@
+<div class="scroll-page">
+
+  <div class="lobby-header">
+    <h2 class="lobby-title">LOBBY</h2>
+    @if (round()) {
+      <p class="lobby-code">{{ round()!.round_code }}</p>
+    }
+  </div>
+
+  <!-- Join Link -->
+  <div class="card lobby-link-card">
+    <p class="section-title">Einladungslink</p>
+    <p class="lobby-link-url">{{ joinUrl() }}</p>
+    <button class="btn btn--ghost" (click)="copyLink()">
+      @if (copied()) { ✓ Kopiert! } @else { 📋 Link kopieren }
+    </button>
+  </div>
+
+  <!-- Players -->
+  @if (round()) {
+    <div class="lobby-teams">
+
+      <div class="lobby-team">
+        <p class="lobby-team-name">🔴 {{ round()!.team1_name }}</p>
+        @if (!team1Players().length) {
+          <p class="lobby-empty">Noch niemand beigetreten</p>
+        }
+        @for (p of team1Players(); track p.id) {
+          <div class="lobby-player" [class.lobby-player--me]="p.id === myPlayer()?.id">
+            <span class="lobby-player-name">{{ p.name }}</span>
+            @if (p.id === myPlayer()?.id) { <span class="lobby-player-you">Du</span> }
+          </div>
+        }
+      </div>
+
+      <div class="lobby-team">
+        <p class="lobby-team-name">🔵 {{ round()!.team2_name }}</p>
+        @if (!team2Players().length) {
+          <p class="lobby-empty">Noch niemand beigetreten</p>
+        }
+        @for (p of team2Players(); track p.id) {
+          <div class="lobby-player" [class.lobby-player--me]="p.id === myPlayer()?.id">
+            <span class="lobby-player-name">{{ p.name }}</span>
+            @if (p.id === myPlayer()?.id) { <span class="lobby-player-you">Du</span> }
+          </div>
+        }
+      </div>
+
+    </div>
+  }
+
+  <!-- Add Drinks (anyone can add) -->
+  <button class="btn btn--ghost" (click)="addDrinks()">🍺 Getränke hinzufügen</button>
+
+  <!-- Start Game (host only) -->
+  @if (isHost()) {
+    <div class="lobby-start-area">
+      @if (team1Players().length === 0 || team2Players().length === 0) {
+        <p class="lobby-start-hint">Beide Teams brauchen mindestens einen Spieler</p>
+      }
+      <button class="btn btn--primary lobby-start-btn"
+              (click)="startGame()"
+              [disabled]="starting() || team1Players().length === 0 || team2Players().length === 0">
+        @if (starting()) { Starte… } @else { 🎯 Spiel starten }
+      </button>
+    </div>
+  } @else {
+    <div class="lobby-waiting">
+      <div class="lobby-waiting-dot"></div>
+      <p>Warte auf Spielstart…</p>
+    </div>
+  }
+
+</div>

@@ -4,14 +4,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../../../services/supabase';
 import { DrinkService } from '../../../services/drink';
-import { AiDrinkService, AiResult } from '../../../services/ai-drink.service';
+import { DrinkCaptureDialog, DrinkCaptureResult } from '../drink-capture-dialog/drink-capture-dialog';
 
 type DrinkType = 'mixable' | 'non-mixable' | 'dilution';
 
 @Component({
   selector: 'app-add-manually',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DrinkCaptureDialog],
   templateUrl: './add-manually.html',
   styleUrls: ['./add-manually.scss'],
 })
@@ -26,17 +26,19 @@ export class AddManually implements OnInit {
   manualQuantity  = 0;
   manualType: DrinkType | '' = '';
   manualAlcPercent: number | null = null;
-  aiLoading    = signal(false);
-  aiApplied    = signal(false);
-  aiError      = signal('');
-  aiVolumeMl: number | null = null;
+
+  captureBarcode  = signal('');
+  captureInitName = signal('');
+  captureInitSize = signal<number | null>(null);
+  captureInitType = signal<DrinkType | null>(null);
+  captureInitAlc  = signal<number | null>(null);
+  showCapture     = signal(false);
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private supabase: SupabaseService,
     private drinkService: DrinkService,
-    private aiDrink: AiDrinkService
   ) {}
 
   async ngOnInit() {
@@ -73,57 +75,61 @@ export class AddManually implements OnInit {
       return;
     }
 
-    // 2. Fallback: Open Food Facts API
+    // 2. Fallback: Open Food Facts API → show capture dialog
     const api = await this.drinkService.lookupOpenFoodFacts(this.barcode.trim());
 
-    const queryParams: Record<string, string> = { barcode: this.barcode, redirect: 'manual' };
-    if (api?.name)        queryParams['name']   = api.name;
-    if (api?.volume_ml)   queryParams['volume'] = String(api.volume_ml);
-    if (api?.alc_percent != null) queryParams['alc'] = String(api.alc_percent);
-
-    this.router.navigate(
-      ['/game', this.gameId, 'round', this.roundId, 'barcode-missing'],
-      { queryParams }
-    );
+    this.captureBarcode.set(this.barcode.trim());
+    this.captureInitName.set(api?.name ?? '');
+    this.captureInitSize.set(api?.volume_ml ?? null);
+    this.captureInitType.set((api?.type as DrinkType) ?? null);
+    this.captureInitAlc.set(api?.alc_percent ?? null);
+    this.barcode = '';
+    this.barcodeQuantity = 0;
+    this.showCapture.set(true);
   }
 
-  async askAiForManual() {
-    if (!this.manualDrinkName.trim()) return;
-    this.aiLoading.set(true);
-    this.aiApplied.set(false);
-    this.aiError.set('');
-    const result = await this.aiDrink.suggest(this.manualDrinkName);
-    this.aiLoading.set(false);
+  async onCaptureConfirmed(result: DrinkCaptureResult) {
+    this.showCapture.set(false);
 
-    if (!result.ok) {
-      if (result.reason === 'rate_limit') {
-        this.aiError.set('KI-Limit erreicht – bitte kurz warten.');
-      } else if (result.reason !== 'no_key') {
-        this.aiError.set('KI-Anfrage fehlgeschlagen.');
-      }
-      return;
+    let drinkId: string | null = null;
+    if (result.barcode && result.fullSizeMl > 0) {
+      const drink = await this.drinkService.createDrink({
+        name:        result.name,
+        barcode:     result.barcode,
+        volume_ml:   result.fullSizeMl,
+        type:        result.type,
+        alc_percent: result.alcPercent ?? null,
+      });
+      drinkId = drink?.id ?? null;
     }
 
-    if (!this.manualType) this.manualType = result.data.type;
-    if (this.manualAlcPercent == null && result.data.alc_percent !== null) {
-      this.manualAlcPercent = result.data.alc_percent;
-    }
-    if (this.manualQuantity <= 0 && result.data.volume_ml !== null) {
-      this.manualQuantity = result.data.volume_ml;
-      this.aiVolumeMl = result.data.volume_ml;
-    }
-    this.aiApplied.set(true);
+    const insertData: any = {
+      round_id:    this.roundId,
+      drink_name:  result.name,
+      quantity_ml: result.quantityMl,
+      used_ml: 0,
+      type:        result.type,
+    };
+    if (drinkId)                   insertData.drink_id    = drinkId;
+    if (result.alcPercent != null) insertData.alc_percent = result.alcPercent;
+
+    await this.supabase.client.from('round_drinks').insert(insertData);
+    await this.loadRoundDrinks();
+  }
+
+  onCaptureCancelled() {
+    this.showCapture.set(false);
   }
 
   async addManually() {
     if (!this.manualDrinkName.trim() || this.manualQuantity <= 0 || !this.manualType) return;
 
     const insertData: any = {
-      round_id: this.roundId,
-      drink_name: this.manualDrinkName,
+      round_id:    this.roundId,
+      drink_name:  this.manualDrinkName,
       quantity_ml: this.manualQuantity,
       used_ml: 0,
-      type: this.manualType,
+      type:        this.manualType,
     };
     if (this.manualAlcPercent != null && this.manualAlcPercent >= 0) {
       insertData.alc_percent = this.manualAlcPercent;
@@ -135,8 +141,6 @@ export class AddManually implements OnInit {
     this.manualQuantity   = 0;
     this.manualType       = '';
     this.manualAlcPercent = null;
-    this.aiVolumeMl       = null;
-    this.aiApplied.set(false);
     await this.loadRoundDrinks();
   }
 

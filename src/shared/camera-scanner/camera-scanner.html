@@ -1,0 +1,42 @@
+<div class="cs-wrapper" [class.cs-wrapper--active]="status() === 'scanning'">
+
+  <!-- Video feed -->
+  <video #video class="cs-video" autoplay muted playsinline></video>
+
+  <!-- Scanner frame overlay -->
+  @if (status() === 'scanning') {
+    <div class="cs-frame">
+      <div class="cs-corner cs-corner--tl"></div>
+      <div class="cs-corner cs-corner--tr"></div>
+      <div class="cs-corner cs-corner--bl"></div>
+      <div class="cs-corner cs-corner--br"></div>
+      <div class="cs-scan-line"></div>
+    </div>
+    <p class="cs-hint">Barcode in den Rahmen halten</p>
+  }
+
+  <!-- Requesting permission -->
+  @if (status() === 'requesting') {
+    <div class="cs-overlay">
+      <div class="cs-spinner"></div>
+      <p>Kamera wird gestartet…</p>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (status() === 'error') {
+    <div class="cs-overlay">
+      <p class="cs-error-icon">📷</p>
+      <p class="cs-error-msg">{{ errorMsg() }}</p>
+      <button class="btn btn--ghost cs-retry-btn" (click)="retry()">Erneut versuchen</button>
+    </div>
+  }
+
+  <!-- Idle -->
+  @if (status() === 'idle') {
+    <div class="cs-overlay">
+      <div class="cs-spinner"></div>
+    </div>
+  }
+
+</div>

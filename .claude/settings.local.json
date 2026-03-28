@@ -9,7 +9,9 @@
       "Bash(do)",
       "Read(//c/dev/meat-beater-drink-game/**)",
       "Bash(done)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(node scripts/clean-rounds.mjs)",
+      "Bash(npm install:*)"
     ]
   }
 }

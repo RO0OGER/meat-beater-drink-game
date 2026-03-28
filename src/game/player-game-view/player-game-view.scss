@@ -1,0 +1,345 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+// ── Centering helper ───────────────────────────────────────────────
+.pgv-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  gap: 16px;
+  padding: 24px;
+  text-align: center;
+}
+
+// ── Pulse loader ───────────────────────────────────────────────────
+.pgv-pulse {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pgv-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pgv-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.85); }
+}
+
+.pgv-status-text {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+// ── SHOOT VIEW ────────────────────────────────────────────────────
+.pgv-shoot-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100dvh;
+  padding: 32px 20px 100px;
+  gap: 20px;
+}
+
+.pgv-your-turn-badge {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.2rem;
+  letter-spacing: 4px;
+  color: var(--accent);
+  text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+  animation: pgv-glow 2s ease-in-out infinite;
+}
+
+@keyframes pgv-glow {
+  0%, 100% { text-shadow: 0 0 20px rgba(251,191,36,0.5); }
+  50%       { text-shadow: 0 0 40px rgba(251,191,36,0.9), 0 0 60px rgba(251,191,36,0.4); }
+}
+
+.pgv-team-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.pgv-cups {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 0;
+}
+
+.pgv-cup-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.pgv-cup {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.pgv-shoot-hint {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  text-align: center;
+  max-width: 260px;
+  margin: 0;
+}
+
+.pgv-shoot-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.pgv-hit-btn {
+  background: var(--accent);
+  color: #000;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 3px;
+  padding: 20px;
+  border: none;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  width: 100%;
+  transition: transform 0.1s;
+  &:active { transform: scale(0.97); }
+  &:disabled { opacity: 0.5; }
+}
+
+.pgv-miss-btn {
+  background: transparent;
+  color: var(--text-muted);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  padding: 16px;
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  width: 100%;
+  &:active { opacity: 0.7; }
+  &:disabled { opacity: 0.4; }
+}
+
+// ── WAITING VIEW ──────────────────────────────────────────────────
+.pgv-shooter-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.pgv-shooter-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3rem;
+  letter-spacing: 3px;
+  color: var(--text);
+  line-height: 1;
+}
+
+.pgv-shooter-team {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.pgv-aiming-anim {
+  font-size: 2.5rem;
+  animation: pgv-aim 1s ease-in-out infinite alternate;
+  margin-top: 8px;
+}
+
+@keyframes pgv-aim {
+  from { transform: scale(1); }
+  to   { transform: scale(1.15); }
+}
+
+// ── DRINK VIEW ────────────────────────────────────────────────────
+.pgv-drink-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100dvh;
+  padding: 40px 20px 100px;
+  gap: 24px;
+}
+
+.pgv-drink-badge {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  letter-spacing: 3px;
+  color: #ef4444;
+  text-shadow: 0 0 24px rgba(239,68,68,0.5);
+  animation: pgv-glow-red 1.5s ease-in-out infinite;
+}
+
+@keyframes pgv-glow-red {
+  0%, 100% { text-shadow: 0 0 20px rgba(239,68,68,0.5); }
+  50%       { text-shadow: 0 0 40px rgba(239,68,68,0.9), 0 0 60px rgba(239,68,68,0.3); }
+}
+
+.pgv-task-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-md);
+  padding: 20px;
+  text-align: center;
+  width: 100%;
+  max-width: 360px;
+}
+
+.pgv-task-label {
+  font-size: 0.72rem;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+}
+
+.pgv-task-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.pgv-drink-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.pgv-drink-icon { font-size: 2.5rem; }
+
+.pgv-done-btn {
+  background: #ef4444;
+  color: #fff;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  letter-spacing: 2px;
+  padding: 18px 40px;
+  border: none;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  width: 100%;
+  max-width: 360px;
+  &:disabled { opacity: 0.5; }
+}
+
+// ── OTHER DRINKS VIEW ─────────────────────────────────────────────
+.pgv-target-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.pgv-target-icon { font-size: 3rem; }
+
+.pgv-target-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.8rem;
+  letter-spacing: 3px;
+  color: #ef4444;
+  line-height: 1;
+}
+
+.pgv-task-pill {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  max-width: 280px;
+  text-align: center;
+}
+
+// ── END VIEW ──────────────────────────────────────────────────────
+.pgv-end-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.4rem;
+  letter-spacing: 4px;
+  color: var(--accent);
+  margin: 0;
+}
+
+.pgv-scores {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.pgv-score-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-surface);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+  font-size: 0.9rem;
+}
+
+.pgv-score-hits {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.pgv-drink-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.pgv-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.pgv-stat-drinks {
+  color: var(--text);
+  font-weight: 600;
+}
+
+// ── Host bar ──────────────────────────────────────────────────────
+.pgv-host-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 20px;
+  background: linear-gradient(to top, var(--bg) 60%, transparent);
+  display: flex;
+  justify-content: center;
+}
+
+.pgv-end-btn {
+  font-size: 0.8rem;
+  opacity: 0.6;
+  &:hover { opacity: 1; }
+}

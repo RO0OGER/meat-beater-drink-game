@@ -12,4 +12,11 @@ export interface Round {
   num_players_team1: number;
   num_players_team2: number;
   created_at: string;
+  // Multiplayer fields
+  status: 'lobby' | 'playing' | 'ended';
+  current_shooter_id: string | null;
+  current_target_id: string | null;
+  shooter_team: 'team1' | 'team2' | null;
+  current_task_id: string | null;
+  turn_number: number;
 }

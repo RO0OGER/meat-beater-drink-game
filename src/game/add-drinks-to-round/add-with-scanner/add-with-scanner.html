@@ -1,8 +1,17 @@
-@if (pendingDrink()) {
+@if (showCapture()) {
+  <app-drink-capture-dialog
+    [barcode]="captureBarcode()"
+    [initName]="captureInitName()"
+    [initSize]="captureInitSize()"
+    [initType]="captureInitType()"
+    [initAlc]="captureInitAlc()"
+    (confirmed)="onCaptureConfirmed($event)"
+    (cancelled)="onCaptureCancelled()">
+  </app-drink-capture-dialog>
+
+} @else if (pendingDrink()) {
   <!-- ── Multi-step dialog (full screen takeover) ── -->
   <div class="dlg-overlay">
-
-    <!-- Header -->
     <div class="dlg-top">
       <button class="dlg-back-btn" (click)="pendingStep() > 1 ? prevStep() : cancelPending()">←</button>
       <div class="dlg-steps">
@@ -17,14 +26,9 @@
 
     <div class="dlg-name">{{ pendingDrink()!.name }}</div>
     <div class="dlg-alc">
-      @if (aiLoading()) {
-        <span class="dlg-alc-loading">⏳ ABV wird ermittelt…</span>
-      } @else if (pendingAlc() != null) {
-        {{ pendingAlc() }}% ABV
-      }
+      @if (pendingAlc() != null) { {{ pendingAlc() }}% ABV }
     </div>
 
-    <!-- Step 1: Verwendete Menge -->
     @if (pendingStep() === 1) {
       <div class="dlg-body">
         <p class="dlg-step-title">Verwendete Menge</p>
@@ -42,19 +46,13 @@
           <span>{{ pendingDrink()!.volume_ml }} ml (voll)</span>
         </div>
       </div>
-      <div class="dlg-footer">
-        <button class="btn btn--primary" (click)="nextStep()">Weiter →</button>
-      </div>
+      <div class="dlg-footer"><button class="btn btn--primary" (click)="nextStep()">Weiter →</button></div>
     }
 
-    <!-- Step 2: Volle Getränkgröße -->
     @if (pendingStep() === 2) {
       <div class="dlg-body">
         <p class="dlg-step-title">Volle Getränkgröße</p>
-        <p class="dlg-step-hint">
-          Die Originalgröße der Flasche / Dose – wird im Katalog gespeichert.
-          Aus dem Katalog vorausgefüllt, bei Bedarf anpassen.
-        </p>
+        <p class="dlg-step-hint">Die Originalgröße der Flasche / Dose – wird im Katalog gespeichert.</p>
         <div class="dlg-fullsize-row">
           <input class="form-input dlg-fullsize-input" type="number"
             [ngModel]="pendingFullSize()" (ngModelChange)="pendingFullSize.set(+$event)"
@@ -62,76 +60,52 @@
           <span class="dlg-unit">ml</span>
         </div>
       </div>
-      <div class="dlg-footer">
-        <button class="btn btn--primary" (click)="nextStep()" [disabled]="pendingFullSize() <= 0">Weiter →</button>
-      </div>
+      <div class="dlg-footer"><button class="btn btn--primary" (click)="nextStep()" [disabled]="pendingFullSize() <= 0">Weiter →</button></div>
     }
 
-    <!-- Step 3: Typ -->
     @if (pendingStep() === 3) {
       <div class="dlg-body">
         <p class="dlg-step-title">Getränketyp</p>
         <p class="dlg-step-hint">Wie wird dieses Getränk eingesetzt?</p>
         <div class="type-btns">
-          <button class="type-btn" [class.type-btn--active]="pendingType() === 'mixable'"
-                  (click)="pendingType.set('mixable')">
-            <span class="type-btn-icon">🥃</span>
-            <span class="type-btn-name">Mischbar</span>
-            <span class="type-btn-sub">Schnaps, Spirituosen</span>
+          <button class="type-btn" [class.type-btn--active]="pendingType() === 'mixable'" (click)="pendingType.set('mixable')">
+            <span class="type-btn-icon">🥃</span><span class="type-btn-name">Mischbar</span><span class="type-btn-sub">Schnaps, Spirituosen</span>
           </button>
-          <button class="type-btn" [class.type-btn--active]="pendingType() === 'non-mixable'"
-                  (click)="pendingType.set('non-mixable')">
-            <span class="type-btn-icon">🍺</span>
-            <span class="type-btn-name">Pur trinken</span>
-            <span class="type-btn-sub">Bier, Wein, Sekt</span>
+          <button class="type-btn" [class.type-btn--active]="pendingType() === 'non-mixable'" (click)="pendingType.set('non-mixable')">
+            <span class="type-btn-icon">🍺</span><span class="type-btn-name">Pur trinken</span><span class="type-btn-sub">Bier, Wein, Sekt</span>
           </button>
-          <button class="type-btn" [class.type-btn--active]="pendingType() === 'dilution'"
-                  (click)="pendingType.set('dilution')">
-            <span class="type-btn-icon">🧃</span>
-            <span class="type-btn-name">Mischgetränk</span>
-            <span class="type-btn-sub">Saft, Wasser, Softdrink</span>
+          <button class="type-btn" [class.type-btn--active]="pendingType() === 'dilution'" (click)="pendingType.set('dilution')">
+            <span class="type-btn-icon">🧃</span><span class="type-btn-name">Mischgetränk</span><span class="type-btn-sub">Saft, Wasser, Softdrink</span>
           </button>
         </div>
       </div>
-      <div class="dlg-footer">
-        <button class="btn btn--primary" (click)="confirmPending()" [disabled]="!pendingType()">✓ Hinzufügen</button>
-      </div>
+      <div class="dlg-footer"><button class="btn btn--primary" (click)="confirmPending()" [disabled]="!pendingType()">✓ Hinzufügen</button></div>
     }
-
   </div>
 
 } @else {
-
   <!-- ── Normal scanner page ── -->
   <div class="scroll-page">
     <div>
       <h2 class="aws-title">SCANNER</h2>
-      <p style="color:var(--text-muted); font-size:0.82rem; margin-top:3px">Barcode-Scanner Modus</p>
+      <p style="color:var(--text-muted); font-size:0.82rem; margin-top:3px">Kamera auf Barcode richten</p>
     </div>
 
-    @if (lookingUp) {
+    <!-- Camera scanner -->
+    <app-camera-scanner
+      [active]="scannerActive()"
+      (scanned)="onBarcodeScanned($event)">
+    </app-camera-scanner>
+
+    <!-- Looking up indicator -->
+    @if (lookingUp()) {
       <div class="card aws-lookup">
         <div class="aws-lookup-dot"></div>
         <p>Barcode wird gesucht<span class="aws-dots">...</span></p>
       </div>
-    } @else {
-      <div class="card aws-scanner-status" [class.aws-scanner-status--active]="scannerActive">
-        <div class="aws-scanner-dot" [class.aws-scanner-dot--active]="scannerActive"></div>
-        <div>
-          <p style="font-weight:600; font-size:0.9rem">
-            {{ scannerActive ? 'Scanner aktiv' : 'Scanner inaktiv' }}
-          </p>
-          <p style="font-size:0.8rem; color:var(--text-muted)">
-            {{ scannerActive ? 'Barcode jetzt scannen...' : 'Scanner aktivieren um zu beginnen' }}
-          </p>
-        </div>
-        <button class="btn btn--sm" [class.btn--danger]="scannerActive" [class.btn--success]="!scannerActive"
-                (click)="toggleScanner()" style="width:auto; margin-left:auto">
-          {{ scannerActive ? 'Stop' : 'Start' }}
-        </button>
-      </div>
     }
 
+    <!-- Drink list -->
     @if (roundDrinks.length > 0) {
       <div>
         <p class="section-title">Hinzugefügte Drinks</p>
@@ -141,7 +115,10 @@
               <span>🍺</span>
               <div style="flex:1">
                 <div style="font-weight:600; font-size:0.9rem">{{ drink.drink_name }}</div>
-                <div style="font-size:0.75rem; color:var(--text-muted)">{{ drink.quantity_ml }} ml · {{ drink.type }}@if (drink.alc_percent != null) { · {{ drink.alc_percent }}%}</div>
+                <div style="font-size:0.75rem; color:var(--text-muted)">
+                  {{ drink.quantity_ml }} ml · {{ drink.type }}
+                  @if (drink.alc_percent != null) { · {{ drink.alc_percent }}% }
+                </div>
               </div>
               <input class="form-input aws-qty-input" type="number"
                 [value]="drink.quantity_ml"
@@ -167,5 +144,4 @@
 
     <button class="btn btn--ghost" (click)="back()" [disabled]="hasZeroQuantity()">← Zurück</button>
   </div>
-
 }

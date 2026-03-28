@@ -1,0 +1,135 @@
+.lobby-header {
+  text-align: center;
+  padding-bottom: 4px;
+}
+
+.lobby-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  letter-spacing: 3px;
+  color: var(--accent);
+  margin: 0;
+}
+
+.lobby-code {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  margin: 4px 0 0;
+}
+
+.lobby-link-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lobby-link-url {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  word-break: break-all;
+  background: var(--bg);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+  margin: 0;
+  font-family: monospace;
+}
+
+.lobby-teams {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.lobby-team {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lobby-team-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  margin: 0;
+  color: var(--text);
+}
+
+.lobby-empty {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.lobby-player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: var(--r-sm);
+  background: var(--bg);
+
+  &--me {
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+  }
+}
+
+.lobby-player-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.lobby-player-you {
+  font-size: 0.7rem;
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.lobby-start-area {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lobby-start-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0;
+}
+
+.lobby-start-btn {
+  padding: 18px;
+  font-size: 1.1rem;
+}
+
+.lobby-waiting {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 16px;
+}
+
+.lobby-waiting-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse-dot 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}

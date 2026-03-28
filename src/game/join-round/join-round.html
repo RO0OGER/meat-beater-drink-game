@@ -1,0 +1,57 @@
+<div class="join-page">
+  <div class="join-logo">🍺</div>
+  <h1 class="join-title">MEAT BEATER</h1>
+
+  @if (error()) {
+    <div class="alert alert--error">{{ error() }}</div>
+  }
+
+  @if (alreadyJoined()) {
+    <div class="card join-card">
+      <p style="text-align:center; color:var(--text-muted)">Du bist bereits beigetreten…</p>
+    </div>
+  } @else if (round()) {
+    <div class="card join-card">
+      <p class="join-round-name">{{ round()!.round_code }}</p>
+      <p class="join-hint">Gib deinen Namen ein und wähle ein Team</p>
+
+      <div class="form-group">
+        <label class="form-label">Dein Name</label>
+        <input class="form-input join-name-input"
+               type="text"
+               [ngModel]="name()"
+               (ngModelChange)="name.set($event)"
+               placeholder="z.B. Max"
+               autofocus />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Team wählen</label>
+        <div class="team-btns">
+          <button class="team-btn"
+                  [class.team-btn--active]="team() === 'team1'"
+                  (click)="team.set('team1')">
+            <span class="team-btn-icon">🔴</span>
+            <span class="team-btn-name">{{ round()!.team1_name }}</span>
+          </button>
+          <button class="team-btn"
+                  [class.team-btn--active]="team() === 'team2'"
+                  (click)="team.set('team2')">
+            <span class="team-btn-icon">🔵</span>
+            <span class="team-btn-name">{{ round()!.team2_name }}</span>
+          </button>
+        </div>
+      </div>
+
+      <button class="btn btn--primary join-btn"
+              (click)="join()"
+              [disabled]="joining() || !name().trim() || !team()">
+        @if (joining()) { Trete bei… } @else { Beitreten 🎯 }
+      </button>
+    </div>
+  } @else if (!error()) {
+    <div class="card join-card">
+      <p style="text-align:center; color:var(--text-muted)">Lade Runde…</p>
+    </div>
+  }
+</div>

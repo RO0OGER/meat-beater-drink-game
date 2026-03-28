@@ -10,31 +10,10 @@
     </div>
   }
 
-  @if (aiLoading()) {
-    <div class="ai-loading">
-      <span class="ai-dot"></span>
-      <span>KI analysiert Getränk…</span>
-    </div>
-  }
-
-  @if (aiApplied()) {
-    <div class="alert alert--success bm-api-hint">
-      ✨ KI hat Typ und Alkoholgehalt automatisch erkannt – bitte prüfen.
-    </div>
-  }
-  @if (aiError()) {
-    <div class="alert alert--error bm-api-hint">⚠ {{ aiError() }}</div>
-  }
-
   <div class="card bm-form">
     <div class="form-group">
       <label class="form-label">Getränkename</label>
-      <div class="bm-name-row">
-        <input class="form-input" type="text" [ngModel]="drinkName()" (ngModelChange)="drinkName.set($event)" placeholder="z.B. Club Mate" />
-        <button class="btn btn--ghost btn--sm bm-ai-btn" (click)="askAi()" [disabled]="aiLoading() || !drinkName().trim()" title="KI fragen">
-          @if (aiLoading()) { ⏳ } @else { ✨ }
-        </button>
-      </div>
+      <input class="form-input" type="text" [ngModel]="drinkName()" (ngModelChange)="drinkName.set($event)" placeholder="z.B. Club Mate" />
       @if (errorName()) { <span class="form-error">{{ errorName() }}</span> }
     </div>
 
@@ -45,19 +24,12 @@
     </div>
 
     <div class="form-group">
-      <label class="form-label">
-        Volle Getränkgröße (ml, optional)
-        @if (aiApplied() && fullSizeMl() != null) { <span class="bm-ai-tag bm-ai-tag--done">✨ KI</span> }
-      </label>
+      <label class="form-label">Volle Getränkgröße (ml, optional)</label>
       <input class="form-input" type="number" [ngModel]="fullSizeMl()" (ngModelChange)="fullSizeMl.set($event)" placeholder="z.B. 500" />
     </div>
 
     <div class="form-group">
-      <label class="form-label">
-        Getränketyp
-        @if (aiLoading()) { <span class="bm-ai-tag">KI lädt…</span> }
-        @else if (aiApplied() && type()) { <span class="bm-ai-tag bm-ai-tag--done">✨ KI</span> }
-      </label>
+      <label class="form-label">Getränketyp</label>
       <div class="type-btns">
         <button class="type-btn" [class.type-btn--active]="type() === 'mixable'"
                 (click)="type.set('mixable')">
@@ -82,10 +54,7 @@
     </div>
 
     <div class="form-group">
-      <label class="form-label">
-        Alkoholgehalt %
-        @if (aiApplied() && alcPercent() != null) { <span class="bm-ai-tag bm-ai-tag--done">✨ KI</span> }
-      </label>
+      <label class="form-label">Alkoholgehalt %</label>
       <input class="form-input" type="number" [ngModel]="alcPercent()" (ngModelChange)="alcPercent.set($event)" placeholder="z.B. 5 für Bier, 40 für Vodka" min="0" max="100" step="0.1" />
     </div>
 

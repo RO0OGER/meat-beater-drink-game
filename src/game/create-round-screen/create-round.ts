@@ -67,7 +67,7 @@ export class CreateRoundPage implements OnInit {
     );
 
     if (round) {
-      this.router.navigate(['/game', this.gameId, 'round', round.id, 'add-drinks']);
+      this.router.navigate(['/join', round.round_code]);
     }
     this.creating = false;
   }

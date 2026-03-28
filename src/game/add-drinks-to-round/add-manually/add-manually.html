@@ -1,3 +1,15 @@
+@if (showCapture()) {
+  <app-drink-capture-dialog
+    [barcode]="captureBarcode()"
+    [initName]="captureInitName()"
+    [initSize]="captureInitSize()"
+    [initType]="captureInitType()"
+    [initAlc]="captureInitAlc()"
+    (confirmed)="onCaptureConfirmed($event)"
+    (cancelled)="onCaptureCancelled()">
+  </app-drink-capture-dialog>
+} @else {
+
 <div class="scroll-page">
   <div>
     <h2 class="am-title">DRINK HINZUFÜGEN</h2>
@@ -20,32 +32,14 @@
     <p class="section-title">Manuell</p>
     <div class="form-group">
       <label class="form-label">Getränkename</label>
-      <div class="am-name-row">
-        <input class="form-input" type="text" [(ngModel)]="manualDrinkName" placeholder="z.B. Bionade" />
-        <button class="btn btn--ghost btn--sm am-ai-btn" (click)="askAiForManual()"
-                [disabled]="aiLoading() || !manualDrinkName.trim()" title="KI fragen">
-          @if (aiLoading()) { ⏳ } @else { ✨ }
-        </button>
-      </div>
-      @if (aiApplied()) {
-        <span style="font-size:0.75rem; color:var(--accent)">✨ KI hat Typ und Alkohol vorausgefüllt</span>
-      }
-      @if (aiError()) {
-        <span style="font-size:0.75rem; color:var(--error)">⚠ {{ aiError() }}</span>
-      }
+      <input class="form-input" type="text" [(ngModel)]="manualDrinkName" placeholder="z.B. Bionade" />
     </div>
     <div class="form-group">
-      <label class="form-label">
-        Menge (ml)
-        @if (aiVolumeMl != null && manualQuantity === aiVolumeMl) { <span style="font-size:0.7rem; color:var(--accent); margin-left:6px">✨ KI</span> }
-      </label>
+      <label class="form-label">Menge (ml)</label>
       <input class="form-input" type="number" [(ngModel)]="manualQuantity" placeholder="z.B. 500" />
     </div>
     <div class="form-group">
-      <label class="form-label">
-        Getränketyp
-        @if (aiApplied() && manualType) { <span style="font-size:0.7rem; color:var(--accent); margin-left:6px">✨ KI</span> }
-      </label>
+      <label class="form-label">Getränketyp</label>
       <div class="type-btns">
         <button class="type-btn" [class.type-btn--active]="manualType === 'mixable'"
                 (click)="manualType = 'mixable'">
@@ -94,3 +88,5 @@
 
   <button class="btn btn--ghost" (click)="back()">← Zurück</button>
 </div>
+
+}

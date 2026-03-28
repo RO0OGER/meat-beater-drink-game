@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Round } from '../model/Round';
+import { RoundPlayer } from '../model/RoundPlayer';
 import { SupabaseService } from './supabase';
 
 @Injectable({ providedIn: 'root' })
@@ -126,5 +127,64 @@ export class RoundService {
 
     const current = team === 'team1' ? round.remaining_time_team1 : round.remaining_time_team2;
     return this.setRemainingTime(roundId, team, current + extraSeconds);
+  }
+
+  async getRoundByCode(code: string): Promise<Round | null> {
+    const { data } = await this.supabase.client
+      .from('rounds')
+      .select('*')
+      .eq('round_code', code)
+      .maybeSingle();
+    return (data as Round) ?? null;
+  }
+
+  /** Sets status=playing and picks first shooter from team1. */
+  async startGame(roundId: string, players: RoundPlayer[], taskId: string | null): Promise<boolean> {
+    const team1 = players.filter(p => p.team === 'team1');
+    if (!team1.length) return false;
+    return this.updateRound(roundId, {
+      status: 'playing',
+      turn_number: 0,
+      current_shooter_id: team1[0].id,
+      shooter_team: 'team1',
+      current_target_id: null,
+      current_task_id: taskId,
+    } as Partial<Round>);
+  }
+
+  /** After a hit: picks a random player from the defending team and sets them as target. */
+  async registerHit(roundId: string, shooterTeam: 'team1' | 'team2', players: RoundPlayer[], taskId: string): Promise<boolean> {
+    const defendingTeam = shooterTeam === 'team1' ? 'team2' : 'team1';
+    const targets = players.filter(p => p.team === defendingTeam);
+    if (!targets.length) return false;
+    const target = targets[Math.floor(Math.random() * targets.length)];
+    return this.updateRound(roundId, {
+      current_target_id: target.id,
+      current_task_id: taskId,
+    } as Partial<Round>);
+  }
+
+  /** After a miss or after the target drinks: advances to the next shooter. */
+  async advanceTurn(roundId: string, players: RoundPlayer[]): Promise<boolean> {
+    const round = await this.getRoundById(roundId);
+    if (!round) return false;
+
+    const nextTurn = (round.turn_number ?? 0) + 1;
+    const nextTeam: 'team1' | 'team2' = nextTurn % 2 === 0 ? 'team1' : 'team2';
+    const teamPlayers = players.filter(p => p.team === nextTeam);
+    if (!teamPlayers.length) return false;
+
+    const idx = Math.floor(nextTurn / 2) % teamPlayers.length;
+    return this.updateRound(roundId, {
+      turn_number: nextTurn,
+      current_shooter_id: teamPlayers[idx].id,
+      shooter_team: nextTeam,
+      current_target_id: null,
+      current_task_id: null,
+    } as Partial<Round>);
+  }
+
+  async endGame(roundId: string): Promise<boolean> {
+    return this.updateRound(roundId, { status: 'ended' } as Partial<Round>);
   }
 }
