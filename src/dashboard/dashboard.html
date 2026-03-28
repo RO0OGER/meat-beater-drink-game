@@ -1,0 +1,35 @@
+<div class="page-wide dash-wrap">
+  <header class="dash-header">
+    <div>
+      <p class="dash-greet">Willkommen zurück</p>
+      <h2 class="dash-username">{{ username }}</h2>
+    </div>
+    <button class="btn btn--ghost btn--sm" (click)="logout()">Abmelden</button>
+  </header>
+
+  <button class="btn btn--primary" (click)="createGame()">+ Neues Spiel</button>
+
+  <div class="dash-section">
+    <p class="section-title">Deine Spiele</p>
+
+    @if (loading) {
+      <div class="dash-loading">
+        <p>Lädt...</p>
+      </div>
+    } @else if (games.length === 0) {
+      <div class="card dash-empty">
+        <p>Noch keine Spiele. Erstelle dein erstes!</p>
+      </div>
+    } @else {
+      <div class="dash-list">
+        @for (game of games; track game.id) {
+          <div class="list-item dash-game-item" (click)="openGame(game)">
+            <div class="dash-game-icon">🍺</div>
+            <span class="dash-game-name">{{ game.name }}</span>
+            <button class="btn btn--ghost btn--sm btn--icon" (click)="deleteGame(game, $event)">🗑</button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

@@ -1,25 +1,25 @@
-<div class="app-background-start page">
-  <div class="animation-container">
-    <img class="animation" src="/animations/animation-start-screen.gif">
+<div class="start-wrap">
+  <div class="start-hero">
+    <h1 class="start-title">MEAT<br>BEATER</h1>
+    <p class="start-sub">Drinking Game</p>
   </div>
 
-  <div class="button-group">
-    <img class="button" src="/buttons/game-start-button.png" (click)="startGame()">
-    <img class="button" src="/buttons/game-load-button.png" (click)="toggleLoad()">
+  <div class="start-actions">
+    <button class="btn btn--primary start-btn" (click)="startGame()">🎮 Neues Spiel starten</button>
+    <button class="btn btn--ghost start-btn" (click)="toggleLoad()">📂 Spiel laden</button>
   </div>
 
   @if (showInput) {
-    <div class="load-section">
-      <label class="text" for="code">GAME-CODE:</label>
-      <input id="code" class="code" [(ngModel)]="loadCode" placeholder="z. B. beer_champs_2025" />
-      <button class="ok-button" (click)="confirmLoad()">OK</button>
+    <div class="card start-load-card">
+      <p class="section-title">Runden-Code eingeben</p>
+      <input class="form-input" [(ngModel)]="loadCode" placeholder="z. B. beer_champs_2025" />
+      <button class="btn btn--primary" style="margin-top:12px" (click)="confirmLoad()">OK</button>
     </div>
   }
 
-  <footer>
-    <p>
-      © 2025 Meat Beater Drinking Game –
-      <a (click)="goToImpressum()" style="cursor: pointer">Impressum</a>
+  <footer class="start-footer">
+    <p>© 2025 Meat Beater –
+      <a (click)="goToImpressum()">Impressum</a>
     </p>
   </footer>
 </div>

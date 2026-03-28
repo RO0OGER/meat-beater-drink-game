@@ -1,24 +1,34 @@
-<div class="scrollable-wrapper app-background-standard">
-  <h2 class="title">Drinks für Runde "{{ roundCode }}"</h2>
+<div class="scroll-page">
+  <div>
+    <h2 class="ad-title">DRINKS</h2>
+    <p style="color:var(--text-muted); font-size:0.82rem; margin-top:3px">Getränke für diese Runde</p>
+  </div>
 
-  <div class="drink-columns">
-    @for (chunk of drinkChunks; track $index) {
-      <div class="drink-column">
-        @for (drink of chunk; track drink.id) {
-          <div class="drink-card">
-            {{ drink.drink_name }} – {{ drink.quantity_ml }}ml
-            <button (click)="deleteDrink(drink.id)">🗑️</button>
+  @if (drinks.length === 0) {
+    <div class="card" style="text-align:center; color:var(--text-muted); padding:28px">
+      Noch keine Drinks. Füge welche hinzu!
+    </div>
+  } @else {
+    <div class="ad-list">
+      @for (drink of drinks; track drink.id) {
+        <div class="list-item">
+          <span class="ad-drink-icon">🍺</span>
+          <div class="ad-drink-info">
+            <span class="ad-drink-name">{{ drink.drink_name }}</span>
+            <span class="ad-drink-ml">{{ drink.quantity_ml }} ml</span>
           </div>
-        }
-      </div>
-    }
+          <button class="btn btn--ghost btn--sm btn--icon" (click)="deleteDrink(drink.id)">✕</button>
+        </div>
+      }
+    </div>
+  }
+
+  <hr class="divider" />
+
+  <div class="ad-actions">
+    <button class="btn btn--ghost" (click)="addManual()">✍ Manuell hinzufügen</button>
+    <button class="btn btn--ghost" (click)="addByScanner()">📷 Mit Scanner</button>
   </div>
 
-  <hr />
-
-  <div class="actions">
-    <button (click)="addManual()">Manuell hinzufügen</button>
-    <button (click)="addByScanner()">Mit Scanner hinzufügen</button>
-    <button (click)="startGame()">Spiel starten</button>
-  </div>
+  <button class="btn btn--primary" (click)="startGame()">▶ Spiel starten</button>
 </div>

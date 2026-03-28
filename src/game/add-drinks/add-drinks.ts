@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { RoundDrinkService } from '../../services/round-drink.service';
 import { RoundDrink } from '../../model/RoundDrink';
-import { RoundService } from '../../services/round';
-import { CommonModule } from '@angular/common';
 import { DrinkGeneratorService } from '../../services/generate-drink';
 
 @Component({
@@ -14,67 +13,47 @@ import { DrinkGeneratorService } from '../../services/generate-drink';
   imports: [CommonModule],
 })
 export class AddDrinksComponent implements OnInit {
-  roundCode = '';
+  gameId = '';
+  roundId = '';
   drinks: RoundDrink[] = [];
-  drinkChunks: RoundDrink[][] = [];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private roundDrinkService: RoundDrinkService,
-    private roundService: RoundService,
     private drinkGeneratorService: DrinkGeneratorService
   ) {}
 
   async ngOnInit() {
-    this.roundCode = this.route.snapshot.paramMap.get('round_code') ?? '';
-    const roundId = await this.roundService.getIdByRoundCode(this.roundCode);
+    this.gameId  = this.route.snapshot.paramMap.get('gameId')  ?? '';
+    this.roundId = this.route.snapshot.paramMap.get('roundId') ?? '';
+    await this.loadDrinks();
+  }
 
-    if (!roundId) {
-      console.error('Runde nicht gefunden');
-      return;
-    }
-
-    this.drinks = await this.roundDrinkService.getRoundDrinksByRoundId(roundId);
-    this.drinkChunks = this.chunkArray(this.drinks, 4); // Drinks paarweise gruppieren
+  async loadDrinks() {
+    this.drinks = await this.roundDrinkService.getRoundDrinksByRoundId(this.roundId);
   }
 
   async deleteDrink(drinkId: string) {
     await this.roundDrinkService.deleteRoundDrinkById(drinkId);
-    this.drinks = this.drinks.filter((d) => d.id !== drinkId);
-    this.drinkChunks = this.chunkArray(this.drinks, 2); // Nach dem Löschen neu gruppieren
+    this.drinks = this.drinks.filter(d => d.id !== drinkId);
   }
 
   addManual() {
-    this.router.navigate(['/add-drink-manual', this.roundCode]);
+    this.router.navigate(['/game', this.gameId, 'round', this.roundId, 'add-drink-manual']);
   }
 
   addByScanner() {
-    this.router.navigate(['/add-drink-scan', this.roundCode]);
+    this.router.navigate(['/game', this.gameId, 'round', this.roundId, 'add-drink-scan']);
   }
 
   async startGame() {
-    const roundId = await this.roundService.getIdByRoundCode(this.roundCode);
-    if (!roundId) {
-      console.error('Runde nicht gefunden');
-      return;
-    }
-
-    const result = await this.drinkGeneratorService.generateDrinks(roundId);
-
-    if (typeof result === 'string') {
-      alert(result); // z. B. "Das gegnerische Team darf den Drink bestimmen"
-      return;
-    }
-
-    this.router.navigate(['/animation/start-round', this.roundCode]);
+    await this.drinkGeneratorService.deleteGeneratedDrinksByRoundId(this.roundId);
+    await this.drinkGeneratorService.generateDrinks(this.roundId);
+    this.router.navigate(['/animation/start-round', this.gameId, this.roundId]);
   }
 
-  private chunkArray<T>(array: T[], size: number): T[][] {
-    const chunked: T[][] = [];
-    for (let i = 0; i < array.length; i += size) {
-      chunked.push(array.slice(i, i + size));
-    }
-    return chunked;
+  back() {
+    this.router.navigate(['/game', this.gameId, 'round', this.roundId, 'add-drinks']);
   }
 }

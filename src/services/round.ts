@@ -1,241 +1,130 @@
 import { Injectable } from '@angular/core';
 import { Round } from '../model/Round';
-import {SupabaseService} from './supabase';
+import { SupabaseService } from './supabase';
 
 @Injectable({ providedIn: 'root' })
 export class RoundService {
-  constructor(private supabaseService: SupabaseService) {
-  }
+  constructor(private supabase: SupabaseService) {}
 
-  // GET ALL
-  async getAllRounds(): Promise<Round[]> {
-    const {data, error} = await this.supabaseService.client.from('rounds').select('*');
-    if (error) throw error;
-    return data as Round[];
-  }
-
-  // GET BY CODE
-  async getRoundByCode(code: string): Promise<Round | null> {
-    const {data, error} = await this.supabaseService.client
+  async getRoundById(id: string): Promise<Round | null> {
+    const { data, error } = await this.supabase.client
       .from('rounds')
       .select('*')
-      .eq('round_code', code)
+      .eq('id', id)
       .single();
+
     if (error) {
-      console.error('getRoundByCode failed:', error.message);
+      console.error('getRoundById failed:', error.message);
       return null;
     }
     return data as Round;
   }
 
-  // SET CODE
-  async setRoundCode(id: string, code: string): Promise<boolean> {
-    const {error} = await this.supabaseService.client
+  async getRoundsByGameId(gameId: string): Promise<Round[]> {
+    const { data, error } = await this.supabase.client
       .from('rounds')
-      .update({round_code: code})
-      .eq('id', id);
-    return !error;
-  }
-
-  // SET is_active
-  async setIsActive(id: string, value: boolean): Promise<boolean> {
-    const {error} = await this.supabaseService.client
-      .from('rounds')
-      .update({is_active: value})
-      .eq('id', id);
-    return !error;
-  }
-
-  // GET is_active
-  async getIsActive(id: string): Promise<boolean | null> {
-    const {data, error} = await this.supabaseService.client
-      .from('rounds')
-      .select('is_active')
-      .eq('id', id)
-      .single();
-    return error ? null : data.is_active;
-  }
-
-  // 🔫 Hits
-  async updateTeam1Hits(id: string, hits: number): Promise<boolean> {
-    const {error} = await this.supabaseService.client
-      .from('rounds')
-      .update({team1_hits: hits})
-      .eq('id', id);
-    return !error;
-  }
-
-  async updateTeam2Hits(id: string, hits: number): Promise<boolean> {
-    const {error} = await this.supabaseService.client
-      .from('rounds')
-      .update({team2_hits: hits})
-      .eq('id', id);
-    return !error;
-  }
-
-  async getTeam1Hits(id: string): Promise<number | null> {
-    const {data, error} = await this.supabaseService.client
-      .from('rounds')
-      .select('team1_hits')
-      .eq('id', id)
-      .single();
-    return error ? null : data.team1_hits;
-  }
-
-  async getTeam2Hits(id: string): Promise<number | null> {
-    const {data, error} = await this.supabaseService.client
-      .from('rounds')
-      .select('team2_hits')
-      .eq('id', id)
-      .single();
-    return error ? null : data.team2_hits;
-  }
-
-  // ⏱ Zeit
-  async getRemainingTimeTeam1(id: string): Promise<number | null> {
-    const {data, error} = await this.supabaseService.client
-      .from('rounds')
-      .select('remaining_time_team1')
-      .eq('id', id)
-      .single();
-    return error ? null : data.remaining_time_team1;
-  }
-
-  async getRemainingTimeTeam2(id: string): Promise<number | null> {
-    const {data, error} = await this.supabaseService.client
-      .from('rounds')
-      .select('remaining_time_team2')
-      .eq('id', id)
-      .single();
-    return error ? null : data.remaining_time_team2;
-  }
-
-  async setRemainingTimeByCode(roundCode: string, team: 'team1' | 'team2', seconds: number): Promise<boolean> {
-    const column = team === 'team1' ? 'remaining_time_team1' : 'remaining_time_team2';
-
-    const { error } = await this.supabaseService.client
-      .from('rounds')
-      .update({ [column]: seconds })
-      .eq('round_code', roundCode);
-
-    return !error;
-  }
-
-  // 👥 Spieleranzahl
-  async getNumPlayersTeam1(id: string): Promise<number | null> {
-    const {data, error} = await this.supabaseService.client
-      .from('rounds')
-      .select('num_players_team1')
-      .eq('id', id)
-      .single();
-    return error ? null : data.num_players_team1;
-  }
-
-  async getNumPlayersTeam2(id: string): Promise<number | null> {
-    const {data, error} = await this.supabaseService.client
-      .from('rounds')
-      .select('num_players_team2')
-      .eq('id', id)
-      .single();
-    return error ? null : data.num_players_team2;
-  }
-
-  async setNumPlayersTeam1(id: string, value: number): Promise<boolean> {
-    const {error} = await this.supabaseService.client
-      .from('rounds')
-      .update({num_players_team1: value})
-      .eq('id', id);
-    return !error;
-  }
-
-  async setNumPlayersTeam2(id: string, value: number): Promise<boolean> {
-    const {error} = await this.supabaseService.client
-      .from('rounds')
-      .update({num_players_team2: value})
-      .eq('id', id);
-    return !error;
-  }
-
-  async getIdByRoundCode(code: string): Promise<string | null> {
-    const {data, error} = await this.supabaseService.client
-      .from('rounds')
-      .select('id')
-      .eq('round_code', code)
-      .single();
+      .select('*')
+      .eq('game_id', gameId)
+      .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Fehler beim Abrufen der ID via round_code:', error.message);
-      return null;
+      console.error('getRoundsByGameId failed:', error.message);
+      return [];
     }
-
-    return data.id;
+    return data as Round[];
   }
 
   async createRound(
-    round_code: string,
-    num_players_team1: number,
-    num_players_team2: number,
-    time_team1: number,
-    time_team2: number
-  ): Promise<string | null> {
-    const {data, error} = await this.supabaseService.client
+    gameId: string,
+    roundCode: string,
+    team1Name: string,
+    team2Name: string,
+    numPlayersTeam1: number,
+    numPlayersTeam2: number,
+    timeTeam1Seconds: number,
+    timeTeam2Seconds: number
+  ): Promise<Round | null> {
+    const { data, error } = await this.supabase.client
       .from('rounds')
       .insert({
-        round_code,
-        num_players_team1,
-        num_players_team2,
-        remaining_time_team1: time_team1,
-        remaining_time_team2: time_team2,
+        game_id: gameId,
+        round_code: roundCode,
+        team1_name: team1Name,
+        team2_name: team2Name,
+        num_players_team1: numPlayersTeam1,
+        num_players_team2: numPlayersTeam2,
+        remaining_time_team1: timeTeam1Seconds,
+        remaining_time_team2: timeTeam2Seconds,
         team1_hits: 0,
         team2_hits: 0,
         is_active: false,
       })
-      .select('id')
+      .select()
       .single();
 
     if (error) {
-      console.error('Fehler beim Erstellen der Runde:', error.message);
+      console.error('createRound failed:', error.message);
       return null;
     }
-
-    return data.id;
+    return data as Round;
   }
-  async getRemainingTimeByCode(
-    roundCode: string,
-    team: 'team1' | 'team2'
-  ): Promise<number | null> {
-    const column = team === 'team1' ? 'remaining_time_team1' : 'remaining_time_team2';
 
-    type TimeColumn = 'remaining_time_team1' | 'remaining_time_team2';
-    type TimeResult = Pick<Round, TimeColumn>;
-
-    const { data, error } = await this.supabaseService.client
+  async updateRound(id: string, fields: Partial<Round>): Promise<boolean> {
+    const { error } = await this.supabase.client
       .from('rounds')
-      .select(column)
-      .eq('round_code', roundCode)
-      .single<TimeResult>();
+      .update(fields)
+      .eq('id', id);
 
-    if (error || !data) {
-      console.error(`Fehler beim Abrufen der Zeit für ${team}:`, error?.message);
-      return null;
+    if (error) {
+      console.error('updateRound failed:', error.message);
+      return false;
     }
-
-    // Typisch sicher: garantiert number durch Pick<Round, TimeColumn>
-    return data[column as TimeColumn];
+    return true;
   }
 
   async deleteRoundById(id: string): Promise<boolean> {
-    const { error } = await this.supabaseService.client
+    const { error } = await this.supabase.client
       .from('rounds')
       .delete()
       .eq('id', id);
 
     if (error) {
-      console.error('Fehler beim Löschen der Runde:', error.message);
+      console.error('deleteRoundById failed:', error.message);
       return false;
     }
-
     return true;
   }
 
+  async isCodeTaken(code: string): Promise<boolean> {
+    const { data } = await this.supabase.client
+      .from('rounds')
+      .select('id')
+      .eq('round_code', code)
+      .maybeSingle();
+
+    return !!data;
+  }
+
+  async incrementHits(roundId: string, team: 'team1' | 'team2'): Promise<boolean> {
+    const round = await this.getRoundById(roundId);
+    if (!round) return false;
+
+    const field = team === 'team1' ? 'team1_hits' : 'team2_hits';
+    const current = team === 'team1' ? round.team1_hits : round.team2_hits;
+
+    return this.updateRound(roundId, { [field]: current + 1 } as Partial<Round>);
+  }
+
+  async setRemainingTime(roundId: string, team: 'team1' | 'team2', seconds: number): Promise<boolean> {
+    const field = team === 'team1' ? 'remaining_time_team1' : 'remaining_time_team2';
+    return this.updateRound(roundId, { [field]: seconds } as Partial<Round>);
+  }
+
+  async addRemainingTime(roundId: string, team: 'team1' | 'team2', extraSeconds: number): Promise<boolean> {
+    const round = await this.getRoundById(roundId);
+    if (!round) return false;
+
+    const current = team === 'team1' ? round.remaining_time_team1 : round.remaining_time_team2;
+    return this.setRemainingTime(roundId, team, current + extraSeconds);
+  }
 }

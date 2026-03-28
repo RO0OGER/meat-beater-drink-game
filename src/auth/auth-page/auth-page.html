@@ -1,0 +1,53 @@
+<div class="auth-wrap">
+  <div class="auth-logo">
+    <h1 class="auth-title">MEAT<br>BEATER</h1>
+    <p class="auth-sub">Drinking Game</p>
+  </div>
+
+  <div class="card auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab" [class.auth-tab--active]="mode === 'login'" (click)="switchMode('login')">Login</button>
+      <button class="auth-tab" [class.auth-tab--active]="mode === 'register'" (click)="switchMode('register')">Registrieren</button>
+    </div>
+
+    @if (errorMessage) {
+      <div class="alert alert--error">{{ errorMessage }}</div>
+    }
+
+    @if (mode === 'login') {
+      <form [formGroup]="loginForm" (ngSubmit)="login()" class="auth-form">
+        <div class="form-group">
+          <label class="form-label">E-Mail</label>
+          <input class="form-input" formControlName="email" type="email" placeholder="name@example.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Passwort</label>
+          <input class="form-input" formControlName="password" type="password" placeholder="••••••••" />
+        </div>
+        <button type="submit" class="btn btn--primary" [disabled]="loginForm.invalid || loading">
+          {{ loading ? 'Laden...' : 'Einloggen' }}
+        </button>
+      </form>
+    }
+
+    @if (mode === 'register') {
+      <form [formGroup]="registerForm" (ngSubmit)="register()" class="auth-form">
+        <div class="form-group">
+          <label class="form-label">Benutzername</label>
+          <input class="form-input" formControlName="username" type="text" placeholder="DeinName" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">E-Mail</label>
+          <input class="form-input" formControlName="email" type="email" placeholder="name@example.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Passwort</label>
+          <input class="form-input" formControlName="password" type="password" placeholder="Min. 6 Zeichen" />
+        </div>
+        <button type="submit" class="btn btn--primary" [disabled]="registerForm.invalid || loading">
+          {{ loading ? 'Laden...' : 'Konto erstellen' }}
+        </button>
+      </form>
+    }
+  </div>
+</div>

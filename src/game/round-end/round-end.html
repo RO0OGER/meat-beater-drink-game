@@ -1,18 +1,35 @@
-<div class="round-end-wrapper app-background-standard">
-  <p class="warning-text">⚠️ Diese Aktion löscht die komplette Runde inklusive aller zugehörigen Daten.</p>
+<div class="re-wrap">
+  <div class="re-content">
+    <h1 class="re-title">RUNDE BEENDEN</h1>
 
-  <button class="delete-button" (click)="confirmAndDelete()">🗑️ Runde löschen</button>
-  <button class="extend-toggle-button" (click)="toggleExtend()">⏭️ Weiter?</button>
+    <div class="card re-warning">
+      <p>⚠ Diese Aktion löscht die Runde und alle zugehörigen Daten.</p>
+    </div>
 
-  <div *ngIf="confirmDelete" class="confirm-box">
-    <p>Bist du sicher, dass du alles löschen willst?</p>
-    <button class="yes-button" (click)="deleteEverything()">✅ Ja, alles löschen</button>
-    <button class="cancel-button" (click)="cancelDelete()">❌ Abbrechen</button>
-  </div>
+    <div class="re-actions">
+      <button class="btn btn--danger" (click)="confirmAndDelete()">🗑 Runde löschen</button>
+      <button class="btn btn--ghost" (click)="toggleExtend()">⏭ Weiter spielen?</button>
+    </div>
 
-  <div *ngIf="showExtend" class="extend-box">
-    <p>Wie viele Minuten soll das Team <strong>{{ team }}</strong> zusätzlich erhalten?</p>
-    <input type="number" [(ngModel)]="extraMinutes" min="1" placeholder="Minuten eingeben..." />
-    <button class="apply-button" (click)="applyExtraTime()">✅ Zeit hinzufügen & Aufgabe fortsetzen</button>
+    @if (confirmDelete) {
+      <div class="card re-confirm-box">
+        <p style="font-weight:600; margin-bottom:12px">Bist du sicher?</p>
+        <div style="display:flex; gap:8px">
+          <button class="btn btn--danger" (click)="deleteEverything()">Ja, löschen</button>
+          <button class="btn btn--ghost" (click)="cancelDelete()">Abbrechen</button>
+        </div>
+      </div>
+    }
+
+    @if (showExtend) {
+      <div class="card re-extend-box">
+        <p class="section-title">Zusatzzeit für {{ team }}</p>
+        <div class="form-group" style="margin-top:10px">
+          <label class="form-label">Minuten</label>
+          <input class="form-input" type="number" [(ngModel)]="extraMinutes" min="1" placeholder="z.B. 5" />
+        </div>
+        <button class="btn btn--primary" style="margin-top:12px" (click)="applyExtraTime()">✅ Zeit hinzufügen</button>
+      </div>
+    }
   </div>
 </div>

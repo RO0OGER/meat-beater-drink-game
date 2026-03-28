@@ -1,51 +1,64 @@
-$purple: #7b22a2;
-$yellow: #facd05;
-$border: #fd9a00;
+.cd-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  background: radial-gradient(ellipse at 50% 40%, rgba(245,158,11,0.07) 0%, var(--bg) 65%);
+}
 
-.countdown-wrapper {
-  height: 100vh;
-  width: 100%;
-  font-family: "Eras Bold ITC", sans-serif;
+.cd-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  background-size: cover;
-  background-position: center;
+  gap: 24px;
   text-align: center;
-  padding: 2rem;
-  box-sizing: border-box;
+  max-width: 320px;
+  width: 100%;
 }
 
-.countdown-time {
-  font-size: 3rem;
-  font-weight: bold;
-  color: $yellow;
-  margin-bottom: 2rem;
+.cd-task-label {
+  font-size: 1rem;
+  color: var(--text-muted);
+  font-style: italic;
+  max-width: 260px;
 }
 
-.task-label {
-  font-size: 1.6rem;
-  font-weight: bold;
-  color: $yellow;
-  margin-bottom: 3rem;
-  max-width: 700px;
+.cd-timer-ring {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  box-shadow:
+    0 0 0 1px var(--accent-dim),
+    0 0 40px var(--accent-dim),
+    inset 0 0 40px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, var(--bg-card-2) 0%, var(--bg-card) 100%);
 }
 
-.finish-button {
-  padding: 1.2rem 2.5rem;
-  font-size: 1.4rem;
-  font-weight: bold;
-  background: $yellow;
-  color: $purple;
-  border: 4px solid $border;
-  border-bottom-width: 6px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: transform 0.2s ease;
+.cd-time {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3.8rem;
+  letter-spacing: 4px;
+  color: var(--accent);
+  text-shadow: 0 0 20px var(--accent-glow);
+  line-height: 1;
+}
 
-  &:hover {
-    transform: scale(1.05);
-    background: lighten($yellow, 5%);
-  }
+.cd-colon {
+  animation: blink 1s step-start infinite;
+  margin: 0 2px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+.cd-btn {
+  width: 100%;
+  max-width: 280px;
 }

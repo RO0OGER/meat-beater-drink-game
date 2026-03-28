@@ -1,64 +1,46 @@
-$purple: #7b22a2;
-$yellow: #facd05;
-$border: #fd9a00;
+.hit-wrap {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
 
-.hit-wrapper {
-  height: 100vh;
-  width: 100%;
+  &--t2 { background: radial-gradient(ellipse at 50% 40%, rgba(59,130,246,0.12) 0%, var(--bg) 65%); }
+}
+
+.hit-back-btn {
+  background: transparent;
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-sm);
+  color: var(--text-muted);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  padding: 8px 16px;
+  cursor: pointer;
+  width: fit-content;
+  transition: color 0.2s, border-color 0.2s;
+  &:hover { color: var(--text); border-color: var(--border); }
+}
+
+.hit-content {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; // vertikal zentriert
+  justify-content: center;
   text-align: center;
-  padding: 2rem;
-  font-family: "Eras Bold ITC", sans-serif;
+  gap: 14px;
+  padding-bottom: 40px;
 }
 
-.hit-title {
-  font-size: 2.8rem;
-  font-weight: bold;
-  color: $yellow;
-  margin-bottom: 1.5rem;
+.hit-icon { font-size: 4rem; }
+
+.hit-headline {
+  font-size: 4rem;
+  letter-spacing: 6px;
+  &--t2 { color: var(--team2); text-shadow: 0 0 30px var(--team2-glow); }
 }
 
-.hit-subtext {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: $yellow;
-  margin-bottom: 2.5rem;
-}
-
-.back-button,
-.show-task-button {
-  padding: 1.2rem 2.4rem;
-  font-size: 1.5rem;
-  font-weight: bold;
-  border: 4px solid $border;
-  border-bottom-width: 6px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-  margin-bottom: 1.5rem;
-  width: max-content;
-}
-
-.back-button {
-  background: $yellow;
-  color: $purple;
-
-  &:hover {
-    transform: scale(1.05);
-    background: #f2f2f2;
-  }
-}
-
-.show-task-button {
-  background: $yellow;
-  color: $purple;
-
-  &:hover {
-    transform: scale(1.05);
-    background: lighten($yellow, 5%);
-  }
-}
-
+.hit-sub { font-size: 1rem; color: var(--text-muted); strong { color: var(--text); } }
+.hit-question { font-size: 0.9rem; color: var(--text-dim); }
+.hit-task-btn { max-width: 280px; margin-top: 8px; font-size: 1.2rem; }

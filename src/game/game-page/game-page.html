@@ -1,48 +1,54 @@
-<div class="vs-page app-background-game-screen">
-  <!-- Team 1 -->
-  <div class="team-side left">
-    <div class="info-box top-left single-line">
-      <strong>Verbleibende Zeit:</strong>&nbsp;{{ remainingTimeTeam1Formatted }}    </div>
+<div class="game-screen">
 
-    <div class="info-box top-right single-line">
-      <strong>Score:</strong>&nbsp;{{ team2Hits }}
+  <!-- Team 1 panel -->
+  <div class="team-panel team-panel--t1">
+    <div class="team-name team-name--t1">{{ round?.team1_name ?? 'Team 1' }}</div>
+    <div class="team-timer">{{ team1TimeFormatted }}</div>
+
+    <p class="cups-label">BECHER ÜBRIG: {{ cupsRemaining(round?.team2_hits ?? 0) }}</p>
+    <div class="cups-wrap">
+      @for (row of cupRows; track $index) {
+        <div class="cups-row">
+          @for (i of row; track i) {
+            <div class="cup cup--t1" [class.cup--gone]="isCupHit(i, round?.team2_hits ?? 0)"></div>
+          }
+        </div>
+      }
     </div>
 
-    <div class="info-box center-top">
-      <h3>Spieleranzahl</h3>
-      <p>{{ numPlayersTeam1 }}</p>
+    <div class="team-score">
+      HITS&nbsp;<span>{{ round?.team2_hits ?? 0 }}</span>
     </div>
 
-    <div class="info-box bottom">
-      <h3>Becher von Team 1 wurde getroffen?</h3>
-      <button class="hit-button team1" (click)="navigateToHitAnimation('team1')">Hit Button</button>
-    </div>
+    <button class="btn btn--hit-team1" (click)="navigateToHit('team1')">⚡ HIT!</button>
   </div>
 
-  <!-- Team 2 -->
-  <div class="team-side right">
-    <div class="info-box top-left single-line">
+  <!-- Team 2 panel -->
+  <div class="team-panel team-panel--t2">
+    <div class="team-name team-name--t2">{{ round?.team2_name ?? 'Team 2' }}</div>
+    <div class="team-timer">{{ team2TimeFormatted }}</div>
 
-      <strong>Score:</strong>&nbsp;{{ team1Hits }}
+    <p class="cups-label">BECHER ÜBRIG: {{ cupsRemaining(round?.team1_hits ?? 0) }}</p>
+    <div class="cups-wrap">
+      @for (row of cupRows; track $index) {
+        <div class="cups-row">
+          @for (i of row; track i) {
+            <div class="cup cup--t2" [class.cup--gone]="isCupHit(i, round?.team1_hits ?? 0)"></div>
+          }
+        </div>
+      }
     </div>
 
-    <div class="info-box top-right single-line">
-      <strong>Verbleibende Zeit:</strong>&nbsp;{{ remainingTimeTeam2Formatted }}
+    <div class="team-score">
+      HITS&nbsp;<span>{{ round?.team1_hits ?? 0 }}</span>
     </div>
 
-    <div class="info-box center-top">
-      <h3>Spieleranzahl</h3>
-      <p>{{ numPlayersTeam2 }}</p>
-    </div>
-
-    <div class="info-box bottom">
-      <h3>Becher von Team 2 wurde getroffen?</h3>
-      <button class="hit-button team2" (click)="navigateToHitAnimation('team2')">Hit Button</button>
-    </div>
+    <button class="btn btn--hit-team2" (click)="navigateToHit('team2')">⚡ HIT!</button>
   </div>
 
-  <!-- Settings -->
-  <div class="settings-button info-box">
-    <button class="settings-btn" (click)="navigateToSettings()">⚙️ Einstellungen</button>
+  <!-- Settings floating pill -->
+  <div class="settings-bar">
+    <button (click)="navigateToSettings()">⚙ Einstellungen</button>
   </div>
+
 </div>

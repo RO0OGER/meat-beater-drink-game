@@ -1,14 +1,16 @@
 export interface GeneratedDrinkEntry {
-  id?: string; // optional, da von Supabase generiert
+  id?: string;
   round_id: string;
   is_mix: boolean;
-  drink_parts: DrinkPart[]; // jsonb array
+  drink_parts: DrinkPart[];
   total_ml: number;
-  mix_ratio: number | null;
-  created_at?: string; // wird von Supabase automatisch gesetzt
+  mix_ratio: number | null;          // Anteil Spirit (0–1), für Anzeige
+  result_alc_percent: number | null; // Resultierender ABV% des fertigen Drinks
+  created_at?: string;
 }
 
 export interface DrinkPart {
-  id: string;    // ID des verwendeten RoundDrinks
-  amount: number; // Menge in ml
+  id: string;          // round_drink ID
+  amount: number;      // ml
+  alc_percent: number; // ABV% dieses Anteils (0 wenn kein Alkohol)
 }

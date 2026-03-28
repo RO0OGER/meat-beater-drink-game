@@ -8,12 +8,13 @@ import { Task } from '../../../model/Task';
   standalone: true,
   templateUrl: './task-screen.html',
   styleUrl: './task-screen.scss',
-  imports: []
+  imports: [],
 })
 export class TaskScreen implements OnInit {
   task: Task | null = null;
-  roundCode = '';
-  team = '';
+  gameId  = '';
+  roundId = '';
+  team    = '';
 
   constructor(
     private taskService: TaskService,
@@ -22,17 +23,16 @@ export class TaskScreen implements OnInit {
   ) {}
 
   async ngOnInit() {
-    this.roundCode = this.route.snapshot.paramMap.get('round_code') ?? '';
-    this.team = this.route.snapshot.paramMap.get('team') ?? '';
-    this.task = await this.taskService.getRandomTask();
+    this.gameId  = this.route.snapshot.paramMap.get('gameId')  ?? '';
+    this.roundId = this.route.snapshot.paramMap.get('roundId') ?? '';
+    this.team    = this.route.snapshot.paramMap.get('team')    ?? '';
+    this.task    = await this.taskService.getRandomTask();
 
     if (this.task) {
       setTimeout(() => {
         this.router.navigate([
-          '/animation/drink-mix-and-amount',
-          this.team,
-          this.roundCode,
-          this.task!.id
+          '/animation/drink',
+          this.team, this.gameId, this.roundId, this.task!.id
         ]);
       }, 10000);
     }

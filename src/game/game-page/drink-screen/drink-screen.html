@@ -1,42 +1,47 @@
-<div class="drink-screen-wrapper app-background-standard">
-  <div class="drink-scroll">
-    <h1>🍹 Aufgabe für {{ team | uppercase }}</h1>
+<div class="ds-wrap scroll-page">
+  <div class="ds-header">
+    <p class="ds-eyebrow">AUFGABE FÜR {{ team | uppercase }}</p>
+    <h2 class="ds-task-label">{{ taskLabel }}</h2>
+  </div>
 
-    <p class="task-line">Aktuelle Aufgabe: <strong>{{ taskLabel }}</strong></p>
-
-    @if (drinksToShow.length === 0) {
-      <p>❌ Es wurden keine Drinks für euch generiert.<br>
-        👉 Das gegnerische Team darf {{ fallbackDrinkCount }} Drinks für euch definieren.</p>
-    } @else {
-      <p>Es wurden {{ drinksToShow.length }} Drinks für euch generiert:</p>
-    }
+  @if (drinksToShow.length === 0) {
+    <div class="card ds-fallback">
+      <p class="ds-fallback-icon">🎲</p>
+      <p>Keine Drinks generiert.</p>
+      <p style="margin-top:6px; color:var(--text-muted)">
+        Das gegnerische Team darf <strong style="color:var(--accent)">{{ fallbackDrinkCount }}</strong> Drinks definieren.
+      </p>
+    </div>
+  } @else {
+    <p style="font-size:0.8rem; color:var(--text-muted)">{{ drinksToShow.length }} Drink(s) generiert</p>
 
     @for (drink of drinksToShow; track drink; let i = $index) {
-      <div class="drink-box">
-        <h3>Drink #{{ i + 1 }}</h3>
+      <div class="card ds-drink-card">
+        <div class="ds-drink-num">Drink #{{ i + 1 }}</div>
 
         @if (drink.is_mix) {
-          <p>Mischgetränk ({{ drink.total_ml }}ml):</p>
+          <p class="ds-drink-type">Mischgetränk · <span>{{ drink.total_ml }} ml</span>@if (drink.result_alc_percent != null) { · <span class="ds-alc">{{ drink.result_alc_percent }}% ABV</span>}</p>
         } @else {
-          <p>Einzelgetränk ({{ drink.total_ml }}ml):</p>
+          <p class="ds-drink-type">Einzelgetränk · <span>{{ drink.total_ml }} ml</span>@if (drink.result_alc_percent != null) { · <span class="ds-alc">{{ drink.result_alc_percent }}% ABV</span>}</p>
         }
 
-        <ul>
+        <ul class="ds-parts">
           @for (part of drink.drink_parts_named; track part) {
-            <li>
-              Zutat: <strong>{{ part.name }}</strong> – {{ part.amount }}ml
+            <li class="ds-part">
+              <span class="ds-part-name">{{ part.name }}</span>
+              <span class="ds-part-ml">{{ part.amount }} ml</span>
             </li>
           }
         </ul>
 
         @if (drink.mix_ratio !== null) {
-          <p>
-            Schnaps: <strong>{{ toTenthFraction(drink.mix_ratio) }}</strong>
-          </p>
+          <div class="ds-ratio">
+            Schnaps-Anteil: <strong>{{ toTenthFraction(drink.mix_ratio) }}</strong>
+          </div>
         }
       </div>
     }
+  }
 
-    <button class="ready-btn" (click)="navigateToCountdown()">✅ Bereit</button>
-  </div>
+  <button class="btn btn--primary" (click)="navigateToCountdown()">✅ Bereit – Countdown starten</button>
 </div>

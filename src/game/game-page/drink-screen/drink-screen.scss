@@ -1,100 +1,81 @@
-$purple: #7b22a2;
-$yellow: #facd05;
-$border: #fd9a00;
+.ds-wrap { padding-bottom: 24px; }
 
-.drink-screen-wrapper {
-  height: 100vh;
-  width: 100%;
-  font-family: "Eras Bold ITC", sans-serif;
+.ds-header {
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.ds-eyebrow {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+}
+
+.ds-task-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  letter-spacing: 2px;
+  color: var(--accent);
+  line-height: 1.1;
+  margin-top: 4px;
+}
+
+.ds-fallback {
+  text-align: center;
+  padding: 28px 20px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.ds-fallback-icon {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.ds-drink-card {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ds-drink-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  color: var(--accent);
+}
+
+.ds-drink-type {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  span { color: var(--text); font-weight: 600; }
+  .ds-alc { color: var(--accent); }
+}
+
+.ds-parts {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ds-part {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  background-size: cover;
-  background-position: center;
+  background: var(--bg-surface);
+  border-radius: var(--r-sm);
+  padding: 8px 12px;
+}
 
-  .drink-scroll {
-    max-width: 800px;
-    width: 100%;
-    height: 90vh;
-    overflow-y: auto;
-    padding: 2rem;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
+.ds-part-name { font-weight: 600; font-size: 0.9rem; }
+.ds-part-ml   { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
 
-  h1 {
-    font-size: 2.6rem;
-    color: $yellow;
-    margin-bottom: 1.5rem;
-  }
-
-  .task-line {
-    font-size: 1.5rem;
-    margin-bottom: 2rem;
-    color: $yellow;
-
-    strong {
-      color: darken($yellow, 10%);
-    }
-  }
-
-  p {
-    font-size: 1.2rem;
-    color: $purple;
-    margin: 1rem 0;
-  }
-
-  ul {
-    list-style: none;
-    padding-left: 0;
-    margin-top: 0.5rem;
-
-    li {
-      font-size: 1.1rem;
-      margin: 0.3rem 0;
-    }
-  }
-
-  .drink-box {
-    background: $yellow;
-    border: 4px solid $border;
-    border-bottom-width: 9px;
-    border-radius: 14px;
-    padding: 1.5rem 2rem;
-    margin-bottom: 1.5rem;
-    width: 90%;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
-
-    h3 {
-      font-size: 1.5rem;
-      margin-bottom: 0.6rem;
-      color: $purple;
-    }
-
-    p {
-      margin: 0.3rem 0;
-    }
-  }
-
-  .ready-btn {
-    margin-top: 2rem;
-    padding: 1.2rem 2.5rem;
-    font-size: 1.4rem;
-    font-weight: bold;
-    background: $yellow;
-    color: $purple;
-    border: 4px solid $border;
-    border-bottom-width: 6px;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-
-    &:hover {
-      transform: scale(1.05);
-      background: lighten($yellow, 5%);
-    }
-  }
+.ds-ratio {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  padding-top: 4px;
+  border-top: 1px solid var(--border-dim);
+  strong { color: var(--text); }
 }

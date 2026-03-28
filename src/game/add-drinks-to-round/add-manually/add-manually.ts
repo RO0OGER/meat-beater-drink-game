@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SupabaseService } from '../../../services/supabase';
-import { RoundService } from '../../../services/round';
-import { DrinkGeneratorService } from '../../../services/generate-drink';
+import { DrinkService } from '../../../services/drink';
+import { AiDrinkService, AiResult } from '../../../services/ai-drink.service';
 
 type DrinkType = 'mixable' | 'non-mixable' | 'dilution';
 
@@ -16,110 +16,127 @@ type DrinkType = 'mixable' | 'non-mixable' | 'dilution';
   styleUrls: ['./add-manually.scss'],
 })
 export class AddManually implements OnInit {
-  barcode = '';
-  barcodeQuantity: number = 0;
-
-  manualDrinkName = '';
-  manualQuantity: number = 0;
-  manualType: DrinkType | '' = '';
-
-  roundCode = '';
+  gameId  = '';
   roundId = '';
   roundDrinks: any[] = [];
-  roundDrinkChunks: any[][] = [];
+
+  barcode         = '';
+  barcodeQuantity = 0;
+  manualDrinkName = '';
+  manualQuantity  = 0;
+  manualType: DrinkType | '' = '';
+  manualAlcPercent: number | null = null;
+  aiLoading    = signal(false);
+  aiApplied    = signal(false);
+  aiError      = signal('');
+  aiVolumeMl: number | null = null;
 
   constructor(
-    private supabase: SupabaseService,
-    private router: Router,
     private route: ActivatedRoute,
-    private roundService: RoundService,
-    private drinkGeneratorService: DrinkGeneratorService
+    private router: Router,
+    private supabase: SupabaseService,
+    private drinkService: DrinkService,
+    private aiDrink: AiDrinkService
   ) {}
 
   async ngOnInit() {
-    this.roundCode = this.route.snapshot.paramMap.get('round_code') ?? '';
-
-    const { data, error } = await this.supabase.client
-      .from('rounds')
-      .select('id')
-      .eq('round_code', this.roundCode)
-      .single();
-
-    if (error || !data) {
-      console.error('Runde nicht gefunden:', error?.message);
-      return;
-    }
-
-    this.roundId = data.id;
+    this.gameId  = this.route.snapshot.paramMap.get('gameId')  ?? '';
+    this.roundId = this.route.snapshot.paramMap.get('roundId') ?? '';
     await this.loadRoundDrinks();
   }
 
   async loadRoundDrinks() {
-    const { data, error } = await this.supabase.client
+    const { data } = await this.supabase.client
       .from('round_drinks')
       .select('*')
       .eq('round_id', this.roundId);
-
-    if (!error && data) {
-      this.roundDrinks = data;
-      this.roundDrinkChunks = this.chunkArray(data, 2);
-    } else {
-      console.error('Fehler beim Laden der Getränke:', error?.message);
-    }
-  }
-
-  private chunkArray<T>(array: T[], size: number): T[][] {
-    const chunked: T[][] = [];
-    for (let i = 0; i < array.length; i += size) {
-      chunked.push(array.slice(i, i + size));
-    }
-    return chunked;
+    this.roundDrinks = data ?? [];
   }
 
   async addByBarcode() {
-    if (!this.barcode.trim() || this.barcodeQuantity <= 0) return;
+    if (!this.barcode.trim()) return;
 
-    const { data, error } = await this.supabase.client
-      .from('drinks')
-      .select('*')
-      .eq('barcode', this.barcode)
-      .single();
-
-    if (error || !data) {
-      this.router.navigate(
-        ['/barcode-is-missing', this.roundCode],
-        { queryParams: { barcode: this.barcode, redirect: 'add-drink-manual' } }
-      );
-    } else {
+    // 1. Check local Supabase catalog
+    const drink = await this.drinkService.getDrinkByBarcode(this.barcode.trim());
+    if (drink) {
       await this.supabase.client.from('round_drinks').insert({
-        round_id: this.roundId,
-        drink_id: data.id,
-        quantity_ml: this.barcodeQuantity,
+        round_id:    this.roundId,
+        drink_id:    drink.id,
+        drink_name:  drink.name,
+        quantity_ml: this.barcodeQuantity || drink.volume_ml,
         used_ml: 0,
-        drink_name: data.name,
-        type: data.type,
+        type: drink.type,
       });
-
       this.barcode = '';
       this.barcodeQuantity = 0;
       await this.loadRoundDrinks();
+      return;
     }
+
+    // 2. Fallback: Open Food Facts API
+    const api = await this.drinkService.lookupOpenFoodFacts(this.barcode.trim());
+
+    const queryParams: Record<string, string> = { barcode: this.barcode, redirect: 'manual' };
+    if (api?.name)        queryParams['name']   = api.name;
+    if (api?.volume_ml)   queryParams['volume'] = String(api.volume_ml);
+    if (api?.alc_percent != null) queryParams['alc'] = String(api.alc_percent);
+
+    this.router.navigate(
+      ['/game', this.gameId, 'round', this.roundId, 'barcode-missing'],
+      { queryParams }
+    );
+  }
+
+  async askAiForManual() {
+    if (!this.manualDrinkName.trim()) return;
+    this.aiLoading.set(true);
+    this.aiApplied.set(false);
+    this.aiError.set('');
+    const result = await this.aiDrink.suggest(this.manualDrinkName);
+    this.aiLoading.set(false);
+
+    if (!result.ok) {
+      if (result.reason === 'rate_limit') {
+        this.aiError.set('KI-Limit erreicht – bitte kurz warten.');
+      } else if (result.reason !== 'no_key') {
+        this.aiError.set('KI-Anfrage fehlgeschlagen.');
+      }
+      return;
+    }
+
+    if (!this.manualType) this.manualType = result.data.type;
+    if (this.manualAlcPercent == null && result.data.alc_percent !== null) {
+      this.manualAlcPercent = result.data.alc_percent;
+    }
+    if (this.manualQuantity <= 0 && result.data.volume_ml !== null) {
+      this.manualQuantity = result.data.volume_ml;
+      this.aiVolumeMl = result.data.volume_ml;
+    }
+    this.aiApplied.set(true);
   }
 
   async addManually() {
     if (!this.manualDrinkName.trim() || this.manualQuantity <= 0 || !this.manualType) return;
 
-    await this.supabase.client.from('round_drinks').insert({
+    const insertData: any = {
       round_id: this.roundId,
+      drink_name: this.manualDrinkName,
       quantity_ml: this.manualQuantity,
       used_ml: 0,
-      drink_name: this.manualDrinkName,
       type: this.manualType,
-    });
+    };
+    if (this.manualAlcPercent != null && this.manualAlcPercent >= 0) {
+      insertData.alc_percent = this.manualAlcPercent;
+    }
 
-    this.manualDrinkName = '';
-    this.manualQuantity = 0;
-    this.manualType = '';
+    await this.supabase.client.from('round_drinks').insert(insertData);
+
+    this.manualDrinkName  = '';
+    this.manualQuantity   = 0;
+    this.manualType       = '';
+    this.manualAlcPercent = null;
+    this.aiVolumeMl       = null;
+    this.aiApplied.set(false);
     await this.loadRoundDrinks();
   }
 
@@ -128,32 +145,7 @@ export class AddManually implements OnInit {
     await this.loadRoundDrinks();
   }
 
-  backToOverview() {
-    this.router.navigate(['/add-drinks', this.roundCode]);
-  }
-
-  async startGame() {
-    const roundId = await this.roundService.getIdByRoundCode(this.roundCode);
-    if (!roundId) {
-      console.error('Runde nicht gefunden');
-      return;
-    }
-
-    const deleted = await this.drinkGeneratorService.deleteGeneratedDrinksByRoundId(roundId);
-    if (!deleted) {
-      console.warn('Konnte vorhandene generated_drinks nicht (vollständig) löschen.');
-    }
-
-    const result = await this.drinkGeneratorService.generateDrinks(roundId);
-
-    if (typeof result === 'string') {
-      alert(result);
-      return;
-    }
-
-    this.router.navigate(['/animation/start-round', this.roundCode]);
-  }
-  trackByIndex(index: number, _item: any): number {
-    return index;
+  back() {
+    this.router.navigate(['/game', this.gameId, 'round', this.roundId, 'add-drinks']);
   }
 }

@@ -4,27 +4,21 @@ import { ActivatedRoute, Router } from '@angular/router';
 @Component({
   selector: 'app-animation-screen-drink-mix-and-amount',
   standalone: true,
+  imports: [],
   templateUrl: './animation-screen-drink-mix-and-amount.html',
   styleUrl: './animation-screen-drink-mix-and-amount.scss',
-  imports: [],
 })
 export class AnimationScreenDrinkMixAndAmount implements OnInit {
-  roundCode = '';
-  taskId = '';
-  team = '';
+  constructor(private route: ActivatedRoute, private router: Router) {}
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router
-  ) {}
-
-  ngOnInit(): void {
-    this.roundCode = this.route.snapshot.paramMap.get('round_code') ?? '';
-    this.taskId = this.route.snapshot.paramMap.get('task_id') ?? '';
-    this.team = this.route.snapshot.paramMap.get('team') ?? '';
+  ngOnInit() {
+    const team    = this.route.snapshot.paramMap.get('team')    ?? '';
+    const gameId  = this.route.snapshot.paramMap.get('gameId')  ?? '';
+    const roundId = this.route.snapshot.paramMap.get('roundId') ?? '';
+    const taskId  = this.route.snapshot.paramMap.get('taskId')  ?? '';
 
     setTimeout(() => {
-      this.router.navigate(['/drink', this.team, this.roundCode, this.taskId]);
+      this.router.navigate(['/game', gameId, 'round', roundId, 'drink', team, taskId]);
     }, 2110);
   }
 }

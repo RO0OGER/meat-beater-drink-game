@@ -1,11 +1,10 @@
-<div class="app-background-standard">
-<div class="hit-wrapper">
-  <button class="back-button" (click)="backToGame()">↩️ Team stimmt nicht? Zurück zum Spiel</button>
-
-  <h2 class="hit-title">🏓 Becher von Team 1 wurde getroffen!</h2>
-
-  <p class="hit-subtext">❓ Ist Team 1 bereit, die Aufgabe zu lösen?</p>
-
-  <button class="show-task-button" (click)="showTask()">📋 Aufgabe anzeigen</button>
-</div>
+<div class="hit-wrap hit-wrap--t1">
+  <button class="hit-back-btn" (click)="backToGame()">← Zurück</button>
+  <div class="hit-content">
+    <div class="hit-icon">🏓</div>
+    <h1 class="hit-headline hit-headline--t1">TREFFER!</h1>
+    <p class="hit-sub">Becher von <strong>Team 1</strong> wurde getroffen</p>
+    <p class="hit-question">Ist Team 1 bereit für die Aufgabe?</p>
+    <button class="btn btn--primary hit-task-btn" (click)="showTask()">📋 Aufgabe anzeigen</button>
+  </div>
 </div>

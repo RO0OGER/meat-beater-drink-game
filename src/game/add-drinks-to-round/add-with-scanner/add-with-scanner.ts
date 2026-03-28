@@ -1,10 +1,13 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { SupabaseService } from '../../../services/supabase';
 import { FormsModule } from '@angular/forms';
-import { RoundService } from '../../../services/round';
-import { DrinkGeneratorService } from '../../../services/generate-drink';
+import { SupabaseService } from '../../../services/supabase';
+import { DrinkService } from '../../../services/drink';
+import { AiDrinkService } from '../../../services/ai-drink.service';
+import { Drink } from '../../../model/Drink';
+
+type DrinkType = 'mixable' | 'non-mixable' | 'dilution';
 
 @Component({
   selector: 'app-add-with-scanner',
@@ -14,46 +17,39 @@ import { DrinkGeneratorService } from '../../../services/generate-drink';
   styleUrls: ['./add-with-scanner.scss'],
 })
 export class AddWithScanner implements OnInit {
-  roundCode = '';
+  gameId  = '';
   roundId = '';
   roundDrinks: any[] = [];
-
-  // neu fuer Listenlogik
-  roundDrinkChunks: any[][] = [];
-
-  scannerActive = true;
+  scannerActive  = true;
   scannedBarcode = '';
+  lookingUp      = false;
+
+  // Multi-step dialog when drink found in catalog
+  pendingDrink    = signal<Drink | null>(null);
+  pendingStep     = signal(1);          // 1 = quantity slider, 2 = full size, 3 = type
+  pendingQuantity = signal(0);
+  pendingFullSize = signal(0);
+  pendingType     = signal<DrinkType | ''>('');
+  pendingAlc      = signal<number | null>(null);
+  aiLoading       = signal(false);
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private supabase: SupabaseService,
-    private roundService: RoundService,
-    private drinkGeneratorService: DrinkGeneratorService
+    private drinkService: DrinkService,
+    private aiDrink: AiDrinkService
   ) {}
 
   async ngOnInit() {
-    this.roundCode = this.route.snapshot.paramMap.get('round_code') ?? '';
-
-    const { data, error } = await this.supabase.client
-      .from('rounds')
-      .select('id')
-      .eq('round_code', this.roundCode)
-      .single();
-
-    if (error || !data) {
-      console.error('Runde nicht gefunden:', error?.message);
-      return;
-    }
-
-    this.roundId = data.id;
+    this.gameId  = this.route.snapshot.paramMap.get('gameId')  ?? '';
+    this.roundId = this.route.snapshot.paramMap.get('roundId') ?? '';
     await this.loadRoundDrinks();
   }
 
   @HostListener('document:keydown', ['$event'])
   handleScannerInput(event: KeyboardEvent) {
     if (!this.scannerActive) return;
-
     if (event.key === 'Enter') {
       this.onBarcodeScanned(this.scannedBarcode.trim());
       this.scannedBarcode = '';
@@ -64,58 +60,89 @@ export class AddWithScanner implements OnInit {
 
   async onBarcodeScanned(barcode: string) {
     if (!barcode) return;
+    this.lookingUp = true;
 
-    const { data, error } = await this.supabase.client
-      .from('drinks')
-      .select('*')
-      .eq('barcode', barcode)
-      .single();
+    // 1. Check local Supabase catalog
+    const drink = await this.drinkService.getDrinkByBarcode(barcode);
+    if (drink) {
+      this.lookingUp = false;
+      this.pendingDrink.set(drink);
+      this.pendingStep.set(1);
+      this.pendingQuantity.set(drink.volume_ml);
+      this.pendingFullSize.set(drink.volume_ml);
+      this.pendingType.set(drink.type as DrinkType);
+      this.pendingAlc.set(drink.alc_percent ?? null);
+      this.scannerActive = false;
+      // If alc_percent unknown, ask AI in background
+      if (drink.alc_percent == null) this.fetchAiAlc(drink.name);
+      return;
+    }
 
-    if (error || !data) {
-      this.router.navigate(['/barcode-is-missing', this.roundCode], {
-        queryParams: { barcode, redirect: 'add-drink-scan' },
-      });
-    } else {
-      await this.supabase.client.from('round_drinks').insert({
-        round_id: this.roundId,
-        drink_id: data.id,
-        quantity_ml: 0,
-        used_ml: 0,
-        drink_name: data.name,
-        type: data.type,
-      });
+    // 2. Fallback: Open Food Facts API
+    const api = await this.drinkService.lookupOpenFoodFacts(barcode);
+    this.lookingUp = false;
 
-      await this.loadRoundDrinks();
+    const queryParams: Record<string, string> = { barcode, redirect: 'scan' };
+    if (api?.name)        queryParams['name']   = api.name;
+    if (api?.volume_ml)   queryParams['volume'] = String(api.volume_ml);
+    if (api?.alc_percent != null) queryParams['alc'] = String(api.alc_percent);
+
+    this.router.navigate(
+      ['/game', this.gameId, 'round', this.roundId, 'barcode-missing'],
+      { queryParams }
+    );
+  }
+
+  async fetchAiAlc(name: string) {
+    this.aiLoading.set(true);
+    const result = await this.aiDrink.suggest(name, this.pendingFullSize());
+    this.aiLoading.set(false);
+    if (result.ok && result.data.alc_percent !== null) {
+      this.pendingAlc.set(result.data.alc_percent);
     }
   }
 
-  toggleScanner() {
-    this.scannerActive = !this.scannerActive;
+  async confirmPending() {
+    const drink = this.pendingDrink();
+    if (!drink || !this.pendingType() || this.pendingQuantity() <= 0) return;
+    const insertData: any = {
+      round_id:    this.roundId,
+      drink_id:    drink.id,
+      drink_name:  drink.name,
+      quantity_ml: this.pendingQuantity(),
+      used_ml: 0,
+      type: this.pendingType(),
+    };
+    const alc = this.pendingAlc() ?? drink.alc_percent;
+    if (alc != null) insertData.alc_percent = alc;
+    await this.supabase.client.from('round_drinks').insert(insertData);
+    this.pendingDrink.set(null);
+    this.pendingStep.set(1);
+    this.scannerActive = true;
+    await this.loadRoundDrinks();
+  }
+
+  nextStep() {
+    if (this.pendingStep() < 3) this.pendingStep.set(this.pendingStep() + 1);
+  }
+
+  prevStep() {
+    if (this.pendingStep() > 1) this.pendingStep.set(this.pendingStep() - 1);
+  }
+
+  cancelPending() {
+    this.pendingDrink.set(null);
+    this.pendingStep.set(1);
+    this.pendingAlc.set(null);
+    this.scannerActive = true;
   }
 
   async loadRoundDrinks() {
-    const { data, error } = await this.supabase.client
+    const { data } = await this.supabase.client
       .from('round_drinks')
       .select('*')
       .eq('round_id', this.roundId);
-
-    if (!error && data) {
-      this.roundDrinks = data;
-      // 8 pro Spalte – passe an, falls du eine andere chunk size willst
-      this.roundDrinkChunks = this.chunkArray(data, 8);
-    }
-  }
-
-  private chunkArray<T>(array: T[], size: number): T[][] {
-    const chunked: T[][] = [];
-    for (let i = 0; i < array.length; i += size) {
-      chunked.push(array.slice(i, i + size));
-    }
-    return chunked;
-  }
-
-  trackByIndex(index: number, _item: any): number {
-    return index;
+    this.roundDrinks = data ?? [];
   }
 
   async deleteDrink(id: string) {
@@ -123,72 +150,39 @@ export class AddWithScanner implements OnInit {
     await this.loadRoundDrinks();
   }
 
-  backToOverview() {
-    this.router.navigate(['/add-drinks', this.roundCode]);
-  }
-
-  async startGame() {
-    const roundId = await this.roundService.getIdByRoundCode(this.roundCode);
-    if (!roundId) {
-      console.error('Runde nicht gefunden');
-      return;
-    }
-
-    // ❌ Vorher alle generierten Drinks löschen
-    const deleted = await this.drinkGeneratorService.deleteGeneratedDrinksByRoundId(roundId);
-    if (!deleted) {
-      console.warn('Alte generated_drinks konnten nicht gelöscht werden');
-      // du kannst trotzdem weitermachen oder hier abbrechen
-    }
-
-    const result = await this.drinkGeneratorService.generateDrinks(roundId);
-
-    if (typeof result === 'string') {
-      alert(result); // z. B. "Das gegnerische Team darf den Drink bestimmen"
-      return;
-    }
-
-    this.router.navigate(['/animation/start-round', this.roundCode]);
-  }
-
   async updateQuantity(roundDrinkId: string, quantity: number) {
-    const parsedQuantity = parseInt(quantity as any, 10);
-    if (isNaN(parsedQuantity) || parsedQuantity < 0) return;
+    const parsed = parseInt(quantity as any, 10);
+    if (isNaN(parsed) || parsed < 0) return;
+    await this.supabase.client.from('round_drinks').update({ quantity_ml: parsed }).eq('id', roundDrinkId);
+    await this.loadRoundDrinks();
+  }
 
-    await this.supabase.client
-      .from('round_drinks')
-      .update({ quantity_ml: parsedQuantity })
-      .eq('id', roundDrinkId);
+  async setToFullQuantity(roundDrinkId: string) {
+    const { data } = await this.supabase.client
+      .from('round_drinks').select('drink_id').eq('id', roundDrinkId).single();
+    if (!data?.drink_id) return;
 
+    const { data: drink } = await this.supabase.client
+      .from('drinks').select('volume_ml').eq('id', data.drink_id).single();
+    if (!drink?.volume_ml) return;
+
+    await this.supabase.client.from('round_drinks').update({ quantity_ml: drink.volume_ml }).eq('id', roundDrinkId);
     await this.loadRoundDrinks();
   }
 
   hasZeroQuantity(): boolean {
-    return this.roundDrinks.some((drink) => drink.quantity_ml === 0);
+    return this.roundDrinks.some(d => d.quantity_ml === 0);
   }
 
-  async setToFullQuantity(roundDrinkId: string) {
-    const { data: drinkData, error } = await this.supabase.client
-      .from('round_drinks')
-      .select('drink_id')
-      .eq('id', roundDrinkId)
-      .single();
+  toggleScanner() {
+    this.scannerActive = !this.scannerActive;
+  }
 
-    if (!drinkData?.drink_id || error) return;
+  back() {
+    this.router.navigate(['/game', this.gameId, 'round', this.roundId, 'add-drinks']);
+  }
 
-    const { data: drink, error: drinkError } = await this.supabase.client
-      .from('drinks')
-      .select('volume_ml')
-      .eq('id', drinkData.drink_id)
-      .single();
-
-    if (drinkError || !drink?.volume_ml) return;
-
-    await this.supabase.client
-      .from('round_drinks')
-      .update({ quantity_ml: drink.volume_ml })
-      .eq('id', roundDrinkId);
-
-    await this.loadRoundDrinks();
+  trackByIndex(index: number): number {
+    return index;
   }
 }

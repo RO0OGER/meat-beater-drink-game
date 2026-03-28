@@ -1,35 +1,32 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors, ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { RoundService } from '../../services/round';
-import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-create-round',
   templateUrl: './create-round.html',
   styleUrl: './create-round.scss',
   standalone: true,
-  imports: [ReactiveFormsModule]
+  imports: [ReactiveFormsModule, CommonModule],
 })
-export class CreateRound {
+export class CreateRoundPage implements OnInit {
   form: FormGroup;
+  gameId = '';
   codeAvailable: boolean | null = null;
   creating = false;
 
   constructor(
     private fb: FormBuilder,
     private roundService: RoundService,
+    private route: ActivatedRoute,
     private router: Router
   ) {
     this.form = this.fb.group({
-      round_code: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(5),
-          this.codeFormatValidator
-        ]
-      ],
+      round_code: ['', [Validators.required, Validators.minLength(5), this.codeFormatValidator]],
+      team1_name: ['Team 1', [Validators.required]],
+      team2_name: ['Team 2', [Validators.required]],
       num_players_team1: [1, [Validators.required, Validators.min(1)]],
       num_players_team2: [1, [Validators.required, Validators.min(1)]],
       time_team1_min: [1, [Validators.required, Validators.min(1)]],
@@ -37,44 +34,45 @@ export class CreateRound {
     });
   }
 
+  ngOnInit() {
+    this.gameId = this.route.snapshot.paramMap.get('gameId') ?? '';
+  }
+
   codeFormatValidator(control: AbstractControl): ValidationErrors | null {
     const value = control.value as string;
-    const isValid = /^[a-zA-Z0-9_-]+$/.test(value);
-    return isValid ? null : { invalidFormat: true };
+    return /^[a-zA-Z0-9_-]+$/.test(value) ? null : { invalidFormat: true };
   }
 
   async checkCode() {
     const control = this.form.get('round_code');
-    const code = control?.value;
-    if (!code || control?.invalid) return;
-
-    const existing = await this.roundService.getRoundByCode(code);
-    this.codeAvailable = !existing;
+    if (!control?.value || control.invalid) return;
+    this.codeAvailable = !(await this.roundService.isCodeTaken(control.value));
   }
 
-  async createGame() {
-    if (this.form.invalid || this.codeAvailable === false) return;
-
+  async createRound() {
+    if (this.form.invalid || this.codeAvailable === false || !this.gameId) return;
     this.creating = true;
 
-    const round_code = this.form.value.round_code;
-    const num_players_team1 = this.form.value.num_players_team1;
-    const num_players_team2 = this.form.value.num_players_team2;
-    const time_team1 = this.form.value.time_team1_min * 60; // ⏱ Minuten → Sekunden
-    const time_team2 = this.form.value.time_team2_min * 60;
+    const { round_code, team1_name, team2_name, num_players_team1, num_players_team2, time_team1_min, time_team2_min } = this.form.value;
 
-    const success = await this.roundService.createRound(
+    const round = await this.roundService.createRound(
+      this.gameId,
       round_code,
+      team1_name,
+      team2_name,
       num_players_team1,
       num_players_team2,
-      time_team1,
-      time_team2
+      time_team1_min * 60,
+      time_team2_min * 60
     );
 
-    if (success) {
-      this.router.navigate(['/add-drinks', round_code]);
+    if (round) {
+      this.router.navigate(['/game', this.gameId, 'round', round.id, 'add-drinks']);
     }
-
     this.creating = false;
+  }
+
+  back() {
+    this.router.navigate(['/game', this.gameId]);
   }
 }

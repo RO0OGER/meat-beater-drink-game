@@ -1,6 +1,9 @@
 export interface Round {
   id: string;
+  game_id: string;
   round_code: string;
+  team1_name: string;
+  team2_name: string;
   team1_hits: number;
   team2_hits: number;
   is_active: boolean;
@@ -8,4 +11,5 @@ export interface Round {
   remaining_time_team2: number;
   num_players_team1: number;
   num_players_team2: number;
+  created_at: string;
 }

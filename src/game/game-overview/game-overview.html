@@ -1,0 +1,52 @@
+<div class="scroll-page">
+  <button class="btn btn--ghost btn--sm" style="width:auto" (click)="back()">← Dashboard</button>
+
+  @if (loading) {
+    <p style="color:var(--text-muted); text-align:center; padding:20px">Lädt...</p>
+  } @else {
+    <div>
+      <h2 class="ov-title">{{ game?.name }}</h2>
+      <p class="ov-sub">Deine Runden</p>
+    </div>
+
+    <button class="btn btn--primary" (click)="createRound()">+ Neue Runde</button>
+
+    @if (rounds.length === 0) {
+      <div class="card" style="text-align:center; color:var(--text-muted); padding:28px">
+        Noch keine Runden. Erstelle deine erste!
+      </div>
+    } @else {
+      <div class="ov-list">
+        @for (round of rounds; track round.id) {
+          <div class="card ov-round-card">
+            <div class="ov-round-header">
+              <div class="ov-teams">{{ round.team1_name }} <span>vs</span> {{ round.team2_name }}</div>
+              <span class="ov-code">{{ round.round_code }}</span>
+            </div>
+
+            <div class="ov-stats">
+              <div class="ov-stat">
+                <span class="ov-stat-val ov-stat-val--t1">{{ round.team1_hits }}</span>
+                <span class="ov-stat-label">Hits T1</span>
+              </div>
+              <div class="ov-cups-mini">
+                @for (i of [0,1,2,3,4,5,6,7,8,9]; track i) {
+                  <div class="cup-mini" [class.cup-mini--t1]="i >= round.team1_hits" [class.cup-mini--gone]="i < round.team1_hits"></div>
+                }
+              </div>
+              <div class="ov-stat">
+                <span class="ov-stat-val ov-stat-val--t2">{{ round.team2_hits }}</span>
+                <span class="ov-stat-label">Hits T2</span>
+              </div>
+            </div>
+
+            <div class="ov-actions">
+              <button class="btn btn--ghost btn--sm" (click)="setupRound(round)">🍺 Drinks</button>
+              <button class="btn btn--primary btn--sm" (click)="playRound(round)">▶ Spielen</button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

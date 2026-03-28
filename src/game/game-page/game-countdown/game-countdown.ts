@@ -11,12 +11,13 @@ import { Task } from '../../../model/Task';
   styleUrl: './game-countdown.scss',
 })
 export class GameCountdown implements OnInit, OnDestroy {
-  roundCode = '';
+  gameId  = '';
+  roundId = '';
   team: 'team1' | 'team2' = 'team1';
-  remainingSeconds = 0;
-  intervalId: any;
-  taskId = '';
+  taskId  = '';
   currentTask: Task | null = null;
+  remainingSeconds = 0;
+  private intervalId: any;
 
   constructor(
     private route: ActivatedRoute,
@@ -25,21 +26,21 @@ export class GameCountdown implements OnInit, OnDestroy {
     private taskService: TaskService
   ) {}
 
-  async ngOnInit(): Promise<void> {
-    this.roundCode = this.route.snapshot.paramMap.get('round_code') ?? '';
-    const teamParam = this.route.snapshot.paramMap.get('team') ?? 'team1';
-    this.team = teamParam === 'team2' ? 'team2' : 'team1';
-    this.taskId = this.route.snapshot.paramMap.get('task_id') ?? '';
+  async ngOnInit() {
+    this.gameId  = this.route.snapshot.paramMap.get('gameId')  ?? '';
+    this.roundId = this.route.snapshot.paramMap.get('roundId') ?? '';
+    this.taskId  = this.route.snapshot.paramMap.get('taskId')  ?? '';
+    const t = this.route.snapshot.paramMap.get('team') ?? 'team1';
+    this.team = t === 'team2' ? 'team2' : 'team1';
 
-    if (!this.roundCode) {
-      console.error('Fehlender round-code in der URL');
-      return;
+    const round = await this.roundService.getRoundById(this.roundId);
+    this.remainingSeconds = this.team === 'team1'
+      ? (round?.remaining_time_team1 ?? 0)
+      : (round?.remaining_time_team2 ?? 0);
+
+    if (this.taskId && this.taskId !== 'none') {
+      this.currentTask = await this.taskService.getTaskById(this.taskId);
     }
-
-    this.remainingSeconds =
-      (await this.roundService.getRemainingTimeByCode(this.roundCode, this.team)) ?? 0;
-
-    this.currentTask = await this.taskService.getTaskById(this.taskId);
 
     this.startCountdown();
   }
@@ -49,41 +50,25 @@ export class GameCountdown implements OnInit, OnDestroy {
       if (this.remainingSeconds > 0) {
         this.remainingSeconds--;
       } else {
-        this.finished();
+        this.onTimeUp();
       }
     }, 1000);
   }
 
   async finishTask() {
     clearInterval(this.intervalId);
-
-    await this.roundService.setRemainingTimeByCode(this.roundCode, this.team, this.remainingSeconds);
-
-    this.router.navigate(['/game', this.roundCode]);
+    await this.roundService.setRemainingTime(this.roundId, this.team, this.remainingSeconds);
+    this.router.navigate(['/game', this.gameId, 'round', this.roundId, 'play']);
   }
 
-  async finished() {
+  async onTimeUp() {
     clearInterval(this.intervalId);
-
-    await this.roundService.setRemainingTimeByCode(this.roundCode, this.team, this.remainingSeconds);
-
-    // ⛳️ Neue Route mit `/round-end/:team/:round_code`
-    this.router.navigate(['/round-end', this.team, this.roundCode]);
+    await this.roundService.setRemainingTime(this.roundId, this.team, 0);
+    this.router.navigate(['/game', this.gameId, 'round', this.roundId, 'end', this.team]);
   }
 
-  get minutes(): string {
-    return Math.floor(this.remainingSeconds / 60).toString().padStart(2, '0');
-  }
+  get minutes(): string { return Math.floor(this.remainingSeconds / 60).toString().padStart(2, '0'); }
+  get seconds(): string { return (this.remainingSeconds % 60).toString().padStart(2, '0'); }
 
-  get seconds(): string {
-    return (this.remainingSeconds % 60).toString().padStart(2, '0');
-  }
-
-  ngOnDestroy(): void {
-    clearInterval(this.intervalId);
-  }
-
-  skipManually() {
-    this.finishTask();
-  }
+  ngOnDestroy() { clearInterval(this.intervalId); }
 }

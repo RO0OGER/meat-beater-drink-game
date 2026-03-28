@@ -1,39 +1,34 @@
+// Replaced by hit-page component. Kept for backward compatibility.
 import { Component } from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {RoundService} from '../../../services/round';
+import { Router, ActivatedRoute } from '@angular/router';
+import { RoundService } from '../../../services/round';
 
 @Component({
   selector: 'app-hit-team2',
-  imports: [],
   templateUrl: './hit-team2.html',
-  styleUrl: './hit-team2.scss'
+  styleUrl: './hit-team2.scss',
+  standalone: true,
+  imports: [],
 })
 export class HitTeam2 {
-  roundCode = '';
-  team = '';
+  gameId  = '';
+  roundId = '';
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private roundService: RoundService
   ) {
-    this.roundCode = this.route.snapshot.paramMap.get('round_code') ?? '';
-    this.team = 'team2'; // weil Komponente spezifisch für team1
+    this.gameId  = this.route.snapshot.paramMap.get('gameId')  ?? '';
+    this.roundId = this.route.snapshot.paramMap.get('roundId') ?? '';
   }
 
   async showTask() {
-    const id = await this.roundService.getIdByRoundCode(this.roundCode);
-    if (!id) return;
-
-    const currentHits = await this.roundService.getTeam1Hits(id);
-    if (currentHits === null) return;
-
-    await this.roundService.updateTeam2Hits(id, currentHits + 1);
-
-    this.router.navigate(['/animation/task', this.team, this.roundCode]);
+    await this.roundService.incrementHits(this.roundId, 'team2');
+    this.router.navigate(['/animation/task', 'team2', this.gameId, this.roundId]);
   }
 
   backToGame() {
-    this.router.navigate(['/game', this.roundCode]);
+    this.router.navigate(['/game', this.gameId, 'round', this.roundId, 'play']);
   }
 }

@@ -1,57 +1,96 @@
-<div class="scrollable-wrapper app-background-standard">
-  <h2 class="title">Getränk hinzufügen (Runde: {{ roundCode }})</h2>
-
-  <!-- Abschnitt: Barcode -->
-  <div class="section">
-    <h3>Mit Barcode hinzufügen</h3>
-    <div class="input-group">
-      <input type="text" [(ngModel)]="barcode" placeholder="Barcode eingeben" />
-      <input type="number" [(ngModel)]="barcodeQuantity" placeholder="Verwendete Menge (ml)" />
-      <p>Anzahl in ML</p>
-    </div>
-    <button (click)="addByBarcode()">Hinzufügen mit Barcode</button>
+<div class="scroll-page">
+  <div>
+    <h2 class="am-title">DRINK HINZUFÜGEN</h2>
   </div>
 
-  <!-- Abschnitt: Manuell -->
-  <div class="section">
-    <h3>Manuell hinzufügen</h3>
-    <div class="input-group">
-      <input type="text" [(ngModel)]="manualDrinkName" placeholder="Getränkename" />
-      <input type="number" [(ngModel)]="manualQuantity" placeholder="Menge in ml" />
-      <select [(ngModel)]="manualType">
-        <option value="">-- Typ wählen --</option>
-        <option value="mixable">Mischbar</option>
-        <option value="non-mixable">Nicht mischbar</option>
-        <option value="dilution">Verdünnung</option>
-      </select>
+  <div class="card">
+    <p class="section-title">Mit Barcode</p>
+    <div class="form-group">
+      <label class="form-label">Barcode</label>
+      <input class="form-input" type="text" [(ngModel)]="barcode" placeholder="Barcode eingeben" />
     </div>
-    <button (click)="addManually()">Manuell hinzufügen</button>
+    <div class="form-group">
+      <label class="form-label">Verwendete Menge (ml)</label>
+      <input class="form-input" type="number" [(ngModel)]="barcodeQuantity" placeholder="z.B. 330" />
+    </div>
+    <button class="btn btn--primary" (click)="addByBarcode()">🔍 Hinzufügen</button>
   </div>
 
-  <!-- Abschnitt: Vorhandene Drinks -->
-  <div class="section drink-list-section">
-    <h3>Bereits hinzugefügte Getränke</h3>
-    @if (roundDrinkChunks.length > 0) {
-      <div class="drink-columns">
-        @for (chunk of roundDrinkChunks; track trackByIndex) {
-          <div class="drink-column">
-            @for (drink of chunk; track drink.id) {
-              <div class="drink-card">
-                {{ drink.drink_name }} – {{ drink.quantity_ml }}ml ({{ drink.type }})
-                <button (click)="deleteDrink(drink.id)">🗑️</button>
-              </div>
-            }
+  <div class="card">
+    <p class="section-title">Manuell</p>
+    <div class="form-group">
+      <label class="form-label">Getränkename</label>
+      <div class="am-name-row">
+        <input class="form-input" type="text" [(ngModel)]="manualDrinkName" placeholder="z.B. Bionade" />
+        <button class="btn btn--ghost btn--sm am-ai-btn" (click)="askAiForManual()"
+                [disabled]="aiLoading() || !manualDrinkName.trim()" title="KI fragen">
+          @if (aiLoading()) { ⏳ } @else { ✨ }
+        </button>
+      </div>
+      @if (aiApplied()) {
+        <span style="font-size:0.75rem; color:var(--accent)">✨ KI hat Typ und Alkohol vorausgefüllt</span>
+      }
+      @if (aiError()) {
+        <span style="font-size:0.75rem; color:var(--error)">⚠ {{ aiError() }}</span>
+      }
+    </div>
+    <div class="form-group">
+      <label class="form-label">
+        Menge (ml)
+        @if (aiVolumeMl != null && manualQuantity === aiVolumeMl) { <span style="font-size:0.7rem; color:var(--accent); margin-left:6px">✨ KI</span> }
+      </label>
+      <input class="form-input" type="number" [(ngModel)]="manualQuantity" placeholder="z.B. 500" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">
+        Getränketyp
+        @if (aiApplied() && manualType) { <span style="font-size:0.7rem; color:var(--accent); margin-left:6px">✨ KI</span> }
+      </label>
+      <div class="type-btns">
+        <button class="type-btn" [class.type-btn--active]="manualType === 'mixable'"
+                (click)="manualType = 'mixable'">
+          <span class="type-btn-icon">🥃</span>
+          <span class="type-btn-name">Mischbar</span>
+          <span class="type-btn-sub">Schnaps, Spirituosen</span>
+        </button>
+        <button class="type-btn" [class.type-btn--active]="manualType === 'non-mixable'"
+                (click)="manualType = 'non-mixable'">
+          <span class="type-btn-icon">🍺</span>
+          <span class="type-btn-name">Pur trinken</span>
+          <span class="type-btn-sub">Bier, Wein, Sekt</span>
+        </button>
+        <button class="type-btn" [class.type-btn--active]="manualType === 'dilution'"
+                (click)="manualType = 'dilution'">
+          <span class="type-btn-icon">🧃</span>
+          <span class="type-btn-name">Mischgetränk</span>
+          <span class="type-btn-sub">Saft, Wasser, Softdrink</span>
+        </button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Alkoholgehalt % (optional)</label>
+      <input class="form-input" type="number" [(ngModel)]="manualAlcPercent" placeholder="z.B. 5 für Bier, 40 für Vodka" min="0" max="100" step="0.1" />
+    </div>
+    <button class="btn btn--primary" (click)="addManually()">+ Hinzufügen</button>
+  </div>
+
+  @if (roundDrinks.length > 0) {
+    <div>
+      <p class="section-title">Hinzugefügte Drinks</p>
+      <div style="display:flex; flex-direction:column; gap:7px">
+        @for (drink of roundDrinks; track drink.id) {
+          <div class="list-item">
+            <span>🍺</span>
+            <div style="flex:1">
+              <div style="font-weight:600; font-size:0.9rem">{{ drink.drink_name }}</div>
+              <div style="font-size:0.75rem; color:var(--text-muted)">{{ drink.quantity_ml }} ml · {{ drink.type }}@if (drink.alc_percent != null) { · {{ drink.alc_percent }}%}</div>
+            </div>
+            <button class="btn btn--ghost btn--sm btn--icon" (click)="deleteDrink(drink.id)">✕</button>
           </div>
         }
       </div>
-    } @else {
-      <p>Keine Getränke hinzugefügt.</p>
-    }
-  </div>
+    </div>
+  }
 
-  <!-- Aktionen -->
-  <div class="actions">
-    <button (click)="backToOverview()">Zurück zur Übersicht</button>
-    <button (click)="startGame()">Spiel starten</button>
-  </div>
+  <button class="btn btn--ghost" (click)="back()">← Zurück</button>
 </div>

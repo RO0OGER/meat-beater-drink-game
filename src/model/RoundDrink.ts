@@ -6,5 +6,6 @@ export interface RoundDrink {
   quantity_ml: number;
   used_ml: number;
   type: 'mixable' | 'non-mixable' | 'dilution';
+  alc_percent: number | null;   // ABV 0–100
   created_at?: string;
 }

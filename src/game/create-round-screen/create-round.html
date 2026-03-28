@@ -1,40 +1,68 @@
-<div class="app-background-start page">
-  <h2 class="title">NEUE RUNDE ERSTELLEN</h2>
+<div class="scroll-page">
+  <div>
+    <h2 class="cr-title">NEUE RUNDE</h2>
+    <p style="color:var(--text-muted); font-size:0.82rem; margin-top:3px">Runde konfigurieren</p>
+  </div>
 
-  <form [formGroup]="form" (ngSubmit)="createGame()">
-    <label for="round_code">Runden-Code:</label>
-    <input id="round_code" class="input-field" formControlName="round_code" (blur)="checkCode()" />
+  <form [formGroup]="form" (ngSubmit)="createRound()" class="cr-form">
 
-    @if (form.get('round_code')?.touched && form.get('round_code')?.hasError('minlength')) {
-      <div class="error">Mindestens 5 Zeichen erforderlich</div>
-    }
+    <div class="card">
+      <p class="section-title">Runden-Code</p>
+      <div class="form-group">
+        <input class="form-input" formControlName="round_code" placeholder="z.B. beer_finals_2025" (blur)="checkCode()" />
+        @if (form.get('round_code')?.touched && form.get('round_code')?.hasError('minlength')) {
+          <span class="form-error">Mindestens 5 Zeichen</span>
+        }
+        @if (form.get('round_code')?.touched && form.get('round_code')?.hasError('invalidFormat')) {
+          <span class="form-error">Nur Buchstaben, Zahlen, - und _</span>
+        }
+        @if (codeAvailable === false) {
+          <span class="form-error">Code bereits vergeben</span>
+        }
+        @if (codeAvailable === true) {
+          <span class="form-success">✓ Code verfügbar</span>
+        }
+      </div>
+    </div>
 
-    @if (form.get('round_code')?.touched && form.get('round_code')?.hasError('invalidFormat')) {
-      <div class="error">Nur Buchstaben, Zahlen, - und _ erlaubt</div>
-    }
+    <div class="card cr-teams-grid">
+      <div class="cr-team-col">
+        <p class="section-title cr-team-label cr-team-label--t1">Team 1</p>
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input class="form-input" formControlName="team1_name" placeholder="Team 1" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Spieler</label>
+          <input class="form-input" type="number" formControlName="num_players_team1" min="1" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Zeit (Min)</label>
+          <input class="form-input" type="number" formControlName="time_team1_min" min="1" />
+        </div>
+      </div>
 
-    @if (codeAvailable === false) {
-      <div class="error">Code bereits vergeben</div>
-    }
+      <div class="cr-vs">VS</div>
 
-    @if (codeAvailable === true) {
-      <div class="success">Code verfügbar</div>
-    }
+      <div class="cr-team-col">
+        <p class="section-title cr-team-label cr-team-label--t2">Team 2</p>
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input class="form-input" formControlName="team2_name" placeholder="Team 2" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Spieler</label>
+          <input class="form-input" type="number" formControlName="num_players_team2" min="1" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Zeit (Min)</label>
+          <input class="form-input" type="number" formControlName="time_team2_min" min="1" />
+        </div>
+      </div>
+    </div>
 
-    <label for="num_players_team1">Spieler Team 1:</label>
-    <input id="num_players_team1" class="input-field" type="number" formControlName="num_players_team1" min="1" />
-
-    <label for="num_players_team2">Spieler Team 2:</label>
-    <input id="num_players_team2" class="input-field" type="number" formControlName="num_players_team2" min="1" />
-
-    <label for="time_team1_min">Zeit für Team 1 (Minuten):</label>
-    <input id="time_team1_min" class="input-field" type="number" formControlName="time_team1_min" min="1" />
-
-    <label for="time_team2_min">Zeit für Team 2 (Minuten):</label>
-    <input id="time_team2_min" class="input-field" type="number" formControlName="time_team2_min" min="1" />
-
-    <button type="submit" [disabled]="form.invalid || codeAvailable === false || creating">
-      Nächster Schritt: Drinks hinzufügen
+    <button type="submit" class="btn btn--primary" [disabled]="form.invalid || codeAvailable === false || creating">
+      {{ creating ? 'Erstelle...' : '🍺 Weiter: Drinks hinzufügen' }}
     </button>
   </form>
 </div>

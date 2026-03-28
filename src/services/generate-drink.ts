@@ -3,6 +3,17 @@ import { RoundDrinkService } from './round-drink.service';
 import { SupabaseService } from './supabase';
 import { GeneratedDrinkEntry } from '../model/GeneratedDrinkEntry';
 
+const TABLE = 'generated_drink_entries';
+
+/** Ein Drink-Pool-Eintrag mit verbleibendem Volumen */
+interface PoolEntry {
+  roundDrinkId: string;
+  name: string;
+  type: 'mixable' | 'non-mixable' | 'dilution';
+  available_ml: number;
+  alc_percent: number; // 0–100
+}
+
 @Injectable({ providedIn: 'root' })
 export class DrinkGeneratorService {
   constructor(
@@ -10,161 +21,210 @@ export class DrinkGeneratorService {
     private supabase: SupabaseService
   ) {}
 
+  // ────────────────────────────────────────────────────────────
+  // Haupt-Einstieg
+  // ────────────────────────────────────────────────────────────
   async generateDrinks(roundId: string): Promise<GeneratedDrinkEntry[]> {
-    if (!roundId) {
-      console.error('Ungültige roundId übergeben');
-      return [];
-    }
+    if (!roundId) return [];
 
-    const drinks = await this.roundDrinkService.getRoundDrinksByRoundId(roundId);
+    const roundDrinks = await this.roundDrinkService.getRoundDrinksByRoundId(roundId);
 
-    const grouped = new Map<string, {
-      drink_id: string;
-      type: string;
-      available_ml: number;
-      round_drink_ids: string[];
-    }>();
+    // Pool aufbauen – alle Getränke unabhängig von drink_id
+    const pool: PoolEntry[] = roundDrinks
+      .filter(d => (d.quantity_ml ?? 0) > 0)
+      .map(d => ({
+        roundDrinkId: d.id,
+        name: d.drink_name,
+        type: d.type,
+        available_ml: d.quantity_ml,
+        alc_percent: d.alc_percent ?? 0,
+      }));
 
-    for (const d of drinks) {
-      if (!d.drink_id || !d.id || !d.type) continue;
-      const existing = grouped.get(d.drink_id);
-      if (existing) {
-        existing.available_ml += d.quantity_ml ?? 0;
-        existing.round_drink_ids.push(d.id);
-      } else {
-        grouped.set(d.drink_id, {
-          drink_id: d.drink_id,
-          type: d.type,
-          available_ml: d.quantity_ml ?? 0,
-          round_drink_ids: [d.id],
-        });
-      }
-    }
+    const spirits  = pool.filter(d => d.type === 'mixable');
+    const mixers   = pool.filter(d => d.type === 'dilution');
+    const straight = pool.filter(d => d.type === 'non-mixable');
 
-    const available = Array.from(grouped.values()).filter(d => d.available_ml >= 40);
     const generated: GeneratedDrinkEntry[] = [];
 
-    const useDrink = (drinkId: string, amount: number) => {
-      const drink = available.find(d => d.drink_id === drinkId);
-      if (drink) drink.available_ml -= amount;
-    };
+    // 1. Gemischte Drinks generieren
+    this.generateMixes(roundId, spirits, mixers, generated);
 
-    const MAX_ITER = 500;
-    let iter = 0;
+    // 2. Unvermischte Drinks generieren
+    this.generateStraight(roundId, straight, generated);
 
-    while (iter++ < MAX_ITER) {
-      const amount = Math.floor(Math.random() * (250 - 100 + 1)) + 100;
-      const nonMix = available.find(d => d.type === 'non-mixable' && d.available_ml >= amount);
-
-      if (nonMix) {
-        generated.push({
-          round_id: roundId,
-          is_mix: false,
-          drink_parts: [{ id: nonMix.round_drink_ids[0], amount }],
-          total_ml: amount,
-          mix_ratio: null,
-        });
-        useDrink(nonMix.drink_id, amount);
-        continue;
-      }
-
-      const mix = available.find(d => d.type === 'mixable' && d.available_ml >= 40);
-      const dilution = available.find(d => d.type === 'dilution' && d.available_ml >= 40);
-
-      if (mix && dilution) {
-        const mixRatio = Math.random() * (0.30 - 0.2) + 0.2;
-        const totalMl = 200;
-        const alcoholMl = Math.round(totalMl * mixRatio);
-        const dilutionMl = totalMl - alcoholMl;
-
-        if (mix.available_ml >= alcoholMl && dilution.available_ml >= dilutionMl) {
-          generated.push({
-            round_id: roundId,
-            is_mix: true,
-            drink_parts: [
-              { id: mix.round_drink_ids[0], amount: alcoholMl },
-              { id: dilution.round_drink_ids[0], amount: dilutionMl },
-            ],
-            total_ml: totalMl,
-            mix_ratio: mixRatio,
-          });
-
-          useDrink(mix.drink_id, alcoholMl);
-          useDrink(dilution.drink_id, dilutionMl);
-          continue;
-        }
-      }
-
-      break;
-    }
-
-    for (const entry of generated) {
-      const { error } = await this.supabase.client
-        .from('generated_drinks')
-        .insert([entry]);
-
-      if (error) {
-        console.error('Fehler beim Speichern in Supabase:', error);
-      }
+    // Batch-Insert in Supabase
+    if (generated.length > 0) {
+      const { error } = await this.supabase.client.from(TABLE).insert(generated);
+      if (error) console.error('Fehler beim Speichern der Drinks:', error.message);
     }
 
     return generated;
   }
 
+  // ────────────────────────────────────────────────────────────
+  // Misch-Algorithmus
+  // Ziel-ABV zufällig wählen, Spirit-Menge daraus berechnen
+  // ────────────────────────────────────────────────────────────
+  private generateMixes(
+    roundId: string,
+    spirits: PoolEntry[],
+    mixers: PoolEntry[],
+    out: GeneratedDrinkEntry[]
+  ): void {
+    const TOTAL_ML = 200;
+    const MIN_SPIRIT_ML = 25;
+    const MIN_MIXER_ML  = 60;
 
+    // Solange Spirits + Mixer vorhanden
+    while (true) {
+      // Sortieren: meisten Vorrat zuerst → gleichmäßige Nutzung aller Flaschen
+      const availSpirits = spirits
+        .filter(s => s.available_ml >= MIN_SPIRIT_ML)
+        .sort((a, b) => b.available_ml - a.available_ml);
+      const availMixers = mixers
+        .filter(m => m.available_ml >= MIN_MIXER_ML)
+        .sort((a, b) => b.available_ml - a.available_ml);
+
+      if (!availSpirits.length || !availMixers.length) break;
+
+      // Unter den Top-3 zufällig wählen → Vielfalt
+      const spirit = availSpirits[Math.floor(Math.random() * Math.min(3, availSpirits.length))];
+      const mixer  = availMixers [Math.floor(Math.random() * Math.min(3, availMixers.length))];
+
+      // ── Ziel-ABV + Spirit-Menge berechnen ──────────────────
+      let spiritMl: number;
+      let resultAlc: number | null = null;
+      let mixRatio: number | null  = null;
+
+      if (spirit.alc_percent > 0) {
+        // Ziel-ABV zufällig zwischen 8 % und 18 %
+        const targetAbv = this.rand(8, 18);
+
+        // Formel: spirit_ml = total_ml * target_abv / spirit_abv
+        spiritMl = Math.round(TOTAL_ML * (targetAbv / 100) / (spirit.alc_percent / 100));
+
+        // Vernünftige Grenzen: 25–100 ml Spirit
+        spiritMl = Math.max(MIN_SPIRIT_ML, Math.min(100, spiritMl));
+
+        resultAlc = Math.round((spiritMl * spirit.alc_percent / TOTAL_ML) * 10) / 10;
+        mixRatio  = spiritMl / TOTAL_ML;
+      } else {
+        // Kein ABV-Wert → Daumenregel: 1/4 Spirit
+        spiritMl = Math.round(TOTAL_ML * 0.25);
+      }
+
+      const mixerMl = TOTAL_ML - spiritMl;
+
+      // ── Genug Vorrat? ──────────────────────────────────────
+      if (spirit.available_ml < spiritMl || mixer.available_ml < mixerMl) {
+        // Mit dem, was noch da ist, skalieren
+        const scale = Math.min(
+          spirit.available_ml / spiritMl,
+          mixer.available_ml  / mixerMl
+        );
+        const sMl = Math.floor(spiritMl * scale);
+        const mMl = Math.floor(mixerMl  * scale);
+
+        if (sMl < MIN_SPIRIT_ML || mMl < MIN_MIXER_ML) break;
+
+        const scaledAlc = spirit.alc_percent > 0
+          ? Math.round((sMl * spirit.alc_percent / (sMl + mMl)) * 10) / 10
+          : null;
+
+        out.push(this.buildMix(roundId, spirit, sMl, mixer, mMl, scaledAlc));
+        spirit.available_ml -= sMl;
+        mixer.available_ml  -= mMl;
+        break;
+      }
+
+      out.push(this.buildMix(roundId, spirit, spiritMl, mixer, mixerMl, resultAlc, mixRatio));
+      spirit.available_ml -= spiritMl;
+      mixer.available_ml  -= mixerMl;
+    }
+  }
+
+  private buildMix(
+    roundId: string,
+    spirit: PoolEntry, spiritMl: number,
+    mixer:  PoolEntry, mixerMl:  number,
+    resultAlc: number | null,
+    mixRatio?: number | null
+  ): GeneratedDrinkEntry {
+    return {
+      round_id: roundId,
+      is_mix: true,
+      drink_parts: [
+        { id: spirit.roundDrinkId, amount: spiritMl, alc_percent: spirit.alc_percent },
+        { id: mixer.roundDrinkId,  amount: mixerMl,  alc_percent: 0 },
+      ],
+      total_ml: spiritMl + mixerMl,
+      mix_ratio: mixRatio ?? (spiritMl / (spiritMl + mixerMl)),
+      result_alc_percent: resultAlc,
+    };
+  }
+
+  // ────────────────────────────────────────────────────────────
+  // Unvermischte Drinks (Bier, Wein, Softdrinks)
+  // Portionsgröße je nach ABV
+  // ────────────────────────────────────────────────────────────
+  private generateStraight(
+    roundId: string,
+    straight: PoolEntry[],
+    out: GeneratedDrinkEntry[]
+  ): void {
+    for (const drink of straight) {
+      const portion = this.portionSize(drink.alc_percent);
+      let remaining = drink.available_ml;
+
+      while (remaining >= portion * 0.6) {
+        const amount = Math.min(remaining, portion);
+        out.push({
+          round_id: roundId,
+          is_mix: false,
+          drink_parts: [{ id: drink.roundDrinkId, amount, alc_percent: drink.alc_percent }],
+          total_ml: amount,
+          mix_ratio: null,
+          result_alc_percent: drink.alc_percent || null,
+        });
+        remaining -= amount;
+      }
+    }
+  }
+
+  /** Standardportionsgröße basierend auf ABV */
+  private portionSize(alc: number): number {
+    if (alc >= 25)  return 60;   // Schnaps / Destillat → doppelter Shot
+    if (alc >= 12)  return 150;  // Wein / Sekt
+    if (alc >= 3)   return 300;  // Bier / Cider
+    return 330;                   // Alkoholfrei
+  }
+
+  private rand(min: number, max: number): number {
+    return Math.random() * (max - min) + min;
+  }
+
+  // ────────────────────────────────────────────────────────────
+  // Lese-/Lösch-Methoden (unverändert)
+  // ────────────────────────────────────────────────────────────
   async getRandomGeneratedDrink(roundId: string): Promise<GeneratedDrinkEntry | null> {
     const { data, error } = await this.supabase.client
-      .from('generated_drinks')
+      .from(TABLE)
       .select('*')
       .eq('round_id', roundId);
 
-    if (error || !data || data.length === 0) {
-      console.error('Fehler beim Abrufen der Drinks oder keine Daten vorhanden:', error);
-      return null;
-    }
-
-    const randomIndex = Math.floor(Math.random() * data.length);
-    return data[randomIndex] as GeneratedDrinkEntry;
+    if (error || !data?.length) return null;
+    return data[Math.floor(Math.random() * data.length)] as GeneratedDrinkEntry;
   }
+
   async deleteGeneratedDrinkById(id: string): Promise<boolean> {
-    const { error } = await this.supabase.client
-      .from('generated_drinks')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      console.error('Fehler beim Löschen des generierten Drinks:', error);
-      return false;
-    }
-
-    return true;
+    const { error } = await this.supabase.client.from(TABLE).delete().eq('id', id);
+    if (error) console.error('Fehler beim Löschen:', error.message);
+    return !error;
   }
+
   async deleteGeneratedDrinksByRoundId(roundId: string): Promise<boolean> {
-    const { error } = await this.supabase.client
-      .from('generated_drinks')
-      .delete()
-      .eq('round_id', roundId);
-
-    if (error) {
-      console.error('Fehler beim Löschen aller Drinks für Runde:', error);
-      return false;
-    }
-
-    return true;
-  }
-
-  async deleteGeneratedDrinksByRoundCode(roundCode: string): Promise<boolean> {
-    const { data, error } = await this.supabase.client
-      .from('rounds')
-      .select('id')
-      .eq('round_code', roundCode)
-      .single();
-
-    if (error || !data) {
-      console.error('❌ Fehler beim Abrufen der Runde via round_code:', error?.message);
-      return false;
-    }
-
-    return this.deleteGeneratedDrinksByRoundId(data.id);
+    const { error } = await this.supabase.client.from(TABLE).delete().eq('round_id', roundId);
+    if (error) console.error('Fehler beim Löschen aller Drinks:', error.message);
+    return !error;
   }
 }

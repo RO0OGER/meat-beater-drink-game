@@ -1,5 +1,10 @@
-<div class="app-background-standard page">
-  <p class="task">@if (task) { {{ task.label }} } @else { 🔄 Aufgabe wird geladen... }</p>
+<div class="task-wrap">
+  <div class="task-content">
+    <p class="task-eyebrow">AUFGABE</p>
+    @if (task) {
+      <h1 class="task-label">{{ task.label }}</h1>
+    } @else {
+      <p class="task-loading">Aufgabe wird geladen...</p>
+    }
+  </div>
 </div>
-
-

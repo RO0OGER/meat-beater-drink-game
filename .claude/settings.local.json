@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/dev/meat-beater-drink-game -not -path */node_modules* -not -path */.git* -not -path */.idea* -not -path */.vscode* -not -path */dist* -type d)",
+      "Bash(ls -la /c/dev/meat-beater-drink-game/*.*)",
+      "Bash(npx ng:*)",
+      "Skill(update-config)",
+      "Bash(for f:*)",
+      "Bash(do)",
+      "Read(//c/dev/meat-beater-drink-game/**)",
+      "Bash(done)",
+      "Bash(npm run:*)"
+    ]
+  }
+}

@@ -1,87 +1,171 @@
-<div class="scrollable-wrapper app-background-standard">
-  <h2 class="title">📷 Barcode-Scanner Modus (Runde: {{ roundCode }})</h2>
+@if (pendingDrink()) {
+  <!-- ── Multi-step dialog (full screen takeover) ── -->
+  <div class="dlg-overlay">
 
-  <!-- Scanner Steuerung -->
-  <div class="section">
-    <button (click)="toggleScanner()">
-      {{ scannerActive ? '🛑 Scanner deaktivieren' : '✅ Scanner aktivieren' }}
-    </button>
+    <!-- Header -->
+    <div class="dlg-top">
+      <button class="dlg-back-btn" (click)="pendingStep() > 1 ? prevStep() : cancelPending()">←</button>
+      <div class="dlg-steps">
+        <span class="dlg-step-dot" [class.active]="pendingStep() === 1" [class.done]="pendingStep() > 1">@if(pendingStep() > 1){✓}@else{1}</span>
+        <span class="dlg-step-line"></span>
+        <span class="dlg-step-dot" [class.active]="pendingStep() === 2" [class.done]="pendingStep() > 2">@if(pendingStep() > 2){✓}@else{2}</span>
+        <span class="dlg-step-line"></span>
+        <span class="dlg-step-dot" [class.active]="pendingStep() === 3">3</span>
+      </div>
+      <button class="dlg-close-btn" (click)="cancelPending()">✕</button>
+    </div>
 
-    @if (scannerActive) {
-      <p class="scanner-state active">Scanner ist aktiv – bitte Barcode scannen.</p>
-    } @else {
-      <p class="scanner-state inactive">Scanner ist deaktiviert.</p>
+    <div class="dlg-name">{{ pendingDrink()!.name }}</div>
+    <div class="dlg-alc">
+      @if (aiLoading()) {
+        <span class="dlg-alc-loading">⏳ ABV wird ermittelt…</span>
+      } @else if (pendingAlc() != null) {
+        {{ pendingAlc() }}% ABV
+      }
+    </div>
+
+    <!-- Step 1: Verwendete Menge -->
+    @if (pendingStep() === 1) {
+      <div class="dlg-body">
+        <p class="dlg-step-title">Verwendete Menge</p>
+        <p class="dlg-step-hint">
+          Wie viel bringst du mit? Eine volle {{ pendingDrink()!.name }}
+          hat <strong>{{ pendingDrink()!.volume_ml }} ml</strong> –
+          schiebe den Regler nach links wenn du nur einen Teil davon dabei hast.
+        </p>
+        <div class="dlg-big-value">{{ pendingQuantity() }} ml</div>
+        <input class="dlg-slider" type="range"
+          [min]="1" [max]="pendingDrink()!.volume_ml"
+          [ngModel]="pendingQuantity()" (ngModelChange)="pendingQuantity.set(+$event)" />
+        <div class="dlg-slider-bounds">
+          <span>1 ml</span>
+          <span>{{ pendingDrink()!.volume_ml }} ml (voll)</span>
+        </div>
+      </div>
+      <div class="dlg-footer">
+        <button class="btn btn--primary" (click)="nextStep()">Weiter →</button>
+      </div>
     }
+
+    <!-- Step 2: Volle Getränkgröße -->
+    @if (pendingStep() === 2) {
+      <div class="dlg-body">
+        <p class="dlg-step-title">Volle Getränkgröße</p>
+        <p class="dlg-step-hint">
+          Die Originalgröße der Flasche / Dose – wird im Katalog gespeichert.
+          Aus dem Katalog vorausgefüllt, bei Bedarf anpassen.
+        </p>
+        <div class="dlg-fullsize-row">
+          <input class="form-input dlg-fullsize-input" type="number"
+            [ngModel]="pendingFullSize()" (ngModelChange)="pendingFullSize.set(+$event)"
+            placeholder="z.B. 500" min="1" />
+          <span class="dlg-unit">ml</span>
+        </div>
+      </div>
+      <div class="dlg-footer">
+        <button class="btn btn--primary" (click)="nextStep()" [disabled]="pendingFullSize() <= 0">Weiter →</button>
+      </div>
+    }
+
+    <!-- Step 3: Typ -->
+    @if (pendingStep() === 3) {
+      <div class="dlg-body">
+        <p class="dlg-step-title">Getränketyp</p>
+        <p class="dlg-step-hint">Wie wird dieses Getränk eingesetzt?</p>
+        <div class="type-btns">
+          <button class="type-btn" [class.type-btn--active]="pendingType() === 'mixable'"
+                  (click)="pendingType.set('mixable')">
+            <span class="type-btn-icon">🥃</span>
+            <span class="type-btn-name">Mischbar</span>
+            <span class="type-btn-sub">Schnaps, Spirituosen</span>
+          </button>
+          <button class="type-btn" [class.type-btn--active]="pendingType() === 'non-mixable'"
+                  (click)="pendingType.set('non-mixable')">
+            <span class="type-btn-icon">🍺</span>
+            <span class="type-btn-name">Pur trinken</span>
+            <span class="type-btn-sub">Bier, Wein, Sekt</span>
+          </button>
+          <button class="type-btn" [class.type-btn--active]="pendingType() === 'dilution'"
+                  (click)="pendingType.set('dilution')">
+            <span class="type-btn-icon">🧃</span>
+            <span class="type-btn-name">Mischgetränk</span>
+            <span class="type-btn-sub">Saft, Wasser, Softdrink</span>
+          </button>
+        </div>
+      </div>
+      <div class="dlg-footer">
+        <button class="btn btn--primary" (click)="confirmPending()" [disabled]="!pendingType()">✓ Hinzufügen</button>
+      </div>
+    }
+
   </div>
 
-  <hr class="divider" />
+} @else {
 
-  <!-- Vorhandene Drinks (mit Chunking/Spalten) -->
-  <div class="section drink-list-section">
-    <h3>Bereits hinzugefuegte Getraenke</h3>
+  <!-- ── Normal scanner page ── -->
+  <div class="scroll-page">
+    <div>
+      <h2 class="aws-title">SCANNER</h2>
+      <p style="color:var(--text-muted); font-size:0.82rem; margin-top:3px">Barcode-Scanner Modus</p>
+    </div>
 
-    @if (roundDrinkChunks.length > 0) {
-      <div class="drink-columns">
-        @for (chunk of roundDrinkChunks; track trackByIndex) {
-          <div class="drink-column">
-            @for (drink of chunk; track drink.id) {
-              <div class="drink-card">
-                <div class="drink-headline">
-                  <span class="drink-name">{{ drink.drink_name }}</span>
-                  <span class="drink-type">({{ drink.type }})</span>
-                </div>
-
-                <div class="drink-quantity">
-                  <label for="quantity-{{ drink.id }}">Menge (ml)</label>
-                  <input
-                    id="quantity-{{ drink.id }}"
-                    type="number"
-                    [value]="drink.quantity_ml"
-                    (change)="updateQuantity(drink.id, $any($event.target).value)"
-                    min="0"
-                  />
-
-                  @if (drink.drink_id) {
-                    <button class="btn-inline" (click)="setToFullQuantity(drink.id)">💯</button>
-                  }
-                </div>
-
-                <div class="drink-actions">
-                  <button class="btn-delete" (click)="deleteDrink(drink.id)">🗑️ Löschen</button>
-                </div>
-              </div>
-            }
-          </div>
-        }
+    @if (lookingUp) {
+      <div class="card aws-lookup">
+        <div class="aws-lookup-dot"></div>
+        <p>Barcode wird gesucht<span class="aws-dots">...</span></p>
       </div>
     } @else {
-      <p>Keine Getraenke hinzugefuegt.</p>
+      <div class="card aws-scanner-status" [class.aws-scanner-status--active]="scannerActive">
+        <div class="aws-scanner-dot" [class.aws-scanner-dot--active]="scannerActive"></div>
+        <div>
+          <p style="font-weight:600; font-size:0.9rem">
+            {{ scannerActive ? 'Scanner aktiv' : 'Scanner inaktiv' }}
+          </p>
+          <p style="font-size:0.8rem; color:var(--text-muted)">
+            {{ scannerActive ? 'Barcode jetzt scannen...' : 'Scanner aktivieren um zu beginnen' }}
+          </p>
+        </div>
+        <button class="btn btn--sm" [class.btn--danger]="scannerActive" [class.btn--success]="!scannerActive"
+                (click)="toggleScanner()" style="width:auto; margin-left:auto">
+          {{ scannerActive ? 'Stop' : 'Start' }}
+        </button>
+      </div>
     }
+
+    @if (roundDrinks.length > 0) {
+      <div>
+        <p class="section-title">Hinzugefügte Drinks</p>
+        <div style="display:flex; flex-direction:column; gap:7px">
+          @for (drink of roundDrinks; track drink.id) {
+            <div class="list-item">
+              <span>🍺</span>
+              <div style="flex:1">
+                <div style="font-weight:600; font-size:0.9rem">{{ drink.drink_name }}</div>
+                <div style="font-size:0.75rem; color:var(--text-muted)">{{ drink.quantity_ml }} ml · {{ drink.type }}@if (drink.alc_percent != null) { · {{ drink.alc_percent }}%}</div>
+              </div>
+              <input class="form-input aws-qty-input" type="number"
+                [value]="drink.quantity_ml"
+                (change)="updateQuantity(drink.id, $any($event.target).value)"
+                min="0" />
+              @if (drink.drink_id) {
+                <button class="btn btn--ghost btn--sm btn--icon" (click)="setToFullQuantity(drink.id)" title="Volle Menge">↑</button>
+              }
+              <button class="btn btn--ghost btn--sm btn--icon" (click)="deleteDrink(drink.id)">✕</button>
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="card" style="text-align:center; color:var(--text-muted); padding:24px">
+        Noch keine Drinks gescannt.
+      </div>
+    }
+
+    @if (hasZeroQuantity()) {
+      <div class="alert alert--info">⚠ Nicht alle Mengen wurden definiert.</div>
+    }
+
+    <button class="btn btn--ghost" (click)="back()" [disabled]="hasZeroQuantity()">← Zurück</button>
   </div>
 
-  @if (hasZeroQuantity()) {
-    <p class="warning">
-      ⚠️ Nicht alle Mengen wurden definiert. Bitte vor dem Start nachtragen.
-    </p>
-  }
-
-  <hr class="divider" />
-
-  <!-- Aktionen -->
-  <div class="actions">
-    <button
-      (click)="backToOverview()
-      "
-      [disabled]="hasZeroQuantity()"
-    >
-      Zurueck zur Uebersicht
-    </button>
-
-    <button
-      (click)="startGame()"
-      [disabled]="hasZeroQuantity()"
-    >
-      Spiel starten
-    </button>
-  </div>
-</div>
+}

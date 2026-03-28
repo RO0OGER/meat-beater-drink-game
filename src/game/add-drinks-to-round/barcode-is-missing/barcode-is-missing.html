@@ -1,56 +1,105 @@
-<div class="scrollable-wrapper app-background-standard">
-  <h2 class="title">Barcode nicht gefunden</h2>
-  <p class="subtitle">Du kannst das Getränk hier manuell erfassen.</p>
+<div class="scroll-page">
+  <div>
+    <h2 class="bm-title">BARCODE FEHLT</h2>
+    <p style="color:var(--text-muted); font-size:0.82rem; margin-top:3px">Getränk manuell erfassen</p>
+  </div>
 
-  <div class="form-wrapper">
+  @if (apiFound) {
+    <div class="alert alert--success bm-api-hint">
+      ✓ Open Food Facts: Getränk erkannt – Fehlende Felder bitte ergänzen.
+    </div>
+  }
+
+  @if (aiLoading()) {
+    <div class="ai-loading">
+      <span class="ai-dot"></span>
+      <span>KI analysiert Getränk…</span>
+    </div>
+  }
+
+  @if (aiApplied()) {
+    <div class="alert alert--success bm-api-hint">
+      ✨ KI hat Typ und Alkoholgehalt automatisch erkannt – bitte prüfen.
+    </div>
+  }
+  @if (aiError()) {
+    <div class="alert alert--error bm-api-hint">⚠ {{ aiError() }}</div>
+  }
+
+  <div class="card bm-form">
     <div class="form-group">
-      <label>Getränkename</label>
-      <input type="text" [ngModel]="drinkName()" (ngModelChange)="drinkName.set($event)" />
-      @if (errorName()) {
-        <p class="error">{{ errorName() }}</p>
-      }
+      <label class="form-label">Getränkename</label>
+      <div class="bm-name-row">
+        <input class="form-input" type="text" [ngModel]="drinkName()" (ngModelChange)="drinkName.set($event)" placeholder="z.B. Club Mate" />
+        <button class="btn btn--ghost btn--sm bm-ai-btn" (click)="askAi()" [disabled]="aiLoading() || !drinkName().trim()" title="KI fragen">
+          @if (aiLoading()) { ⏳ } @else { ✨ }
+        </button>
+      </div>
+      @if (errorName()) { <span class="form-error">{{ errorName() }}</span> }
     </div>
 
     <div class="form-group">
-      <label>Verwendete Menge (ml)</label>
-      <input type="number" [ngModel]="quantityMl()" (ngModelChange)="quantityMl.set($event)" />
-      @if (errorQuantity()) {
-        <p class="error">{{ errorQuantity() }}</p>
-      }
+      <label class="form-label">Verwendete Menge (ml)</label>
+      <input class="form-input" type="number" [ngModel]="quantityMl()" (ngModelChange)="quantityMl.set($event)" placeholder="z.B. 330" />
+      @if (errorQuantity()) { <span class="form-error">{{ errorQuantity() }}</span> }
     </div>
 
     <div class="form-group">
-      <label>Volle Getränkgröße (ml, optional)</label>
-      <input type="number" [ngModel]="fullSizeMl()" (ngModelChange)="fullSizeMl.set($event)" />
-      @if (errorFullSize()) {
-        <p class="error">{{ errorFullSize() }}</p>
-      }
+      <label class="form-label">
+        Volle Getränkgröße (ml, optional)
+        @if (aiApplied() && fullSizeMl() != null) { <span class="bm-ai-tag bm-ai-tag--done">✨ KI</span> }
+      </label>
+      <input class="form-input" type="number" [ngModel]="fullSizeMl()" (ngModelChange)="fullSizeMl.set($event)" placeholder="z.B. 500" />
     </div>
 
     <div class="form-group">
-      <label>Typ</label>
-      <select [ngModel]="type()" (ngModelChange)="type.set($event)">
-        <option value="">-- auswählen --</option>
-        <option value="mixable">Mischbar</option>
-        <option value="non-mixable">Nicht mischbar</option>
-        <option value="dilution">Verdünnung</option>
-      </select>
-      @if (errorType()) {
-        <p class="error">{{ errorType() }}</p>
-      }
+      <label class="form-label">
+        Getränketyp
+        @if (aiLoading()) { <span class="bm-ai-tag">KI lädt…</span> }
+        @else if (aiApplied() && type()) { <span class="bm-ai-tag bm-ai-tag--done">✨ KI</span> }
+      </label>
+      <div class="type-btns">
+        <button class="type-btn" [class.type-btn--active]="type() === 'mixable'"
+                (click)="type.set('mixable')">
+          <span class="type-btn-icon">🥃</span>
+          <span class="type-btn-name">Mischbar</span>
+          <span class="type-btn-sub">Schnaps, Spirituosen</span>
+        </button>
+        <button class="type-btn" [class.type-btn--active]="type() === 'non-mixable'"
+                (click)="type.set('non-mixable')">
+          <span class="type-btn-icon">🍺</span>
+          <span class="type-btn-name">Pur trinken</span>
+          <span class="type-btn-sub">Bier, Wein, Sekt</span>
+        </button>
+        <button class="type-btn" [class.type-btn--active]="type() === 'dilution'"
+                (click)="type.set('dilution')">
+          <span class="type-btn-icon">🧃</span>
+          <span class="type-btn-name">Mischgetränk</span>
+          <span class="type-btn-sub">Saft, Wasser, Softdrink</span>
+        </button>
+      </div>
+      @if (errorType()) { <span class="form-error">{{ errorType() }}</span> }
     </div>
 
     <div class="form-group">
-      <label>Optional: Barcode</label>
-      <input type="text" [ngModel]="barcode()" (ngModelChange)="barcode.set($event)" />
+      <label class="form-label">
+        Alkoholgehalt %
+        @if (aiApplied() && alcPercent() != null) { <span class="bm-ai-tag bm-ai-tag--done">✨ KI</span> }
+      </label>
+      <input class="form-input" type="number" [ngModel]="alcPercent()" (ngModelChange)="alcPercent.set($event)" placeholder="z.B. 5 für Bier, 40 für Vodka" min="0" max="100" step="0.1" />
     </div>
 
-    <button (click)="addDrink()">➕ Getränk hinzufügen</button>
+    <div class="form-group">
+      <label class="form-label">Barcode (optional – für spätere Erkennung)</label>
+      <input class="form-input" type="text" [ngModel]="barcode()" (ngModelChange)="barcode.set($event)" placeholder="Wird automatisch gespeichert" />
+    </div>
+
+    <button class="btn btn--primary" (click)="addDrink()">+ Getränk hinzufügen</button>
 
     @if (statusMessage()) {
-      <p [ngClass]="statusType() === 'error' ? 'error' : 'success'">
+      <div class="alert" [class.alert--success]="statusSuccess()" [class.alert--error]="!statusSuccess()">
         {{ statusMessage() }}
-      </p>
+      </div>
     }
   </div>
 </div>

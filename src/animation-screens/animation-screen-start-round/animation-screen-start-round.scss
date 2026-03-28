@@ -1,25 +1,25 @@
-.hit-animation-wrapper {
-  height: 100vh;
+.anim-wrap {
+  min-height: 100vh;
   display: flex;
-  justify-content: center;    // horizontal
-  align-items: center;        // vertikal
-  font-family: "Eras Bold ITC", sans-serif;
-}
-
-.center-center {
-  display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 50% 50%, rgba(245,158,11,0.15) 0%, var(--bg) 65%);
+}
+
+.anim-text {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 4rem;
+  letter-spacing: 6px;
   text-align: center;
+  color: var(--accent);
+  text-shadow: 0 0 40px var(--accent-glow);
+
+  &--pulse {
+    animation: text-pulse 0.8s ease-in-out infinite alternate;
+  }
 }
 
-.hit-animation {
-  width: 80vw;
-  max-width: 1000px;
-}
-
-.hit-title{
-  font-family: "Eras Bold ITC",sans-serif;
-  font-size: 100px;
-  color: #facd05;
+@keyframes text-pulse {
+  from { text-shadow: 0 0 20px var(--accent-glow); transform: scale(1); }
+  to   { text-shadow: 0 0 60px var(--accent-glow), 0 0 100px rgba(245,158,11,0.1); transform: scale(1.04); }
 }

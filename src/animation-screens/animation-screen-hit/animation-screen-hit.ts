@@ -1,24 +1,23 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-animation-screen-hit',
+  standalone: true,
   imports: [],
   templateUrl: './animation-screen-hit.html',
-  styleUrl: './animation-screen-hit.scss'
+  styleUrl: './animation-screen-hit.scss',
 })
 export class AnimationScreenHit implements OnInit {
-  roundCode = '';
-  team = '';
-
   constructor(private route: ActivatedRoute, private router: Router) {}
 
   ngOnInit() {
-    this.roundCode = this.route.snapshot.paramMap.get('round_code') ?? '';
-    this.team = this.route.snapshot.paramMap.get('team') ?? '';
+    const team    = this.route.snapshot.paramMap.get('team')    ?? '';
+    const gameId  = this.route.snapshot.paramMap.get('gameId')  ?? '';
+    const roundId = this.route.snapshot.paramMap.get('roundId') ?? '';
 
     setTimeout(() => {
-      this.router.navigate([`/hit-${this.team}`, this.roundCode]);
+      this.router.navigate(['/game', gameId, 'round', roundId, 'hit', team]);
     }, 2500);
   }
 }

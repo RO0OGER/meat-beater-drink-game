@@ -1,102 +1,30 @@
-.scrollable-wrapper {
+.ad-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.2rem;
+  letter-spacing: 3px;
+  color: var(--accent);
+}
+
+.ad-list {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  overflow-y: auto;
-  padding: 24px;
-  box-sizing: border-box;
+  gap: 7px;
 }
 
+.ad-drink-icon { font-size: 1.3rem; flex-shrink: 0; }
 
-.title {
-  margin-top: 10vh;
-  font-family: "Eras Bold ITC", sans-serif;
-  background: #ffdc52; // Gelber Kontrast
-  color: #723a8c;       // Gleiche Violett wie Grundfarbe
-  padding: 12px 24px;
-  border-radius: 12px;
-  font-weight: 900;
-  text-align: center;
-  margin-bottom: 40px;
-  width: 500px;
-  border: 4px solid #fd9a00;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-.drink-columns {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: stretch;
-  gap: 16px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  width: 100%;
-  padding: 16px 0;
-  box-sizing: border-box;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-}
-
-.drink-column {
-  flex: 0 0 25%;
-  max-width: 25%;
-  min-width: 200px;
+.ad-drink-info {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  scroll-snap-align: start;
+  flex: 1;
+  gap: 2px;
 }
 
-.drink-card {
-  padding: 12px 16px;
-  border-radius: 8px;
-  border: 4px solid #fd9a00;
-  background-color: #ffdc52;
-  color: #723a8c;
-  font-weight: 600;
+.ad-drink-name { font-weight: 600; font-size: 0.9rem; }
+.ad-drink-ml   { font-size: 0.75rem; color: var(--text-muted); }
+
+.ad-actions {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  box-sizing: border-box;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s ease;
-}
-
-.drink-card:hover {
-  transform: translateY(-2px);
-}
-
-.drink-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  color: #723a8c;
-}
-
-.actions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 32px;
-  align-items: center;
-}
-
-button {
-  padding: 10px 24px;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  background-color: #ffdc52;
-  color: #723a8c;
-  border: 2px solid #fd9a00;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-button:hover {
-  background-color: #ffe77a;
-  transform: scale(1.05);
+  gap: 8px;
 }

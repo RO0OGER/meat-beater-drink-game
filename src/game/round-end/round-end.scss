@@ -1,90 +1,49 @@
-$purple: #7b22a2;
-$yellow: #facd05;
-$border: #fd9a00;
+.re-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 20px;
+  background: radial-gradient(ellipse at 50% 20%, rgba(239,68,68,0.07) 0%, var(--bg) 65%);
+}
 
-.round-end-wrapper {
-  font-family: "Eras Bold ITC", sans-serif;
+.re-content {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
+.re-title {
+  font-size: 2.5rem;
+  letter-spacing: 4px;
+  color: var(--team1);
+  text-shadow: 0 0 20px var(--team1-glow);
   text-align: center;
+}
 
-  .warning-text {
-    font-size: 1.4rem;
-    color: red;
-    margin-bottom: 2rem;
-    font-weight: bold;
-  }
+.re-warning {
+  background: rgba(239,68,68,0.07);
+  border-color: rgba(239,68,68,0.2);
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  text-align: center;
+}
 
-  button {
-    font-size: 1.3rem;
-    font-weight: bold;
-    border: 4px solid $border;
-    border-bottom-width: 6px;
-    border-radius: 12px;
-    cursor: pointer;
-    padding: 1rem 2rem;
-    margin: 0.5rem;
-    transition: transform 0.2s ease;
+.re-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
-    &:hover {
-      transform: scale(1.05);
-    }
-  }
+.re-confirm-box,
+.re-extend-box {
+  background: var(--bg-card-2);
+  animation: slide-in 0.2s ease-out;
+}
 
-  .delete-button {
-    background: $yellow;
-    color: $purple;
-  }
-
-  .extend-toggle-button {
-    background: $yellow;
-    color: $purple;
-  }
-
-  .confirm-box,
-  .extend-box {
-    border-bottom-width: 6px;
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin-top: 2rem;
-    max-width: 100%;
-
-    p {
-      font-size: 1.3rem;
-      margin-bottom: 1.5rem;
-      color: $yellow
-    }
-
-    input {
-      padding: 0.8rem 1rem;
-      font-size: 1.1rem;
-      border: 3px solid $purple;
-      border-radius: 8px;
-      background: $yellow;
-      color: $purple;
-      font-weight: bold;
-      outline: none;
-      width: 80%;
-      max-width: 300px;
-      margin-bottom: 1rem;
-
-      &::placeholder {
-        color: rgba($purple, 0.7);
-      }
-    }
-  }
-
-  .yes-button {
-    background: $yellow;
-    color: $purple;
-  }
-
-  .cancel-button {
-    background: $yellow;
-    color: $purple;
-  }
-
-  .apply-button {
-    background: $yellow;
-    color: $purple;
-  }
+@keyframes slide-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }

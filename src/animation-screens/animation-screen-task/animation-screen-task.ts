@@ -3,23 +3,21 @@ import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-animation-screen-task',
-  templateUrl: './animation-screen-task.html',
-  styleUrl: './animation-screen-task.scss',
   standalone: true,
   imports: [],
+  templateUrl: './animation-screen-task.html',
+  styleUrl: './animation-screen-task.scss',
 })
 export class AnimationScreenTask implements OnInit {
-  roundCode = '';
-  team = '';
-
   constructor(private router: Router, private route: ActivatedRoute) {}
 
-  ngOnInit(): void {
-    this.roundCode = this.route.snapshot.paramMap.get('round_code') ?? '';
-    this.team = this.route.snapshot.paramMap.get('team') ?? '';
+  ngOnInit() {
+    const team    = this.route.snapshot.paramMap.get('team')    ?? '';
+    const gameId  = this.route.snapshot.paramMap.get('gameId')  ?? '';
+    const roundId = this.route.snapshot.paramMap.get('roundId') ?? '';
 
     setTimeout(() => {
-      this.router.navigate(['/task', this.team, this.roundCode]);
+      this.router.navigate(['/game', gameId, 'round', roundId, 'task', team]);
     }, 2180);
   }
 }
