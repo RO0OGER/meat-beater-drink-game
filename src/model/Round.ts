@@ -9,8 +9,6 @@ export interface Round {
   is_active: boolean;
   remaining_time_team1: number;
   remaining_time_team2: number;
-  num_players_team1: number;
-  num_players_team2: number;
   created_at: string;
   // Multiplayer fields
   status: 'lobby' | 'playing' | 'ended';

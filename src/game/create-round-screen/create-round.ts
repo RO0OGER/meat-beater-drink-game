@@ -27,8 +27,6 @@ export class CreateRoundPage implements OnInit {
       round_code: ['', [Validators.required, Validators.minLength(5), this.codeFormatValidator]],
       team1_name: ['Team 1', [Validators.required]],
       team2_name: ['Team 2', [Validators.required]],
-      num_players_team1: [1, [Validators.required, Validators.min(1)]],
-      num_players_team2: [1, [Validators.required, Validators.min(1)]],
       time_team1_min: [1, [Validators.required, Validators.min(1)]],
       time_team2_min: [1, [Validators.required, Validators.min(1)]],
     });
@@ -53,15 +51,13 @@ export class CreateRoundPage implements OnInit {
     if (this.form.invalid || this.codeAvailable === false || !this.gameId) return;
     this.creating = true;
 
-    const { round_code, team1_name, team2_name, num_players_team1, num_players_team2, time_team1_min, time_team2_min } = this.form.value;
+    const { round_code, team1_name, team2_name, time_team1_min, time_team2_min } = this.form.value;
 
     const round = await this.roundService.createRound(
       this.gameId,
       round_code,
       team1_name,
       team2_name,
-      num_players_team1,
-      num_players_team2,
       time_team1_min * 60,
       time_team2_min * 60
     );

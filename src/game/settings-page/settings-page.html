@@ -39,20 +39,6 @@
     </div>
   </div>
 
-  <div class="card">
-    <p class="section-title" style="margin-bottom:14px">Spieler</p>
-    <div class="sp-grid">
-      <div class="form-group">
-        <label class="form-label" style="color:var(--team1)">Team 1</label>
-        <input class="form-input" type="number" [(ngModel)]="numPlayersTeam1" />
-      </div>
-      <div class="form-group">
-        <label class="form-label" style="color:var(--team2)">Team 2</label>
-        <input class="form-input" type="number" [(ngModel)]="numPlayersTeam2" />
-      </div>
-    </div>
-  </div>
-
-  <button class="btn btn--primary" (click)="saveChanges()">💾 Änderungen speichern</button>
+<button class="btn btn--primary" (click)="saveChanges()">💾 Änderungen speichern</button>
   <button class="btn btn--danger" (click)="endRound()">Runde beenden</button>
 </div>

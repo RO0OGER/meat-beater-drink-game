@@ -5,6 +5,7 @@ import { RoundService } from '../../../services/round';
 import { GeneratedDrinkEntry } from '../../../model/GeneratedDrinkEntry';
 import { DrinkGeneratorService } from '../../../services/generate-drink';
 import { RoundDrinkService } from '../../../services/round-drink.service';
+import { RoundPlayerService } from '../../../services/round-player.service';
 import { TaskService } from '../../../services/task';
 
 @Component({
@@ -32,6 +33,7 @@ export class DrinkScreen implements OnInit {
     private roundService: RoundService,
     private drinkGenerator: DrinkGeneratorService,
     private roundDrinkService: RoundDrinkService,
+    private roundPlayerService: RoundPlayerService,
     private taskService: TaskService
   ) {}
 
@@ -41,16 +43,14 @@ export class DrinkScreen implements OnInit {
     this.team    = this.route.snapshot.paramMap.get('team')    ?? '';
     this.taskId  = this.route.snapshot.paramMap.get('taskId')  ?? '';
 
-    const [round, task] = await Promise.all([
-      this.roundService.getRoundById(this.roundId),
+    const [players, task] = await Promise.all([
+      this.roundPlayerService.getPlayersByRound(this.roundId),
       this.taskId ? this.taskService.getTaskById(this.taskId) : Promise.resolve(null),
     ]);
 
     this.taskLabel = task?.label ?? '';
 
-    const numPlayers = this.team === 'team1'
-      ? (round?.num_players_team1 ?? 0)
-      : (round?.num_players_team2 ?? 0);
+    const numPlayers = players.filter(p => p.team === this.team).length;
 
     if (numPlayers === 0) return;
 

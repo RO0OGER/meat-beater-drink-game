@@ -21,8 +21,6 @@ export class SettingsPage implements OnInit {
   team2Hits = 0;
   remainingTimeTeam1 = 0;
   remainingTimeTeam2 = 0;
-  numPlayersTeam1 = 0;
-  numPlayersTeam2 = 0;
 
   constructor(
     private route: ActivatedRoute,
@@ -40,8 +38,6 @@ export class SettingsPage implements OnInit {
       this.team2Hits          = this.round.team2_hits;
       this.remainingTimeTeam1 = this.round.remaining_time_team1;
       this.remainingTimeTeam2 = this.round.remaining_time_team2;
-      this.numPlayersTeam1    = this.round.num_players_team1;
-      this.numPlayersTeam2    = this.round.num_players_team2;
     }
   }
 
@@ -51,8 +47,6 @@ export class SettingsPage implements OnInit {
       team2_hits:           this.team2Hits,
       remaining_time_team1: this.remainingTimeTeam1,
       remaining_time_team2: this.remainingTimeTeam2,
-      num_players_team1:    this.numPlayersTeam1,
-      num_players_team2:    this.numPlayersTeam2,
     });
     this.router.navigate(['/game', this.gameId, 'round', this.roundId, 'play']);
   }

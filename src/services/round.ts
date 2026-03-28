@@ -40,8 +40,6 @@ export class RoundService {
     roundCode: string,
     team1Name: string,
     team2Name: string,
-    numPlayersTeam1: number,
-    numPlayersTeam2: number,
     timeTeam1Seconds: number,
     timeTeam2Seconds: number
   ): Promise<Round | null> {
@@ -52,8 +50,6 @@ export class RoundService {
         round_code: roundCode,
         team1_name: team1Name,
         team2_name: team2Name,
-        num_players_team1: numPlayersTeam1,
-        num_players_team2: numPlayersTeam2,
         remaining_time_team1: timeTeam1Seconds,
         remaining_time_team2: timeTeam2Seconds,
         team1_hits: 0,
