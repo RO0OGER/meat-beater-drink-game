@@ -130,7 +130,7 @@ export class RoundService {
   }
 
   async getRoundByCode(code: string): Promise<Round | null> {
-    const { data } = await this.supabase.client
+    const { data, error } = await this.supabase.client
       .from('rounds')
       .select('*')
       .eq('round_code', code)

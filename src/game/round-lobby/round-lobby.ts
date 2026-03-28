@@ -35,6 +35,7 @@ export class RoundLobbyPage implements OnInit, OnDestroy {
   copied    = signal(false);
 
   private channel: any = null;
+  private pollInterval: any = null;
 
   team1Players = () => this.players().filter(p => p.team === 'team1');
   team2Players = () => this.players().filter(p => p.team === 'team2');
@@ -59,10 +60,30 @@ export class RoundLobbyPage implements OnInit, OnDestroy {
         }
       })
       .subscribe();
+
+    // Polling fallback in case Realtime is not enabled for these tables
+    this.pollInterval = setInterval(() => this.poll(), 2500);
   }
 
   ngOnDestroy() {
     this.channel?.unsubscribe();
+    clearInterval(this.pollInterval);
+  }
+
+  private async poll() {
+    const [round, players] = await Promise.all([
+      this.roundSvc.getRoundById(this.roundId),
+      this.playerSvc.getPlayersByRound(this.roundId),
+    ]);
+    if (round) {
+      this.round.set(round);
+      if (round.status === 'playing') {
+        clearInterval(this.pollInterval);
+        this.router.navigate(['/round', this.roundId, 'personal']);
+        return;
+      }
+    }
+    if (players) this.players.set(players);
   }
 
   private async getCode(): Promise<string> {

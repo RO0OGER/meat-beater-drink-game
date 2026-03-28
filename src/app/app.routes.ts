@@ -13,7 +13,6 @@ import { GameOverviewPage } from '../game/game-overview/game-overview';
 import { CreateRoundPage } from '../game/create-round-screen/create-round';
 import { AddDrinksComponent } from '../game/add-drinks/add-drinks';
 import { AddManually } from '../game/add-drinks-to-round/add-manually/add-manually';
-import { BarcodeIsMissing } from '../game/add-drinks-to-round/barcode-is-missing/barcode-is-missing';
 import { AddWithScanner } from '../game/add-drinks-to-round/add-with-scanner/add-with-scanner';
 
 // Gameplay
@@ -60,7 +59,6 @@ export const routes: Routes = [
   { path: 'game/:gameId/round/:roundId/add-drinks',             component: AddDrinksComponent,  canActivate: [authGuard] },
   { path: 'game/:gameId/round/:roundId/add-drink-manual',       component: AddManually,         canActivate: [authGuard] },
   { path: 'game/:gameId/round/:roundId/add-drink-scan',         component: AddWithScanner,      canActivate: [authGuard] },
-  { path: 'game/:gameId/round/:roundId/barcode-missing',        component: BarcodeIsMissing,    canActivate: [authGuard] },
 
   // Protected: Gameplay
   { path: 'game/:gameId/round/:roundId/play',                            component: GamePage,       canActivate: [authGuard] },

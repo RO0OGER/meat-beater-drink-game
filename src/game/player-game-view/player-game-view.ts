@@ -37,6 +37,7 @@ export class PlayerGameView implements OnInit, OnDestroy {
   acting   = signal(false);
 
   private channel: any = null;
+  private pollInterval: any = null;
 
   shooter   = computed(() => this.players().find(p => p.id === this.round()?.current_shooter_id) ?? null);
   target    = computed(() => this.players().find(p => p.id === this.round()?.current_target_id)  ?? null);
@@ -88,24 +89,41 @@ export class PlayerGameView implements OnInit, OnDestroy {
     this.channel = this.supabase.client
       .channel(`game:${this.roundId}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'rounds', filter: `id=eq.${this.roundId}` }, async (payload: any) => {
-        const r = payload.new as Round;
-        this.round.set(r);
-        if (r.current_task_id) {
-          const t = await this.taskSvc.getTaskById(r.current_task_id);
-          this.task.set(t);
-        } else {
-          this.task.set(null);
-        }
+        await this.applyRoundUpdate(payload.new as Round);
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'round_players', filter: `round_id=eq.${this.roundId}` }, async () => {
         const players = await this.playerSvc.getPlayersByRound(this.roundId);
         this.players.set(players);
       })
       .subscribe();
+
+    // Polling fallback in case Realtime is not enabled for these tables
+    this.pollInterval = setInterval(() => this.poll(), 2500);
   }
 
   ngOnDestroy() {
     this.channel?.unsubscribe();
+    clearInterval(this.pollInterval);
+  }
+
+  private async applyRoundUpdate(r: Round) {
+    const prev = this.round();
+    this.round.set(r);
+    if (r.current_task_id && r.current_task_id !== prev?.current_task_id) {
+      const t = await this.taskSvc.getTaskById(r.current_task_id);
+      this.task.set(t);
+    } else if (!r.current_task_id) {
+      this.task.set(null);
+    }
+  }
+
+  private async poll() {
+    const [round, players] = await Promise.all([
+      this.roundSvc.getRoundById(this.roundId),
+      this.playerSvc.getPlayersByRound(this.roundId),
+    ]);
+    if (round) await this.applyRoundUpdate(round);
+    if (players) this.players.set(players);
   }
 
   /** Shooter pressed HIT */
