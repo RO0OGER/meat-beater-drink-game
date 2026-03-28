@@ -57,6 +57,8 @@ export class RoundService {
         team1_hits: 0,
         team2_hits: 0,
         is_active: false,
+        status: 'lobby',
+        turn_number: 0,
       })
       .select()
       .single();

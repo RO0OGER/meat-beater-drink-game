@@ -48,7 +48,9 @@ export class CreateRoundPage implements OnInit {
   }
 
   async createRound() {
-    if (this.form.invalid || this.codeAvailable === false || !this.gameId) return;
+    if (this.form.invalid || !this.gameId) return;
+    if (this.codeAvailable === null) await this.checkCode();
+    if (this.codeAvailable !== true) return;
     this.creating = true;
 
     const { round_code, team1_name, team2_name, time_team1_min, time_team2_min } = this.form.value;

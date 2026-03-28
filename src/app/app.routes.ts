@@ -56,9 +56,9 @@ export const routes: Routes = [
 
   // Protected: Round setup
   { path: 'game/:gameId/round/new',                             component: CreateRoundPage,     canActivate: [authGuard] },
-  { path: 'game/:gameId/round/:roundId/add-drinks',             component: AddDrinksComponent,  canActivate: [authGuard] },
-  { path: 'game/:gameId/round/:roundId/add-drink-manual',       component: AddManually,         canActivate: [authGuard] },
-  { path: 'game/:gameId/round/:roundId/add-drink-scan',         component: AddWithScanner,      canActivate: [authGuard] },
+  { path: 'game/:gameId/round/:roundId/add-drinks',             component: AddDrinksComponent },
+  { path: 'game/:gameId/round/:roundId/add-drink-manual',       component: AddManually },
+  { path: 'game/:gameId/round/:roundId/add-drink-scan',         component: AddWithScanner },
 
   // Protected: Gameplay
   { path: 'game/:gameId/round/:roundId/play',                            component: GamePage,       canActivate: [authGuard] },
