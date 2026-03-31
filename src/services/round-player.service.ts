@@ -16,6 +16,18 @@ export class RoundPlayerService {
     return token;
   }
 
+  saveActiveSession(roundId: string): void {
+    localStorage.setItem('active_session_round', roundId);
+  }
+
+  clearActiveSession(): void {
+    localStorage.removeItem('active_session_round');
+  }
+
+  getActiveSessionRoundId(): string | null {
+    return localStorage.getItem('active_session_round');
+  }
+
   clearDeviceToken(roundId: string): void {
     localStorage.removeItem(`player_token_${roundId}`);
   }

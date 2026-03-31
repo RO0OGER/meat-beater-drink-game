@@ -6,6 +6,7 @@ import { RoundPlayerService } from '../../services/round-player.service';
 import { TaskService } from '../../services/task';
 import { AuthService } from '../../services/auth.service';
 import { SupabaseService } from '../../services/supabase';
+import { DrinkGeneratorService } from '../../services/generate-drink';
 import { Round } from '../../model/Round';
 import { RoundPlayer } from '../../model/RoundPlayer';
 
@@ -24,15 +25,17 @@ export class RoundLobbyPage implements OnInit, OnDestroy {
   private taskSvc  = inject(TaskService);
   private auth     = inject(AuthService);
   private supabase = inject(SupabaseService);
+  private drinkGen = inject(DrinkGeneratorService);
 
   roundId   = '';
   round     = signal<Round | null>(null);
   players   = signal<RoundPlayer[]>([]);
   myPlayer  = signal<RoundPlayer | null>(null);
   isHost    = signal(false);
-  starting  = signal(false);
-  joinUrl   = signal('');
-  copied    = signal(false);
+  starting         = signal(false);
+  joinUrl          = signal('');
+  copied           = signal(false);
+  taskTimerSeconds = 30;
 
   private channel: any = null;
   private pollInterval: any = null;
@@ -114,11 +117,15 @@ export class RoundLobbyPage implements OnInit, OnDestroy {
     if (!t1.length || !t2.length) return;
 
     this.starting.set(true);
+    await this.drinkGen.generateDrinks(this.roundId);
     const task = await this.taskSvc.getRandomTask();
-    await this.roundSvc.startGame(this.roundId, players, task?.id ?? null);
+    await this.roundSvc.startGame(this.roundId, players, task?.id ?? null, this.taskTimerSeconds);
     this.starting.set(false);
     this.router.navigate(['/round', this.roundId, 'personal']);
   }
+
+  increaseTimer() { this.taskTimerSeconds = Math.min(120, this.taskTimerSeconds + 5); }
+  decreaseTimer() { this.taskTimerSeconds = Math.max(5,   this.taskTimerSeconds - 5); }
 
   addDrinks() {
     const r = this.round();

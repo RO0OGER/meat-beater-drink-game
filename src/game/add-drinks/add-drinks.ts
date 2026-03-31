@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { RoundDrinkService } from '../../services/round-drink.service';
-import { RoundDrink } from '../../model/RoundDrink';
 import { DrinkGeneratorService } from '../../services/generate-drink';
+import { RoundDrink } from '../../model/RoundDrink';
 
 @Component({
   selector: 'app-add-drinks',
@@ -13,15 +13,29 @@ import { DrinkGeneratorService } from '../../services/generate-drink';
   imports: [CommonModule],
 })
 export class AddDrinksComponent implements OnInit {
-  gameId = '';
+  gameId  = '';
   roundId = '';
   drinks: RoundDrink[] = [];
+
+  readonly TARGET     = DrinkGeneratorService.TARGET;
+  readonly cupIndices = Array.from({ length: DrinkGeneratorService.TARGET }, (_, i) => i);
+
+  get totalMl(): number {
+    return this.drinks.reduce((s, d) => s + (d.quantity_ml ?? 0), 0);
+  }
+
+  get avgMlPerDrink(): number {
+    return this.totalMl > 0 ? Math.round(this.totalMl / this.TARGET) : 0;
+  }
+
+  get tooSmall(): boolean {
+    return this.totalMl > 0 && this.avgMlPerDrink < 200;
+  }
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private roundDrinkService: RoundDrinkService,
-    private drinkGeneratorService: DrinkGeneratorService
   ) {}
 
   async ngOnInit() {
@@ -47,13 +61,7 @@ export class AddDrinksComponent implements OnInit {
     this.router.navigate(['/game', this.gameId, 'round', this.roundId, 'add-drink-scan']);
   }
 
-  async startGame() {
-    await this.drinkGeneratorService.deleteGeneratedDrinksByRoundId(this.roundId);
-    await this.drinkGeneratorService.generateDrinks(this.roundId);
-    this.router.navigate(['/animation/start-round', this.gameId, this.roundId]);
-  }
-
   back() {
-    this.router.navigate(['/game', this.gameId, 'round', this.roundId, 'add-drinks']);
+    this.router.navigate(['/round', this.roundId, 'lobby']);
   }
 }

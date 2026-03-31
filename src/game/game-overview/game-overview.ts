@@ -23,17 +23,15 @@ export class GameOverviewPage implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private gameService: GameService,
-    private roundService: RoundService
+    private roundService: RoundService,
   ) {}
 
   async ngOnInit() {
     this.gameId = this.route.snapshot.paramMap.get('gameId') ?? '';
-
     const [game, rounds] = await Promise.all([
       this.gameService.getGameById(this.gameId),
       this.roundService.getRoundsByGameId(this.gameId),
     ]);
-
     this.game = game;
     this.rounds = rounds;
     this.loading = false;
@@ -43,21 +41,28 @@ export class GameOverviewPage implements OnInit {
     this.router.navigate(['/game', this.gameId, 'round', 'new']);
   }
 
-  playRound(round: Round) {
-    this.router.navigate(['/game', this.gameId, 'round', round.id, 'play']);
+  openLobby(round: Round) {
+    this.router.navigate(['/round', round.id, 'lobby']);
   }
 
-  setupRound(round: Round) {
+  setupDrinks(round: Round) {
     this.router.navigate(['/game', this.gameId, 'round', round.id, 'add-drinks']);
+  }
+
+  async deleteRound(round: Round, event: Event) {
+    event.stopPropagation();
+    if (!confirm(`Runde "${round.round_code}" wirklich löschen?`)) return;
+    await this.roundService.deleteRoundById(round.id);
+    this.rounds = this.rounds.filter(r => r.id !== round.id);
   }
 
   back() {
     this.router.navigate(['/dashboard']);
   }
 
-  formatTime(seconds: number): string {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m}:${s.toString().padStart(2, '0')}`;
+  statusLabel(round: Round): string {
+    if (round.status === 'playing') return 'Läuft';
+    if (round.status === 'ended')   return 'Beendet';
+    return 'Lobby';
   }
 }

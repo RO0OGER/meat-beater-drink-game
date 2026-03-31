@@ -7,6 +7,17 @@
     <button class="btn btn--ghost btn--sm" (click)="logout()">Abmelden</button>
   </header>
 
+  @if (activeRoundId) {
+    <div class="dash-resume" (click)="resumeGame()">
+      <div class="dash-resume-dot"></div>
+      <div>
+        <div class="dash-resume-title">Spiel läuft noch</div>
+        <div class="dash-resume-sub">Tippe um zurückzukehren</div>
+      </div>
+      <span class="dash-resume-arrow">→</span>
+    </div>
+  }
+
   <button class="btn btn--primary" (click)="createGame()">+ Neues Spiel</button>
 
   <div class="dash-section">

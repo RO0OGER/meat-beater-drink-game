@@ -11,7 +11,9 @@
       "Bash(done)",
       "Bash(npm run:*)",
       "Bash(node scripts/clean-rounds.mjs)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Read(//mnt/c/dev/meat-beater/meat-beater-drink-game/src/app/**)",
+      "Bash(cmd /c 'dir \"\"C:\\\\dev\\\\meat-beater\\\\meat-beater-drink-game\\\\src\\\\app\\\\game\"\"')"
     ]
   }
 }

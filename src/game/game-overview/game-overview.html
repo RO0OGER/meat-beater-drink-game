@@ -18,32 +18,33 @@
     } @else {
       <div class="ov-list">
         @for (round of rounds; track round.id) {
-          <div class="card ov-round-card">
+          <div class="card ov-round-card" [class.ov-round-card--ended]="round.status === 'ended'">
+
             <div class="ov-round-header">
               <div class="ov-teams">{{ round.team1_name }} <span>vs</span> {{ round.team2_name }}</div>
+              <span class="ov-status" [class.ov-status--playing]="round.status === 'playing'"
+                                      [class.ov-status--ended]="round.status === 'ended'">
+                {{ statusLabel(round) }}
+              </span>
+            </div>
+
+            <div class="ov-meta">
               <span class="ov-code">{{ round.round_code }}</span>
+              <span class="ov-hits">{{ round.team1_hits + round.team2_hits }} Hits gesamt</span>
             </div>
 
-            <div class="ov-stats">
-              <div class="ov-stat">
-                <span class="ov-stat-val ov-stat-val--t1">{{ round.team1_hits }}</span>
-                <span class="ov-stat-label">Hits T1</span>
+            @if (round.status === 'ended') {
+              <div class="ov-actions">
+                <button class="btn btn--danger btn--sm" (click)="deleteRound(round, $event)">🗑 Löschen</button>
               </div>
-              <div class="ov-cups-mini">
-                @for (i of [0,1,2,3,4,5,6,7,8,9]; track i) {
-                  <div class="cup-mini" [class.cup-mini--t1]="i >= round.team1_hits" [class.cup-mini--gone]="i < round.team1_hits"></div>
-                }
+            } @else {
+              <div class="ov-actions">
+                <button class="btn btn--ghost btn--sm" (click)="deleteRound(round, $event)">🗑</button>
+                <button class="btn btn--ghost btn--sm" (click)="setupDrinks(round)">🍺 Drinks</button>
+                <button class="btn btn--primary btn--sm" (click)="openLobby(round)">▶ Lobby</button>
               </div>
-              <div class="ov-stat">
-                <span class="ov-stat-val ov-stat-val--t2">{{ round.team2_hits }}</span>
-                <span class="ov-stat-label">Hits T2</span>
-              </div>
-            </div>
+            }
 
-            <div class="ov-actions">
-              <button class="btn btn--ghost btn--sm" (click)="setupRound(round)">🍺 Drinks</button>
-              <button class="btn btn--primary btn--sm" (click)="playRound(round)">▶ Spielen</button>
-            </div>
           </div>
         }
       </div>

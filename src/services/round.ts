@@ -139,7 +139,7 @@ export class RoundService {
   }
 
   /** Sets status=playing and picks first shooter from team1. */
-  async startGame(roundId: string, players: RoundPlayer[], taskId: string | null): Promise<boolean> {
+  async startGame(roundId: string, players: RoundPlayer[], taskId: string | null, timerSeconds = 30): Promise<boolean> {
     const team1 = players.filter(p => p.team === 'team1');
     if (!team1.length) return false;
     return this.updateRound(roundId, {
@@ -149,6 +149,7 @@ export class RoundService {
       shooter_team: 'team1',
       current_target_id: null,
       current_task_id: taskId,
+      task_timer_seconds: timerSeconds,
     } as Partial<Round>);
   }
 
@@ -184,7 +185,9 @@ export class RoundService {
     } as Partial<Round>);
   }
 
-  async endGame(roundId: string): Promise<boolean> {
-    return this.updateRound(roundId, { status: 'ended' } as Partial<Round>);
+  async endGame(roundId: string, loserTeam?: 'team1' | 'team2'): Promise<boolean> {
+    const update: Partial<Round> = { status: 'ended' };
+    if (loserTeam) update.loser_team = loserTeam;
+    return this.updateRound(roundId, update);
   }
 }

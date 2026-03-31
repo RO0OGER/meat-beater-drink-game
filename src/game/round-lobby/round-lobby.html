@@ -55,6 +55,16 @@
   <!-- Start Game (host only) -->
   @if (isHost()) {
     <div class="lobby-start-area">
+
+      <div class="lobby-timer-setting">
+        <label class="lobby-timer-label">⏱ Aufgaben-Timer</label>
+        <div class="lobby-timer-controls">
+          <button class="lobby-timer-btn" (click)="decreaseTimer()">−</button>
+          <span class="lobby-timer-value">{{ taskTimerSeconds }}s</span>
+          <button class="lobby-timer-btn" (click)="increaseTimer()">+</button>
+        </div>
+      </div>
+
       @if (team1Players().length === 0 || team2Players().length === 0) {
         <p class="lobby-start-hint">Beide Teams brauchen mindestens einen Spieler</p>
       }

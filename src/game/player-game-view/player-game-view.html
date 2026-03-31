@@ -6,7 +6,7 @@
   </div>
 }
 
-<!-- LOBBY (game not started yet) -->
+<!-- LOBBY (Spiel noch nicht gestartet) -->
 @if (viewState() === 'lobby') {
   <div class="pgv-center">
     <div class="pgv-pulse"></div>
@@ -15,72 +15,136 @@
   </div>
 }
 
-<!-- MY TURN TO SHOOT -->
+<!-- ICH BIN DRAN – Schießen -->
 @if (viewState() === 'my-turn') {
   <div class="pgv-shoot-view">
-    <div class="pgv-your-turn-badge">DU BIST DRAN</div>
-    <div class="pgv-team-label">
-      {{ shooterTeam() === 'team1' ? round()?.team1_name : round()?.team2_name }}
+
+    <div class="pgv-top-info">
+      <div class="pgv-your-turn-badge">DU BIST DRAN</div>
+      <div class="pgv-my-name">{{ myPlayer()?.name }}</div>
+      <div class="pgv-team-label">
+        {{ shooterTeam() === 'team1' ? round()?.team1_name : round()?.team2_name }}
+      </div>
     </div>
-    <div class="pgv-cups">
-      @for (row of [[6,7,8,9],[3,4,5],[1,2],[0]]; track $index) {
-        <div class="pgv-cup-row">
-          @for (i of row; track i) {
-            <div class="pgv-cup">🍺</div>
-          }
-        </div>
-      }
+
+    <div class="pgv-shoot-center">
+      <div class="pgv-target-emoji">🎯</div>
+      <p class="pgv-shoot-hint">Hast du getroffen?</p>
     </div>
-    <p class="pgv-shoot-hint">Schieß auf die Becher – war es ein Treffer?</p>
+
     <div class="pgv-shoot-btns">
-      <button class="btn pgv-hit-btn" (click)="onHit()" [disabled]="acting()">
-        🎯 TREFFER
+      <button class="pgv-hit-btn" (click)="onHit()" [disabled]="acting()">
+        TREFFER
       </button>
-      <button class="btn pgv-miss-btn" (click)="onMiss()" [disabled]="acting()">
-        ❌ DANEBEN
+      <button class="pgv-miss-btn" (click)="onMiss()" [disabled]="acting()">
+        DANEBEN
       </button>
     </div>
+
   </div>
 }
 
-<!-- WAITING (someone else is shooting) -->
+<!-- WARTEN (jemand anderes schießt) -->
 @if (viewState() === 'waiting') {
   <div class="pgv-center">
     <div class="pgv-shooter-info">
+      <div class="pgv-aiming-anim">🎯</div>
       <div class="pgv-shooter-name">{{ shooter()?.name ?? '…' }}</div>
       <div class="pgv-shooter-team">
         {{ shooterTeam() === 'team1' ? round()?.team1_name : round()?.team2_name }}
       </div>
-      <p class="pgv-status-text">ist gerade am Schießen…</p>
-      <div class="pgv-aiming-anim">🎯</div>
+      <p class="pgv-status-text">schießt gerade…</p>
     </div>
   </div>
 }
 
-<!-- I HAVE TO DRINK -->
+<!-- ICH MUSS TRINKEN -->
 @if (viewState() === 'i-drink') {
   <div class="pgv-drink-view">
+
     <div class="pgv-drink-badge">DU MUSST TRINKEN</div>
+
+    <!-- 10er-Bruch-Anzeige -->
+    <div class="pgv-drink-counter">
+      <div class="pgv-counter-cups">
+        @for (i of cupIndices; track i) {
+          <div class="pgv-counter-cup" [class.pgv-counter-cup--filled]="i < drinkPosition()"></div>
+        }
+      </div>
+      <div class="pgv-counter-label">{{ drinkPosition() }} / 10</div>
+    </div>
 
     @if (task()) {
       <div class="pgv-task-card">
         <p class="pgv-task-label">Aufgabe</p>
         <p class="pgv-task-text">{{ task()!.label }}</p>
       </div>
+
+      @if (timerRunning()) {
+        <div class="pgv-timer-display" [class.pgv-timer-display--urgent]="timerSecondsLeft() <= 5">
+          <svg class="pgv-timer-ring" viewBox="0 0 64 64">
+            <circle class="pgv-timer-ring-bg" cx="32" cy="32" r="28"/>
+            <circle class="pgv-timer-ring-fill" cx="32" cy="32" r="28"
+              [style.stroke-dashoffset]="175.9 - (175.9 * timerSecondsLeft() / (round()?.task_timer_seconds ?? 30))"/>
+          </svg>
+          <span class="pgv-timer-number">{{ timerSecondsLeft() }}</span>
+        </div>
+      } @else {
+        <button class="pgv-go-btn" (click)="startTimer()" [disabled]="acting()">
+          GO
+        </button>
+      }
     }
 
-    <div class="pgv-drink-info">
-      <span class="pgv-drink-icon">🍺</span>
-      <p>Trinke dein Getränk und bestätige wenn du fertig bist</p>
-    </div>
+    @if (currentMethod(); as method) {
+      <div class="pgv-method-card">
+        <p class="pgv-method-label">So trinkst du</p>
+        <p class="pgv-method-name">{{ method.label }}</p>
+        @if (method.description) {
+          <p class="pgv-method-desc">{{ method.description }}</p>
+        }
+      </div>
+    }
 
-    <button class="btn pgv-done-btn" (click)="onDrinkDone()" [disabled]="acting()">
+    @if (currentDrink(); as drink) {
+      <div class="pgv-drink-card">
+        <p class="pgv-drink-card-label">Dein Getränk</p>
+
+        @if (drink.is_mix) {
+          @for (part of drink.drink_parts; track part.id) {
+            <div class="pgv-drink-part">
+              <span class="pgv-part-name">{{ part.name }}</span>
+              <span class="pgv-part-amount">{{ part.amount }} ml</span>
+            </div>
+          }
+          @if (drink.result_alc_percent) {
+            <div class="pgv-drink-abv">≈ {{ drink.result_alc_percent }}% Vol.</div>
+          }
+        } @else {
+          <div class="pgv-drink-part">
+            <span class="pgv-part-name">{{ drink.drink_parts[0].name }}</span>
+            <span class="pgv-part-amount">{{ drink.total_ml }} ml</span>
+          </div>
+          @if (drink.result_alc_percent) {
+            <div class="pgv-drink-abv">{{ drink.result_alc_percent }}% Vol.</div>
+          }
+        }
+      </div>
+    } @else {
+      <div class="pgv-drink-info">
+        <span class="pgv-drink-icon">🍺</span>
+        <p>Trinke dein Getränk</p>
+      </div>
+    }
+
+    <button class="pgv-done-btn" (click)="onDrinkDone()" [disabled]="acting()">
       ✅ Getrunken!
     </button>
+
   </div>
 }
 
-<!-- SOMEONE ELSE DRINKS -->
+<!-- JEMAND ANDERES TRINKT -->
 @if (viewState() === 'other-drinks') {
   <div class="pgv-center">
     <div class="pgv-target-info">
@@ -94,7 +158,7 @@
   </div>
 }
 
-<!-- GAME ENDED -->
+<!-- SPIEL BEENDET -->
 @if (viewState() === 'ended') {
   <div class="pgv-center">
     <div style="font-size:3rem">🏆</div>
@@ -109,7 +173,6 @@
         <span class="pgv-score-hits">{{ round()?.team2_hits }} Treffer</span>
       </div>
     </div>
-
     <div class="pgv-drink-stats">
       @for (p of team1Players(); track p.id) {
         <div class="pgv-stat-row">
@@ -127,7 +190,7 @@
   </div>
 }
 
-<!-- Host controls (floating) -->
+<!-- Host-Steuerung (schwebend) -->
 @if (isHost() && viewState() !== 'loading' && viewState() !== 'lobby' && viewState() !== 'ended') {
   <div class="pgv-host-bar">
     <button class="btn btn--ghost pgv-end-btn" (click)="endGame()">Spiel beenden</button>

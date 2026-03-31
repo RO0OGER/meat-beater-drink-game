@@ -23,12 +23,17 @@
 .ov-round-card {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+  transition: opacity 0.2s;
+
+  &--ended {
+    opacity: 0.55;
+  }
 }
 
 .ov-round-header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
@@ -42,6 +47,35 @@
   span { color: var(--text-muted); font-size: 0.85rem; margin: 0 4px; }
 }
 
+.ov-status {
+  font-size: 0.65rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  color: var(--text-muted);
+
+  &--playing {
+    background: rgba(16,185,129,0.12);
+    border-color: rgba(16,185,129,0.4);
+    color: #10b981;
+  }
+
+  &--ended {
+    background: rgba(239,68,68,0.08);
+    border-color: rgba(239,68,68,0.2);
+    color: #ef4444;
+  }
+}
+
+.ov-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .ov-code {
   font-size: 0.68rem;
   letter-spacing: 1.5px;
@@ -52,55 +86,10 @@
   padding: 2px 8px;
 }
 
-.ov-stats {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.ov-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  min-width: 50px;
-}
-
-.ov-stat-val {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 2rem;
-  line-height: 1;
-
-  &--t1 { color: var(--team1); text-shadow: 0 0 12px var(--team1-glow); }
-  &--t2 { color: var(--team2); text-shadow: 0 0 12px var(--team2-glow); }
-}
-
-.ov-stat-label {
-  font-size: 0.6rem;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+.ov-hits {
+  font-size: 0.7rem;
   color: var(--text-muted);
-}
-
-.ov-cups-mini {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 3px;
-  justify-content: center;
-  flex: 1;
-  max-width: 140px;
-}
-
-.cup-mini {
-  width: 10px;
-  height: 12px;
-  clip-path: polygon(12% 0%, 88% 0%, 80% 100%, 20% 100%);
-  transition: opacity 0.3s;
-
-  &--t1 { background: linear-gradient(155deg, #f87171, #ef4444); }
-  &--t2 { background: linear-gradient(155deg, #60a5fa, #3b82f6); }
-  &--gone { opacity: 0.1; background: rgba(255,255,255,0.15); }
+  letter-spacing: 1px;
 }
 
 .ov-actions {
@@ -108,4 +97,5 @@
   gap: 8px;
 
   .btn { flex: 1; }
+  .btn:first-child:not(:last-child) { flex: 0 0 auto; }
 }

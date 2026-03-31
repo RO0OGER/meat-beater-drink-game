@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { Game } from '../model/Game';
 import { GameService } from '../services/game.service';
 import { AuthService } from '../services/auth.service';
+import { RoundPlayerService } from '../services/round-player.service';
+import { RoundService } from '../services/round';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,17 +18,37 @@ export class DashboardPage implements OnInit {
   games: Game[] = [];
   username = '';
   loading = true;
+  activeRoundId: string | null = null;
 
   constructor(
     private gameService: GameService,
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private playerSvc: RoundPlayerService,
+    private roundSvc: RoundService,
   ) {}
 
   async ngOnInit() {
     this.username = this.auth.currentUser?.email?.split('@')[0] ?? '';
     this.games = await this.gameService.getUserGames();
+
+    const savedId = this.playerSvc.getActiveSessionRoundId();
+    if (savedId) {
+      const round = await this.roundSvc.getRoundById(savedId);
+      if (round && round.status === 'playing') {
+        this.activeRoundId = savedId;
+      } else {
+        this.playerSvc.clearActiveSession();
+      }
+    }
+
     this.loading = false;
+  }
+
+  resumeGame() {
+    if (this.activeRoundId) {
+      this.router.navigate(['/round', this.activeRoundId, 'personal']);
+    }
   }
 
   openGame(game: Game) {

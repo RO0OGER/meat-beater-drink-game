@@ -1,7 +1,11 @@
 <div class="scroll-page">
+  <button class="btn btn--ghost btn--sm" style="width:auto" (click)="back()">← Zurück zur Lobby</button>
+
   <div>
     <h2 class="ad-title">DRINKS</h2>
-    <p style="color:var(--text-muted); font-size:0.82rem; margin-top:3px">Getränke für diese Runde</p>
+    <p style="color:var(--text-muted); font-size:0.82rem; margin-top:3px">
+      Getränke für diese Runde — werden beim Spielstart automatisch generiert
+    </p>
   </div>
 
   @if (drinks.length === 0) {
@@ -15,11 +19,33 @@
           <span class="ad-drink-icon">🍺</span>
           <div class="ad-drink-info">
             <span class="ad-drink-name">{{ drink.drink_name }}</span>
-            <span class="ad-drink-ml">{{ drink.quantity_ml }} ml</span>
+            <span class="ad-drink-meta">{{ drink.quantity_ml }} ml · {{ drink.type }}</span>
           </div>
           <button class="btn btn--ghost btn--sm btn--icon" (click)="deleteDrink(drink.id)">✕</button>
         </div>
       }
+    </div>
+  }
+
+  <!-- ── Füllstand-Anzeige ── -->
+  @if (drinks.length > 0) {
+    <div class="ad-fill-card" [class.ad-fill-card--warn]="tooSmall">
+      <div class="ad-fill-header">
+        <span class="ad-fill-title">{{ TARGET }} Drinks werden generiert</span>
+        @if (tooSmall) { <span class="ad-fill-warn-badge">⚠️ Becher sehr klein</span> }
+      </div>
+
+      <div class="ad-cups-row">
+        @for (i of cupIndices; track i) {
+          <div class="ad-cup-dot ad-cup-dot--filled"></div>
+        }
+      </div>
+
+      <div class="ad-fill-stats">
+        <span>{{ totalMl | number }} ml gesamt</span>
+        <span class="ad-fill-sep">·</span>
+        <span>Ø {{ avgMlPerDrink }} ml pro Drink</span>
+      </div>
     </div>
   }
 
@@ -30,5 +56,5 @@
     <button class="btn btn--ghost" (click)="addByScanner()">📷 Mit Scanner</button>
   </div>
 
-  <button class="btn btn--primary" (click)="startGame()">▶ Spiel starten</button>
+  <button class="btn btn--primary" (click)="back()">← Zurück zur Lobby</button>
 </div>

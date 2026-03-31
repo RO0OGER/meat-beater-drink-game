@@ -11,6 +11,7 @@ export interface GeneratedDrinkEntry {
 
 export interface DrinkPart {
   id: string;          // round_drink ID
+  name: string;        // Getränkename
   amount: number;      // ml
   alc_percent: number; // ABV% dieses Anteils (0 wenn kein Alkohol)
 }

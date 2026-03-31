@@ -99,6 +99,52 @@
   gap: 8px;
 }
 
+.lobby-timer-setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+}
+
+.lobby-timer-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.lobby-timer-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lobby-timer-btn {
+  background: var(--bg);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-size: 1.1rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  &:hover { border-color: var(--accent); }
+}
+
+.lobby-timer-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  color: var(--accent);
+  min-width: 42px;
+  text-align: center;
+}
+
 .lobby-start-hint {
   font-size: 0.78rem;
   color: var(--text-muted);

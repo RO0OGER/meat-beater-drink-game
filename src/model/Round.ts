@@ -17,4 +17,6 @@ export interface Round {
   shooter_team: 'team1' | 'team2' | null;
   current_task_id: string | null;
   turn_number: number;
+  task_timer_seconds: number;
+  loser_team: 'team1' | 'team2' | null;
 }

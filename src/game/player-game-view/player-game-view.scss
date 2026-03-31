@@ -3,6 +3,27 @@
   min-height: 100dvh;
 }
 
+// ── View-Eingangs-Animation ────────────────────────────────────────
+.pgv-shoot-view,
+.pgv-drink-view,
+.pgv-center {
+  animation: pgv-enter 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pgv-enter {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ── State-Hintergründe ────────────────────────────────────────────
+.pgv-shoot-view {
+  background: radial-gradient(ellipse at 50% 30%, rgba(245,158,11,0.08) 0%, transparent 65%);
+}
+
+.pgv-drink-view {
+  background: radial-gradient(ellipse at 50% 20%, rgba(239,68,68,0.1) 0%, transparent 65%);
+}
+
 // ── Centering helper ───────────────────────────────────────────────
 .pgv-center {
   display: flex;
@@ -40,17 +61,25 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   min-height: 100dvh;
-  padding: 32px 20px 100px;
-  gap: 20px;
+  padding: 48px 24px 48px;
+  gap: 0;
+}
+
+.pgv-top-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
 .pgv-your-turn-badge {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 2.2rem;
-  letter-spacing: 4px;
+  font-size: 2.4rem;
+  letter-spacing: 5px;
   color: var(--accent);
-  text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+  text-shadow: 0 0 20px rgba(251,191,36,0.5);
   animation: pgv-glow 2s ease-in-out infinite;
 }
 
@@ -59,37 +88,38 @@
   50%       { text-shadow: 0 0 40px rgba(251,191,36,0.9), 0 0 60px rgba(251,191,36,0.4); }
 }
 
+.pgv-my-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.8rem;
+  letter-spacing: 3px;
+  color: var(--text);
+  line-height: 1;
+}
+
 .pgv-team-label {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
   letter-spacing: 2px;
   text-transform: uppercase;
 }
 
-.pgv-cups {
+.pgv-shoot-center {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 16px 0;
+  gap: 16px;
 }
 
-.pgv-cup-row {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-}
-
-.pgv-cup {
-  font-size: 2rem;
+.pgv-target-emoji {
+  font-size: 5rem;
   line-height: 1;
+  animation: pgv-aim 1.2s ease-in-out infinite alternate;
 }
 
 .pgv-shoot-hint {
-  font-size: 0.83rem;
+  font-size: 1rem;
   color: var(--text-muted);
   text-align: center;
-  max-width: 260px;
   margin: 0;
 }
 
@@ -98,38 +128,41 @@
   flex-direction: column;
   gap: 12px;
   width: 100%;
-  max-width: 360px;
+  max-width: 400px;
 }
 
 .pgv-hit-btn {
-  background: var(--accent);
-  color: #000;
+  background: linear-gradient(160deg, #fbbf24, #f59e0b 40%, #d97706);
+  color: #1a0e00;
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.5rem;
-  letter-spacing: 3px;
-  padding: 20px;
+  font-size: 2rem;
+  letter-spacing: 4px;
+  padding: 22px;
   border: none;
-  border-radius: var(--r-md);
+  border-radius: var(--r);
   cursor: pointer;
   width: 100%;
-  transition: transform 0.1s;
-  &:active { transform: scale(0.97); }
-  &:disabled { opacity: 0.5; }
+  box-shadow: 0 6px 30px rgba(245,158,11,0.4);
+  transition: transform 0.1s, box-shadow 0.1s;
+  &:active:not(:disabled) { transform: scale(0.97); box-shadow: 0 3px 15px rgba(245,158,11,0.3); }
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
 }
 
 .pgv-miss-btn {
   background: transparent;
   color: var(--text-muted);
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.2rem;
-  letter-spacing: 2px;
+  font-size: 1.3rem;
+  letter-spacing: 3px;
   padding: 16px;
   border: 1px solid var(--border-dim);
-  border-radius: var(--r-md);
+  border-radius: var(--r);
   cursor: pointer;
   width: 100%;
-  &:active { opacity: 0.7; }
-  &:disabled { opacity: 0.4; }
+  transition: border-color 0.15s, color 0.15s;
+  &:hover:not(:disabled) { color: var(--text); border-color: var(--border); }
+  &:active:not(:disabled) { opacity: 0.7; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
 }
 
 // ── WAITING VIEW ──────────────────────────────────────────────────
@@ -158,12 +191,46 @@
 .pgv-aiming-anim {
   font-size: 2.5rem;
   animation: pgv-aim 1s ease-in-out infinite alternate;
-  margin-top: 8px;
+  margin-bottom: 4px;
 }
 
 @keyframes pgv-aim {
   from { transform: scale(1); }
-  to   { transform: scale(1.15); }
+  to   { transform: scale(1.18); }
+}
+
+// ── 10er-Becher-Anzeige ──────────────────────────────────────────
+.pgv-drink-counter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.pgv-counter-cups {
+  display: flex;
+  gap: 7px;
+}
+
+.pgv-counter-cup {
+  width: 14px;
+  height: 17px;
+  clip-path: polygon(12% 0%, 88% 0%, 80% 100%, 20% 100%);
+  background: rgba(255,255,255,0.08);
+  transition: background 0.25s, box-shadow 0.25s;
+
+  &--filled {
+    background: linear-gradient(160deg, #f87171, #ef4444);
+    box-shadow: 0 2px 8px rgba(239,68,68,0.4);
+  }
+}
+
+.pgv-counter-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 3px;
+  color: var(--text-muted);
 }
 
 // ── DRINK VIEW ────────────────────────────────────────────────────
@@ -172,14 +239,14 @@
   flex-direction: column;
   align-items: center;
   min-height: 100dvh;
-  padding: 40px 20px 100px;
+  padding: 48px 24px 48px;
   gap: 24px;
 }
 
 .pgv-drink-badge {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 2rem;
-  letter-spacing: 3px;
+  font-size: 2.2rem;
+  letter-spacing: 4px;
   color: #ef4444;
   text-shadow: 0 0 24px rgba(239,68,68,0.5);
   animation: pgv-glow-red 1.5s ease-in-out infinite;
@@ -193,15 +260,15 @@
 .pgv-task-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-dim);
-  border-radius: var(--r-md);
+  border-radius: var(--r);
   padding: 20px;
   text-align: center;
   width: 100%;
-  max-width: 360px;
+  max-width: 380px;
 }
 
 .pgv-task-label {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--accent);
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -216,31 +283,125 @@
   line-height: 1.4;
 }
 
+// ── Method card ──────────────────────────────────────────────────────
+.pgv-method-card {
+  background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(139,92,246,0.05));
+  border: 1px solid rgba(139,92,246,0.35);
+  border-radius: var(--r);
+  padding: 18px 20px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pgv-method-label {
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(139,92,246,0.8);
+  margin: 0;
+}
+
+.pgv-method-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  letter-spacing: 4px;
+  color: #a78bfa;
+  text-shadow: 0 0 20px rgba(139,92,246,0.4);
+  margin: 0;
+  line-height: 1;
+}
+
+.pgv-method-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+// ── Drink card (generated drink) ───────────────────────────────────
+.pgv-drink-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pgv-drink-card-label {
+  font-size: 0.7rem;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.pgv-drink-part {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-dim);
+
+  &:last-of-type { border-bottom: none; }
+}
+
+.pgv-part-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pgv-part-amount {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  color: var(--accent);
+}
+
+.pgv-drink-abv {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: right;
+  letter-spacing: 1px;
+}
+
 .pgv-drink-info {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
   color: var(--text-muted);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   text-align: center;
 }
 
 .pgv-drink-icon { font-size: 2.5rem; }
 
 .pgv-done-btn {
+  margin-top: auto;
   background: #ef4444;
   color: #fff;
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   letter-spacing: 2px;
-  padding: 18px 40px;
+  padding: 20px 40px;
   border: none;
-  border-radius: var(--r-md);
+  border-radius: var(--r);
   cursor: pointer;
   width: 100%;
-  max-width: 360px;
-  &:disabled { opacity: 0.5; }
+  max-width: 380px;
+  box-shadow: 0 6px 24px rgba(239,68,68,0.35);
+  transition: transform 0.1s;
+  &:active:not(:disabled) { transform: scale(0.97); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 // ── OTHER DRINKS VIEW ─────────────────────────────────────────────
@@ -324,6 +485,80 @@
 .pgv-stat-drinks {
   color: var(--text);
   font-weight: 600;
+}
+
+// ── GO button ────────────────────────────────────────────────────
+.pgv-go-btn {
+  background: linear-gradient(160deg, #22c55e, #16a34a);
+  color: #fff;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.2rem;
+  letter-spacing: 8px;
+  padding: 18px 48px;
+  border: none;
+  border-radius: var(--r);
+  cursor: pointer;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 6px 24px rgba(34,197,94,0.4);
+  transition: transform 0.1s, box-shadow 0.1s;
+  &:active:not(:disabled) { transform: scale(0.97); box-shadow: 0 3px 12px rgba(34,197,94,0.3); }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+// ── Timer countdown ring ──────────────────────────────────────────
+.pgv-timer-display {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &--urgent .pgv-timer-ring-fill {
+    stroke: #ef4444;
+    filter: drop-shadow(0 0 6px rgba(239,68,68,0.7));
+  }
+  &--urgent .pgv-timer-number {
+    color: #ef4444;
+    animation: pgv-timer-pulse 0.5s ease-in-out infinite;
+  }
+}
+
+.pgv-timer-ring {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+
+.pgv-timer-ring-bg {
+  fill: none;
+  stroke: rgba(255,255,255,0.08);
+  stroke-width: 5;
+}
+
+.pgv-timer-ring-fill {
+  fill: none;
+  stroke: #22c55e;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 175.9;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.9s linear, stroke 0.3s;
+}
+
+.pgv-timer-number {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  letter-spacing: 2px;
+  color: #22c55e;
+  line-height: 1;
+  transition: color 0.3s;
+}
+
+@keyframes pgv-timer-pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.15); }
 }
 
 // ── Host bar ──────────────────────────────────────────────────────
