@@ -8,7 +8,7 @@ export class TaskService {
 
   async getAllTasks(): Promise<Task[]> {
     const { data, error } = await this.supabaseService.client
-      .from('tasks')
+      .from('drink_methods')
       .select('*');
 
     if (error) {
@@ -21,7 +21,7 @@ export class TaskService {
 
   async getRandomTask(): Promise<Task | null> {
     const { data, error } = await this.supabaseService.client
-      .from('tasks')
+      .from('drink_methods')
       .select('*');
 
     if (error) {
@@ -40,7 +40,7 @@ export class TaskService {
 
   async getTaskById(id: string): Promise<Task | null> {
     const { data, error } = await this.supabaseService.client
-      .from('tasks')
+      .from('drink_methods')
       .select('*')
       .eq('id', id)
       .single();

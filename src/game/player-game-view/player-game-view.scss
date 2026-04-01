@@ -1,6 +1,8 @@
 :host {
-  display: block;
-  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 // ── View-Eingangs-Animation ────────────────────────────────────────
@@ -30,10 +32,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100dvh;
+  flex: 1;
   gap: 16px;
   padding: 24px;
   text-align: center;
+  overflow: hidden;
 }
 
 // ── Pulse loader ───────────────────────────────────────────────────
@@ -56,15 +59,69 @@
   margin: 0;
 }
 
+// ── TIMER BAR ─────────────────────────────────────────────────────
+.pgv-timer-bar {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-dim);
+  padding: 10px 20px;
+}
+
+.pgv-timer-bar-team {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+
+  &--urgent .pgv-timer-bar-time {
+    color: #ef4444;
+    animation: pgv-timer-pulse 0.5s ease-in-out infinite;
+  }
+}
+
+.pgv-timer-bar-name {
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+
+  @media (max-width: 600px) {
+    font-size: 0.82rem;
+  }
+}
+
+.pgv-timer-bar-time {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 2px;
+  color: var(--text);
+  line-height: 1;
+  transition: color 0.3s;
+
+  @media (max-width: 600px) {
+    font-size: 2.4rem;
+  }
+}
+
+.pgv-timer-bar-divider {
+  width: 1px;
+  height: 36px;
+  background: var(--border-dim);
+  margin: 0 16px;
+}
+
 // ── SHOOT VIEW ────────────────────────────────────────────────────
 .pgv-shoot-view {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  min-height: 100dvh;
-  padding: 48px 24px 48px;
-  gap: 0;
+  flex: 1;
+  padding: 32px 24px;
+  overflow: hidden;
 }
 
 .pgv-top-info {
@@ -129,6 +186,7 @@
   gap: 12px;
   width: 100%;
   max-width: 400px;
+  margin-bottom: 60px;
 }
 
 .pgv-hit-btn {
@@ -233,23 +291,83 @@
   color: var(--text-muted);
 }
 
+// ── CONFIRM HIT VIEW ─────────────────────────────────────────────
+.pgv-confirm-view {
+  gap: 32px;
+}
+
+.pgv-confirm-question {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  line-height: 1.4;
+
+  strong { color: var(--accent); }
+}
+
+.pgv-confirm-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.pgv-confirm-yes {
+  background: linear-gradient(160deg, #fbbf24, #f59e0b 40%, #d97706);
+  color: #1a0e00;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  letter-spacing: 4px;
+  padding: 20px;
+  border: none;
+  border-radius: var(--r);
+  cursor: pointer;
+  width: 100%;
+  box-shadow: 0 6px 24px rgba(245,158,11,0.4);
+  transition: transform 0.1s;
+  &:active:not(:disabled) { transform: scale(0.97); }
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
+}
+
+.pgv-confirm-no {
+  background: transparent;
+  color: var(--text-muted);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 3px;
+  padding: 16px;
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r);
+  cursor: pointer;
+  width: 100%;
+  transition: border-color 0.15s, color 0.15s;
+  &:hover:not(:disabled) { color: var(--text); border-color: var(--border); }
+  &:active:not(:disabled) { opacity: 0.7; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
 // ── DRINK VIEW ────────────────────────────────────────────────────
 .pgv-drink-view {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 100dvh;
-  padding: 48px 24px 48px;
-  gap: 24px;
+  justify-content: space-between;
+  flex: 1;
+  padding: 16px 20px 20px;
+  gap: 10px;
+  overflow: hidden;
 }
 
 .pgv-drink-badge {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   letter-spacing: 4px;
   color: #ef4444;
   text-shadow: 0 0 24px rgba(239,68,68,0.5);
   animation: pgv-glow-red 1.5s ease-in-out infinite;
+  flex-shrink: 0;
 }
 
 @keyframes pgv-glow-red {
@@ -261,10 +379,11 @@
   background: var(--bg-surface);
   border: 1px solid var(--border-dim);
   border-radius: var(--r);
-  padding: 20px;
+  padding: 12px 16px;
   text-align: center;
   width: 100%;
   max-width: 380px;
+  flex-shrink: 0;
 }
 
 .pgv-task-label {
@@ -280,6 +399,13 @@
   font-weight: 600;
   color: var(--text);
   margin: 0;
+  line-height: 1.4;
+}
+
+.pgv-task-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 6px 0 0;
   line-height: 1.4;
 }
 
@@ -327,12 +453,13 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--r);
-  padding: 20px;
+  padding: 12px 16px;
   width: 100%;
   max-width: 380px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .pgv-drink-card-label {
@@ -386,13 +513,13 @@
 .pgv-drink-icon { font-size: 2.5rem; }
 
 .pgv-done-btn {
-  margin-top: auto;
+  flex-shrink: 0;
   background: #ef4444;
   color: #fff;
   font-family: 'Bebas Neue', sans-serif;
   font-size: 1.5rem;
   letter-spacing: 2px;
-  padding: 20px 40px;
+  padding: 16px 40px;
   border: none;
   border-radius: var(--r);
   cursor: pointer;
@@ -405,6 +532,16 @@
 }
 
 // ── OTHER DRINKS VIEW ─────────────────────────────────────────────
+.pgv-other-drink-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px 20px;
+  overflow: hidden;
+}
 .pgv-target-info {
   display: flex;
   flex-direction: column;
@@ -434,57 +571,189 @@
 }
 
 // ── END VIEW ──────────────────────────────────────────────────────
-.pgv-end-title {
+.pgv-end-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px 20px 32px;
+  gap: 20px;
+  overflow: hidden;
+}
+
+.pgv-end-winner-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.pgv-end-trophy {
+  font-size: 3rem;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.pgv-end-winner-name {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 2.4rem;
+  font-size: 2.8rem;
   letter-spacing: 4px;
   color: var(--accent);
-  margin: 0;
+  text-shadow: 0 0 30px rgba(251,191,36,0.6);
+  line-height: 1;
 }
 
-.pgv-scores {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-  max-width: 320px;
-}
-
-.pgv-score-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--bg-surface);
-  border-radius: var(--r-sm);
-  padding: 10px 14px;
-  font-size: 0.9rem;
-}
-
-.pgv-score-hits {
-  font-weight: 700;
-  color: var(--accent);
-}
-
-.pgv-drink-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 100%;
-  max-width: 320px;
-}
-
-.pgv-stat-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 14px;
-  font-size: 0.82rem;
+.pgv-end-winner-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 5px;
   color: var(--text-muted);
 }
 
-.pgv-stat-drinks {
+.pgv-end-loser-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  letter-spacing: 1px;
+}
+
+.pgv-end-teams {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+.pgv-end-team {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r);
+  padding: 14px 12px;
+  overflow: hidden;
+
+  &--winner {
+    border-color: var(--accent);
+    background: rgba(251,191,36,0.06);
+  }
+
+  &--loser {
+    border-color: rgba(239,68,68,0.3);
+    opacity: 0.7;
+  }
+}
+
+.pgv-end-team-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  color: var(--text);
+  line-height: 1;
+}
+
+.pgv-end-team-hits {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  letter-spacing: 2px;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.pgv-end-team-time {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--border-dim);
+  padding-bottom: 8px;
+  margin-bottom: 2px;
+}
+
+.pgv-end-players {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.pgv-end-player-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.pgv-end-player-drinks {
   color: var(--text);
   font-weight: 600;
+}
+
+.pgv-lobby-btn {
+  flex-shrink: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  padding: 12px 24px;
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r);
+  cursor: pointer;
+  width: 100%;
+  transition: color 0.15s, border-color 0.15s;
+  &:hover { color: var(--text); border-color: var(--border); }
+}
+
+.pgv-end-remaining {
+  width: 100%;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  overflow-y: auto;
+  max-height: 35vh;
+  flex-shrink: 0;
+}
+
+.pgv-end-remaining-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #ef4444;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+}
+
+.pgv-end-remaining-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pgv-end-remaining-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--text);
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(239,68,68,0.15);
+  gap: 8px;
+  flex-wrap: wrap;
+
+  &:last-child { border-bottom: none; }
+
+  span { color: var(--text-muted); }
+}
+
+.pgv-end-remaining-abv {
+  color: var(--accent) !important;
+  font-weight: 600;
+  margin-left: auto;
 }
 
 // ── GO button ────────────────────────────────────────────────────
@@ -506,59 +775,34 @@
   &:disabled { opacity: 0.4; cursor: not-allowed; }
 }
 
-// ── Timer countdown ring ──────────────────────────────────────────
+// ── Timer countdown ───────────────────────────────────────────────
 .pgv-timer-display {
-  position: relative;
-  width: 96px;
-  height: 96px;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  flex-shrink: 0;
 
-  &--urgent .pgv-timer-ring-fill {
-    stroke: #ef4444;
-    filter: drop-shadow(0 0 6px rgba(239,68,68,0.7));
-  }
   &--urgent .pgv-timer-number {
     color: #ef4444;
+    text-shadow: 0 0 24px rgba(239,68,68,0.7);
     animation: pgv-timer-pulse 0.5s ease-in-out infinite;
   }
 }
 
-.pgv-timer-ring {
-  position: absolute;
-  inset: 0;
-  transform: rotate(-90deg);
-}
-
-.pgv-timer-ring-bg {
-  fill: none;
-  stroke: rgba(255,255,255,0.08);
-  stroke-width: 5;
-}
-
-.pgv-timer-ring-fill {
-  fill: none;
-  stroke: #22c55e;
-  stroke-width: 5;
-  stroke-linecap: round;
-  stroke-dasharray: 175.9;
-  stroke-dashoffset: 0;
-  transition: stroke-dashoffset 0.9s linear, stroke 0.3s;
-}
-
 .pgv-timer-number {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 2rem;
-  letter-spacing: 2px;
+  font-size: 3.2rem;
+  letter-spacing: 4px;
   color: #22c55e;
+  text-shadow: 0 0 20px rgba(34,197,94,0.5);
   line-height: 1;
-  transition: color 0.3s;
+  transition: color 0.3s, text-shadow 0.3s;
 }
 
 @keyframes pgv-timer-pulse {
   0%, 100% { transform: scale(1); }
-  50%       { transform: scale(1.15); }
+  50%       { transform: scale(1.12); }
 }
 
 // ── Host bar ──────────────────────────────────────────────────────

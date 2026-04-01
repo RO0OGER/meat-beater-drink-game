@@ -172,6 +172,15 @@ export class DrinkGeneratorService {
   // ────────────────────────────────────────────────────────────
   // Lese-/Lösch-Methoden (unverändert)
   // ────────────────────────────────────────────────────────────
+  async getAllGeneratedDrinks(roundId: string): Promise<GeneratedDrinkEntry[]> {
+    const { data, error } = await this.supabase.client
+      .from(TABLE)
+      .select('*')
+      .eq('round_id', roundId);
+    if (error || !data) return [];
+    return data as GeneratedDrinkEntry[];
+  }
+
   async getRandomGeneratedDrink(roundId: string): Promise<GeneratedDrinkEntry | null> {
     const { data, error } = await this.supabase.client
       .from(TABLE)

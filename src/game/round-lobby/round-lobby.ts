@@ -32,10 +32,9 @@ export class RoundLobbyPage implements OnInit, OnDestroy {
   players   = signal<RoundPlayer[]>([]);
   myPlayer  = signal<RoundPlayer | null>(null);
   isHost    = signal(false);
-  starting         = signal(false);
-  joinUrl          = signal('');
-  copied           = signal(false);
-  taskTimerSeconds = 30;
+  starting = signal(false);
+  joinUrl  = signal('');
+  copied   = signal(false);
 
   private channel: any = null;
   private pollInterval: any = null;
@@ -119,13 +118,10 @@ export class RoundLobbyPage implements OnInit, OnDestroy {
     this.starting.set(true);
     await this.drinkGen.generateDrinks(this.roundId);
     const task = await this.taskSvc.getRandomTask();
-    await this.roundSvc.startGame(this.roundId, players, task?.id ?? null, this.taskTimerSeconds);
+    await this.roundSvc.startGame(this.roundId, players, task?.id ?? null);
     this.starting.set(false);
     this.router.navigate(['/round', this.roundId, 'personal']);
   }
-
-  increaseTimer() { this.taskTimerSeconds = Math.min(120, this.taskTimerSeconds + 5); }
-  decreaseTimer() { this.taskTimerSeconds = Math.max(5,   this.taskTimerSeconds - 5); }
 
   addDrinks() {
     const r = this.round();

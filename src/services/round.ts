@@ -139,7 +139,7 @@ export class RoundService {
   }
 
   /** Sets status=playing and picks first shooter from team1. */
-  async startGame(roundId: string, players: RoundPlayer[], taskId: string | null, timerSeconds = 30): Promise<boolean> {
+  async startGame(roundId: string, players: RoundPlayer[], taskId: string | null): Promise<boolean> {
     const team1 = players.filter(p => p.team === 'team1');
     if (!team1.length) return false;
     return this.updateRound(roundId, {
@@ -149,20 +149,31 @@ export class RoundService {
       shooter_team: 'team1',
       current_target_id: null,
       current_task_id: taskId,
-      task_timer_seconds: timerSeconds,
-    } as Partial<Round>);
+    });
   }
 
-  /** After a hit: picks a random player from the defending team and sets them as target. */
-  async registerHit(roundId: string, shooterTeam: 'team1' | 'team2', players: RoundPlayer[], taskId: string): Promise<boolean> {
+  /** Shooter declares a hit: the target is whoever shoots next in the opposing team's rotation. */
+  async proposeHit(roundId: string, shooterTeam: 'team1' | 'team2', players: RoundPlayer[]): Promise<boolean> {
+    const round = await this.getRoundById(roundId);
+    if (!round) return false;
+
     const defendingTeam = shooterTeam === 'team1' ? 'team2' : 'team1';
-    const targets = players.filter(p => p.team === defendingTeam);
-    if (!targets.length) return false;
-    const target = targets[Math.floor(Math.random() * targets.length)];
+    const teamPlayers = players.filter(p => p.team === defendingTeam);
+    if (!teamPlayers.length) return false;
+
+    // The next turn belongs to the defending team; compute which player in their rotation is up.
+    const nextTurn = (round.turn_number ?? 0) + 1;
+    const idx = Math.floor(nextTurn / 2) % teamPlayers.length;
+
     return this.updateRound(roundId, {
-      current_target_id: target.id,
-      current_task_id: taskId,
-    } as Partial<Round>);
+      current_target_id: teamPlayers[idx].id,
+      current_task_id: null,
+    });
+  }
+
+  /** Target confirms the hit: assigns a task and starts the drinking phase. */
+  async confirmHit(roundId: string, taskId: string | null): Promise<boolean> {
+    return this.updateRound(roundId, { current_task_id: taskId });
   }
 
   /** After a miss or after the target drinks: advances to the next shooter. */
@@ -182,12 +193,30 @@ export class RoundService {
       shooter_team: nextTeam,
       current_target_id: null,
       current_task_id: null,
-    } as Partial<Round>);
+    });
+  }
+
+  async resetToLobby(roundId: string): Promise<boolean> {
+    return this.updateRound(roundId, {
+      status: 'lobby',
+      team1_hits: 0,
+      team2_hits: 0,
+      turn_number: 0,
+      current_shooter_id: null,
+      current_target_id: null,
+      current_task_id: null,
+      shooter_team: null,
+      loser_team: null,
+      remaining_time_team1: 60,
+      remaining_time_team2: 60,
+    });
   }
 
   async endGame(roundId: string, loserTeam?: 'team1' | 'team2'): Promise<boolean> {
-    const update: Partial<Round> = { status: 'ended' };
-    if (loserTeam) update.loser_team = loserTeam;
-    return this.updateRound(roundId, update);
+    const ok = await this.updateRound(roundId, { status: 'ended' });
+    if (ok && loserTeam) {
+      await this.updateRound(roundId, { loser_team: loserTeam });
+    }
+    return ok;
   }
 }

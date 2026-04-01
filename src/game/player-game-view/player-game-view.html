@@ -15,6 +15,21 @@
   </div>
 }
 
+<!-- TIMER BAR (immer sichtbar während des Spiels) -->
+@if (viewState() !== 'loading' && viewState() !== 'lobby' && viewState() !== 'ended') {
+  <div class="pgv-timer-bar">
+    <div class="pgv-timer-bar-team" [class.pgv-timer-bar-team--urgent]="team1Time() <= 10">
+      <span class="pgv-timer-bar-name">{{ round()?.team1_name }}</span>
+      <span class="pgv-timer-bar-time">{{ formatTime(team1Time()) }}</span>
+    </div>
+    <div class="pgv-timer-bar-divider"></div>
+    <div class="pgv-timer-bar-team" [class.pgv-timer-bar-team--urgent]="team2Time() <= 10">
+      <span class="pgv-timer-bar-name">{{ round()?.team2_name }}</span>
+      <span class="pgv-timer-bar-time">{{ formatTime(team2Time()) }}</span>
+    </div>
+  </div>
+}
+
 <!-- ICH BIN DRAN – Schießen -->
 @if (viewState() === 'my-turn') {
   <div class="pgv-shoot-view">
@@ -58,6 +73,23 @@
   </div>
 }
 
+<!-- TREFFER BESTÄTIGEN -->
+@if (viewState() === 'confirm-hit') {
+  <div class="pgv-center pgv-confirm-view">
+    <div class="pgv-confirm-question">
+      Hat <strong>{{ shooter()?.name ?? '…' }}</strong> wirklich getroffen?
+    </div>
+    <div class="pgv-confirm-btns">
+      <button class="pgv-confirm-yes" (click)="onConfirmHit()" [disabled]="acting()">
+        JA
+      </button>
+      <button class="pgv-confirm-no" (click)="onDenyHit()" [disabled]="acting()">
+        NEIN
+      </button>
+    </div>
+  </div>
+}
+
 <!-- ICH MUSS TRINKEN -->
 @if (viewState() === 'i-drink') {
   <div class="pgv-drink-view">
@@ -74,34 +106,16 @@
       <div class="pgv-counter-label">{{ drinkPosition() }} / 10</div>
     </div>
 
+    <div class="pgv-timer-display" [class.pgv-timer-display--urgent]="timerSecondsLeft() <= 10">
+      <span class="pgv-timer-number">{{ timerSecondsLeft() }}s</span>
+    </div>
+
     @if (task()) {
       <div class="pgv-task-card">
         <p class="pgv-task-label">Aufgabe</p>
         <p class="pgv-task-text">{{ task()!.label }}</p>
-      </div>
-
-      @if (timerRunning()) {
-        <div class="pgv-timer-display" [class.pgv-timer-display--urgent]="timerSecondsLeft() <= 5">
-          <svg class="pgv-timer-ring" viewBox="0 0 64 64">
-            <circle class="pgv-timer-ring-bg" cx="32" cy="32" r="28"/>
-            <circle class="pgv-timer-ring-fill" cx="32" cy="32" r="28"
-              [style.stroke-dashoffset]="175.9 - (175.9 * timerSecondsLeft() / (round()?.task_timer_seconds ?? 30))"/>
-          </svg>
-          <span class="pgv-timer-number">{{ timerSecondsLeft() }}</span>
-        </div>
-      } @else {
-        <button class="pgv-go-btn" (click)="startTimer()" [disabled]="acting()">
-          GO
-        </button>
-      }
-    }
-
-    @if (currentMethod(); as method) {
-      <div class="pgv-method-card">
-        <p class="pgv-method-label">So trinkst du</p>
-        <p class="pgv-method-name">{{ method.label }}</p>
-        @if (method.description) {
-          <p class="pgv-method-desc">{{ method.description }}</p>
+        @if (task()!.description) {
+          <p class="pgv-task-desc">{{ task()!.description }}</p>
         }
       </div>
     }
@@ -146,53 +160,134 @@
 
 <!-- JEMAND ANDERES TRINKT -->
 @if (viewState() === 'other-drinks') {
-  <div class="pgv-center">
+  <div class="pgv-other-drink-view">
+
     <div class="pgv-target-info">
       <div class="pgv-target-icon">🍺</div>
       <div class="pgv-target-name">{{ target()?.name ?? '…' }}</div>
       <p class="pgv-status-text">muss trinken!</p>
-      @if (task()) {
-        <div class="pgv-task-pill">{{ task()!.label }}</div>
-      }
     </div>
+
+    @if (task()) {
+      <div class="pgv-task-card">
+        <p class="pgv-task-label">Aufgabe</p>
+        <p class="pgv-task-text">{{ task()!.label }}</p>
+        @if (task()!.description) {
+          <p class="pgv-task-desc">{{ task()!.description }}</p>
+        }
+      </div>
+    }
+
+    @if (currentDrink(); as drink) {
+      <div class="pgv-drink-card">
+        <p class="pgv-drink-card-label">Getränk</p>
+        @if (drink.is_mix) {
+          @for (part of drink.drink_parts; track part.id) {
+            <div class="pgv-drink-part">
+              <span class="pgv-part-name">{{ part.name }}</span>
+              <span class="pgv-part-amount">{{ part.amount }} ml</span>
+            </div>
+          }
+        } @else {
+          <div class="pgv-drink-part">
+            <span class="pgv-part-name">{{ drink.drink_parts[0].name }}</span>
+            <span class="pgv-part-amount">{{ drink.total_ml }} ml</span>
+          </div>
+        }
+        @if (drink.result_alc_percent) {
+          <div class="pgv-drink-abv">≈ {{ drink.result_alc_percent }}% Vol.</div>
+        }
+      </div>
+    }
+
   </div>
 }
 
 <!-- SPIEL BEENDET -->
 @if (viewState() === 'ended') {
-  <div class="pgv-center">
-    <div style="font-size:3rem">🏆</div>
-    <h2 class="pgv-end-title">SPIEL BEENDET</h2>
-    <div class="pgv-scores">
-      <div class="pgv-score-item">
-        <span>{{ round()?.team1_name }}</span>
-        <span class="pgv-score-hits">{{ round()?.team1_hits }} Treffer</span>
+  <div class="pgv-end-view">
+
+    @if (winnerTeam()) {
+      <div class="pgv-end-winner-block">
+        <div class="pgv-end-trophy">🏆</div>
+        <div class="pgv-end-winner-name">
+          {{ winnerTeam() === 'team1' ? round()?.team1_name : round()?.team2_name }}
+        </div>
+        <div class="pgv-end-winner-label">GEWINNT</div>
+        <div class="pgv-end-loser-label">
+          {{ round()?.loser_team === 'team1' ? round()?.team1_name : round()?.team2_name }} hat verloren
+        </div>
       </div>
-      <div class="pgv-score-item">
-        <span>{{ round()?.team2_name }}</span>
-        <span class="pgv-score-hits">{{ round()?.team2_hits }} Treffer</span>
+    } @else {
+      <div class="pgv-end-winner-block">
+        <div class="pgv-end-trophy">🏁</div>
+        <div class="pgv-end-winner-label">SPIEL BEENDET</div>
+      </div>
+    }
+
+    <div class="pgv-end-teams">
+      <div class="pgv-end-team" [class.pgv-end-team--winner]="winnerTeam() === 'team1'" [class.pgv-end-team--loser]="round()?.loser_team === 'team1'">
+        <div class="pgv-end-team-name">{{ round()?.team1_name }}</div>
+        <div class="pgv-end-team-hits">{{ round()?.team1_hits }} / 10</div>
+        <div class="pgv-end-team-time">{{ formatTime(round()?.remaining_time_team1 ?? 0) }}</div>
+        <div class="pgv-end-players">
+          @for (p of team1Players(); track p.id) {
+            <div class="pgv-end-player-row">
+              <span>{{ p.name }}</span>
+              <span class="pgv-end-player-drinks">🍺 {{ p.drink_count }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="pgv-end-team" [class.pgv-end-team--winner]="winnerTeam() === 'team2'" [class.pgv-end-team--loser]="round()?.loser_team === 'team2'">
+        <div class="pgv-end-team-name">{{ round()?.team2_name }}</div>
+        <div class="pgv-end-team-hits">{{ round()?.team2_hits }} / 10</div>
+        <div class="pgv-end-team-time">{{ formatTime(round()?.remaining_time_team2 ?? 0) }}</div>
+        <div class="pgv-end-players">
+          @for (p of team2Players(); track p.id) {
+            <div class="pgv-end-player-row">
+              <span>{{ p.name }}</span>
+              <span class="pgv-end-player-drinks">🍺 {{ p.drink_count }}</span>
+            </div>
+          }
+        </div>
       </div>
     </div>
-    <div class="pgv-drink-stats">
-      @for (p of team1Players(); track p.id) {
-        <div class="pgv-stat-row">
-          <span>{{ p.name }}</span>
-          <span class="pgv-stat-drinks">🍺 {{ p.drink_count }}×</span>
+
+    @if (round()?.loser_team && remainingDrinks().length > 0) {
+      <div class="pgv-end-remaining">
+        <p class="pgv-end-remaining-title">
+          {{ round()?.loser_team === 'team1' ? round()?.team1_name : round()?.team2_name }}
+          muss noch {{ remainingDrinks().length }} Drink{{ remainingDrinks().length === 1 ? '' : 's' }} trinken:
+        </p>
+        <div class="pgv-end-remaining-list">
+          @for (drink of remainingDrinks(); track $index) {
+            <div class="pgv-end-remaining-item">
+              @if (drink.is_mix) {
+                @for (part of drink.drink_parts; track part.id) {
+                  <span>{{ part.name }} {{ part.amount }} ml</span>
+                }
+              } @else {
+                <span>{{ drink.drink_parts[0].name }} {{ drink.total_ml }} ml</span>
+              }
+              @if (drink.result_alc_percent) {
+                <span class="pgv-end-remaining-abv">{{ drink.result_alc_percent }}%</span>
+              }
+            </div>
+          }
         </div>
-      }
-      @for (p of team2Players(); track p.id) {
-        <div class="pgv-stat-row">
-          <span>{{ p.name }}</span>
-          <span class="pgv-stat-drinks">🍺 {{ p.drink_count }}×</span>
-        </div>
-      }
-    </div>
+      </div>
+    }
+
+    <button class="pgv-lobby-btn" (click)="goToLobby()">← Zurück zur Lobby</button>
+
   </div>
 }
 
 <!-- Host-Steuerung (schwebend) -->
 @if (isHost() && viewState() !== 'loading' && viewState() !== 'lobby' && viewState() !== 'ended') {
   <div class="pgv-host-bar">
-    <button class="btn btn--ghost pgv-end-btn" (click)="endGame()">Spiel beenden</button>
+    <button class="btn btn--ghost pgv-end-btn" (click)="goToLobby()">Spiel beenden</button>
   </div>
 }

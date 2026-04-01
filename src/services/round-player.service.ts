@@ -36,7 +36,7 @@ export class RoundPlayerService {
     const deviceToken = this.getOrCreateDeviceToken(roundId);
     const { data, error } = await this.supabase.client
       .from('round_players')
-      .upsert({ round_id: roundId, name, team, device_token: deviceToken }, { onConflict: 'round_id,device_token' })
+      .upsert({ round_id: roundId, name, team, device_token: deviceToken, is_active: true }, { onConflict: 'round_id,device_token' })
       .select()
       .single();
 
