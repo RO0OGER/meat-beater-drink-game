@@ -63,6 +63,13 @@ export class GameService {
     return true;
   }
 
+  /** Returns the user's first game, or silently creates one called 'Standard'. */
+  async getOrCreateDefaultGame(): Promise<Game | null> {
+    const games = await this.getUserGames();
+    if (games.length > 0) return games[0];
+    return this.createGame('Standard');
+  }
+
   async deleteGame(id: string): Promise<boolean> {
     const { error } = await this.supabase.client
       .from('games')

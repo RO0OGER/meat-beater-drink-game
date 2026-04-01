@@ -180,6 +180,13 @@ create policy "generated_drink_entries_all_own_rounds" on public.generated_drink
     )
   );
 
+-- Allow unauthenticated players to read and delete generated drink entries
+create policy "generated_drink_entries_select_public" on public.generated_drink_entries
+  for select using (true);
+
+create policy "generated_drink_entries_delete_public" on public.generated_drink_entries
+  for delete using (true);
+
 -- ============================================================
 -- TASKS (global pool + user-created tasks)
 -- ============================================================
@@ -222,3 +229,35 @@ alter table public.round_drinks
 -- Resulting ABV of a generated drink (after mixing)
 alter table public.generated_drink_entries
   add column if not exists result_alc_percent numeric(4,1);
+
+-- ============================================================
+-- ROUND PLAYERS (players who joined a round via invite link)
+-- Each device gets one slot per round, enforced by unique constraint.
+-- ============================================================
+create table if not exists public.round_players (
+  id           uuid        primary key default gen_random_uuid(),
+  round_id     uuid        not null references public.rounds(id) on delete cascade,
+  name         text        not null,
+  team         text        not null check (team in ('team1', 'team2')),
+  device_token text        not null,
+  drink_count  integer     not null default 0,
+  is_active    boolean     not null default true,
+  created_at   timestamptz not null default now(),
+  unique (round_id, device_token)
+);
+
+-- Allow anyone to read/write round_players (no auth required for players)
+-- RLS is intentionally disabled so unauthenticated players can join and view.
+
+-- ============================================================
+-- MISSING ROUNDS COLUMNS (added after initial schema)
+-- ============================================================
+alter table public.rounds
+  add column if not exists status          text    not null default 'lobby'
+      check (status in ('lobby', 'playing', 'ended')),
+  add column if not exists current_shooter_id uuid    references public.round_players(id) on delete set null,
+  add column if not exists current_target_id  uuid    references public.round_players(id) on delete set null,
+  add column if not exists shooter_team    text    check (shooter_team in ('team1', 'team2')),
+  add column if not exists current_task_id uuid    references public.tasks(id) on delete set null,
+  add column if not exists turn_number     integer not null default 0,
+  add column if not exists loser_team      text    check (loser_team in ('team1', 'team2'));

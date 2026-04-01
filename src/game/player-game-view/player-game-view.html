@@ -208,16 +208,60 @@
   <div class="pgv-end-view">
 
     @if (winnerTeam()) {
+
+      <!-- Winner -->
       <div class="pgv-end-winner-block">
         <div class="pgv-end-trophy">🏆</div>
         <div class="pgv-end-winner-name">
           {{ winnerTeam() === 'team1' ? round()?.team1_name : round()?.team2_name }}
         </div>
         <div class="pgv-end-winner-label">GEWINNT</div>
-        <div class="pgv-end-loser-label">
-          {{ round()?.loser_team === 'team1' ? round()?.team1_name : round()?.team2_name }} hat verloren
-        </div>
       </div>
+
+      <!-- Loser -->
+      <div class="pgv-end-loser-block">
+        <div class="pgv-end-loser-name">
+          {{ round()?.loser_team === 'team1' ? round()?.team1_name : round()?.team2_name }}
+        </div>
+        <div class="pgv-end-loser-sub">hat verloren</div>
+      </div>
+
+      <!-- Übrige Drinks für alle -->
+      @if (remainingDrinks().length > 0) {
+        <div class="pgv-end-remaining-block">
+          <div class="pgv-end-penalty-header">
+            <span class="pgv-end-penalty-icon">🍺</span>
+            <span class="pgv-end-penalty-label">{{ round()?.loser_team === 'team1' ? round()?.team1_name : round()?.team2_name }} MUSS NOCH TRINKEN</span>
+            <span class="pgv-end-penalty-count">{{ remainingDrinks().length }}</span>
+          </div>
+          <div class="pgv-end-remaining-list">
+            @for (drink of remainingDrinks(); track $index) {
+              <div class="pgv-end-remaining-item">
+                <span class="pgv-end-remaining-index">{{ $index + 1 }}</span>
+                <div class="pgv-end-remaining-info">
+                  @if (drink.is_mix) {
+                    @for (part of drink.drink_parts; track part.id) {
+                      <div class="pgv-end-remaining-row">
+                        <span class="pgv-end-remaining-name">{{ part.name }}</span>
+                        <span class="pgv-end-remaining-amount">{{ part.amount }} ml</span>
+                      </div>
+                    }
+                  } @else {
+                    <div class="pgv-end-remaining-row">
+                      <span class="pgv-end-remaining-name">{{ drink.drink_parts[0].name }}</span>
+                      <span class="pgv-end-remaining-amount">{{ drink.total_ml }} ml</span>
+                    </div>
+                  }
+                  @if (drink.result_alc_percent) {
+                    <span class="pgv-end-remaining-abv">{{ drink.result_alc_percent }}% Vol.</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
     } @else {
       <div class="pgv-end-winner-block">
         <div class="pgv-end-trophy">🏁</div>
@@ -225,8 +269,9 @@
       </div>
     }
 
+    <!-- Team stats -->
     <div class="pgv-end-teams">
-      <div class="pgv-end-team" [class.pgv-end-team--winner]="winnerTeam() === 'team1'" [class.pgv-end-team--loser]="round()?.loser_team === 'team1'">
+      <div class="pgv-end-team" [class.pgv-end-team--winner]="winnerTeam() === 'team1'" [class.pgv-end-team--loser]="round()?.loser_team === 'team1'" [class.pgv-end-team--mine]="myPlayer()?.team === 'team1'">
         <div class="pgv-end-team-name">{{ round()?.team1_name }}</div>
         <div class="pgv-end-team-hits">{{ round()?.team1_hits }} / 10</div>
         <div class="pgv-end-team-time">{{ formatTime(round()?.remaining_time_team1 ?? 0) }}</div>
@@ -240,7 +285,7 @@
         </div>
       </div>
 
-      <div class="pgv-end-team" [class.pgv-end-team--winner]="winnerTeam() === 'team2'" [class.pgv-end-team--loser]="round()?.loser_team === 'team2'">
+      <div class="pgv-end-team" [class.pgv-end-team--winner]="winnerTeam() === 'team2'" [class.pgv-end-team--loser]="round()?.loser_team === 'team2'" [class.pgv-end-team--mine]="myPlayer()?.team === 'team2'">
         <div class="pgv-end-team-name">{{ round()?.team2_name }}</div>
         <div class="pgv-end-team-hits">{{ round()?.team2_hits }} / 10</div>
         <div class="pgv-end-team-time">{{ formatTime(round()?.remaining_time_team2 ?? 0) }}</div>
@@ -254,31 +299,6 @@
         </div>
       </div>
     </div>
-
-    @if (round()?.loser_team && remainingDrinks().length > 0) {
-      <div class="pgv-end-remaining">
-        <p class="pgv-end-remaining-title">
-          {{ round()?.loser_team === 'team1' ? round()?.team1_name : round()?.team2_name }}
-          muss noch {{ remainingDrinks().length }} Drink{{ remainingDrinks().length === 1 ? '' : 's' }} trinken:
-        </p>
-        <div class="pgv-end-remaining-list">
-          @for (drink of remainingDrinks(); track $index) {
-            <div class="pgv-end-remaining-item">
-              @if (drink.is_mix) {
-                @for (part of drink.drink_parts; track part.id) {
-                  <span>{{ part.name }} {{ part.amount }} ml</span>
-                }
-              } @else {
-                <span>{{ drink.drink_parts[0].name }} {{ drink.total_ml }} ml</span>
-              }
-              @if (drink.result_alc_percent) {
-                <span class="pgv-end-remaining-abv">{{ drink.result_alc_percent }}%</span>
-              }
-            </div>
-          }
-        </div>
-      </div>
-    }
 
     <button class="pgv-lobby-btn" (click)="goToLobby()">← Zurück zur Lobby</button>
 

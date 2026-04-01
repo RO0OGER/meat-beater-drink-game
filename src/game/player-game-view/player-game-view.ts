@@ -43,12 +43,14 @@ export class PlayerGameView implements OnInit, OnDestroy {
 
   currentDrink    = signal<GeneratedDrinkEntry | null>(null);
   remainingDrinks = signal<GeneratedDrinkEntry[]>([]);
-  readonly cupIndices = [0,1,2,3,4,5,6,7,8,9];
+  readonly cupIndices = Array.from({ length: 10 }, (_, i) => i);
 
-  /** Position im aktuellen 10er-Block: 1–10 */
+  /** Anzahl getroffener Becher des verteidigenden Teams (0–10) */
   drinkPosition = computed(() => {
-    const count = this.myPlayer()?.drink_count ?? 0;
-    return (count % 10) + 1;
+    const r = this.round();
+    if (!r?.shooter_team) return 0;
+    const hits = r.shooter_team === 'team1' ? (r.team1_hits ?? 0) : (r.team2_hits ?? 0);
+    return Math.min(hits, 10);
   });
 
   timerRunning     = signal(false);
@@ -157,6 +159,8 @@ export class PlayerGameView implements OnInit, OnDestroy {
       }, async () => {
         const players = await this.playerSvc.getPlayersByRound(this.roundId);
         this.players.set(players);
+        const me = players.find(p => p.id === this.myPlayer()?.id);
+        if (me) this.myPlayer.set(me);
       })
       .subscribe();
 
@@ -212,7 +216,11 @@ export class PlayerGameView implements OnInit, OnDestroy {
       this.playerSvc.getPlayersByRound(this.roundId),
     ]);
     if (round) await this.applyRoundUpdate(round);
-    if (players) this.players.set(players);
+    if (players) {
+      this.players.set(players);
+      const me = players.find(p => p.id === this.myPlayer()?.id);
+      if (me) this.myPlayer.set(me);
+    }
   }
 
   private async loadDrinkForMe() {

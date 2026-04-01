@@ -326,6 +326,22 @@ h1, h2, h3, h4 {
   margin-top: 2px;
 }
 
+/* ── Custom Scrollbar ─────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--accent-dim);
+  border-radius: 2px;
+  &:hover { background: rgba(245,158,11,0.35); }
+}
+
+* { scrollbar-width: thin; scrollbar-color: var(--accent-dim) transparent; }
+
 /* ── Responsive ───────────────────────────────────────── */
 @media (max-width: 480px) {
   .page { padding: 16px; }

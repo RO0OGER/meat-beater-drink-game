@@ -48,7 +48,7 @@ export class SettingsPage implements OnInit {
       remaining_time_team1: this.remainingTimeTeam1,
       remaining_time_team2: this.remainingTimeTeam2,
     });
-    this.router.navigate(['/game', this.gameId, 'round', this.roundId, 'play']);
+    this.router.navigate(['/round', this.roundId, 'personal']);
   }
 
   endRound() {

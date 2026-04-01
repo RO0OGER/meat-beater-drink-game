@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Game } from '../model/Game';
+import { Round } from '../model/Round';
 import { GameService } from '../services/game.service';
+import { RoundService } from '../services/round';
 import { AuthService } from '../services/auth.service';
 import { RoundPlayerService } from '../services/round-player.service';
-import { RoundService } from '../services/round';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,26 +15,26 @@ import { RoundService } from '../services/round';
   styleUrl: './dashboard.scss',
 })
 export class DashboardPage implements OnInit {
-  games: Game[] = [];
+  rounds: Round[] = [];
   username = '';
   loading = true;
   activeRoundId: string | null = null;
 
   constructor(
     private gameService: GameService,
+    private roundService: RoundService,
     private auth: AuthService,
     private router: Router,
     private playerSvc: RoundPlayerService,
-    private roundSvc: RoundService,
   ) {}
 
   async ngOnInit() {
     this.username = this.auth.currentUser?.email?.split('@')[0] ?? '';
-    this.games = await this.gameService.getUserGames();
+    this.rounds = await this.roundService.getAllRounds();
 
     const savedId = this.playerSvc.getActiveSessionRoundId();
     if (savedId) {
-      const round = await this.roundSvc.getRoundById(savedId);
+      const round = await this.roundService.getRoundById(savedId);
       if (round && round.status === 'playing') {
         this.activeRoundId = savedId;
       } else {
@@ -51,19 +51,31 @@ export class DashboardPage implements OnInit {
     }
   }
 
-  openGame(game: Game) {
-    this.router.navigate(['/game', game.id]);
+  async createRound() {
+    const game = await this.gameService.getOrCreateDefaultGame();
+    if (!game) return;
+    this.router.navigate(['/game', game.id, 'round', 'new']);
   }
 
-  createGame() {
-    this.router.navigate(['/game/new']);
+  openLobby(round: Round) {
+    this.router.navigate(['/round', round.id, 'lobby']);
   }
 
-  async deleteGame(game: Game, event: Event) {
+  setupDrinks(round: Round) {
+    this.router.navigate(['/game', round.game_id, 'round', round.id, 'add-drinks']);
+  }
+
+  async deleteRound(round: Round, event: Event) {
     event.stopPropagation();
-    if (!confirm(`Spiel "${game.name}" wirklich löschen?`)) return;
-    await this.gameService.deleteGame(game.id);
-    this.games = this.games.filter(g => g.id !== game.id);
+    if (!confirm(`Runde "${round.round_code}" wirklich löschen?`)) return;
+    await this.roundService.deleteRoundById(round.id);
+    this.rounds = this.rounds.filter(r => r.id !== round.id);
+  }
+
+  statusLabel(round: Round): string {
+    if (round.status === 'playing') return 'Läuft';
+    if (round.status === 'ended')   return 'Beendet';
+    return 'Lobby';
   }
 
   async logout() {

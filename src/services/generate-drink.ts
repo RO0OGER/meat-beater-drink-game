@@ -37,7 +37,7 @@ export class DrinkGeneratorService {
     }
 
     const pool: PoolEntry[] = roundDrinks
-      .filter(d => (d.quantity_ml ?? 0) >= DrinkGeneratorService.MIN_ML)
+      .filter(d => (d.quantity_ml ?? 0) > 0)
       .map(d => ({
         roundDrinkId: d.id,
         name:         d.drink_name,
@@ -47,7 +47,7 @@ export class DrinkGeneratorService {
       }));
 
     if (!pool.length) {
-      console.warn('generateDrinks: Kein Getränk hat genug Inhalt (min', DrinkGeneratorService.MIN_ML, 'ml)');
+      console.warn('generateDrinks: Keine Getränke mit Inhalt vorhanden');
       return [];
     }
 
@@ -75,38 +75,41 @@ export class DrinkGeneratorService {
   }
 
   // ────────────────────────────────────────────────────────────
-  // Kern-Logik: genau 20 Drinks, je 100–350 ml, random
+  // Kern-Logik: genau 20 Drinks – Portionsgrösse wird dynamisch
+  // angepasst damit immer TARGET erreicht wird.
   // ────────────────────────────────────────────────────────────
   private buildDrinks(roundId: string, pool: PoolEntry[]): GeneratedDrinkEntry[] {
-    const TARGET  = DrinkGeneratorService.TARGET;
-    const MIN_ML  = DrinkGeneratorService.MIN_ML;
-    const MAX_ML  = DrinkGeneratorService.MAX_ML;
+    const TARGET = DrinkGeneratorService.TARGET;
+    const MAX_ML = DrinkGeneratorService.MAX_ML;
 
     const spirits  = pool.filter(d => d.type === 'mixable');
     const mixers   = pool.filter(d => d.type === 'dilution');
     const straight = pool.filter(d => d.type === 'non-mixable');
 
-    // Wie viele Mixes sollen es sein?
-    const canMix = spirits.length > 0 && mixers.length > 0;
-    const mixTarget = canMix ? Math.floor(TARGET * 0.45) : 0; // ~9 von 20
+    // Effektive Mindestgrösse: total verfügbar / TARGET, mindestens 10 ml
+    const totalAvailableMl = pool.reduce((s, d) => s + d.available_ml, 0);
+    const effectiveMin = Math.max(10, Math.floor(totalAvailableMl / TARGET / 10) * 10);
 
     const out: GeneratedDrinkEntry[] = [];
 
     // ── Phase 1: Mixgetränke ───────────────────────────────
+    const canMix   = spirits.length > 0 && mixers.length > 0;
+    const mixTarget = canMix ? Math.floor(TARGET * 0.45) : 0;
+
     for (let i = 0; i < mixTarget && out.length < TARGET; i++) {
-      const avS = spirits.filter(s => s.available_ml >= MIN_ML / 2)
+      const avS = spirits.filter(s => s.available_ml >= effectiveMin / 2)
                          .sort((a, b) => b.available_ml - a.available_ml);
-      const avM = mixers .filter(m => m.available_ml >= MIN_ML / 2)
+      const avM = mixers .filter(m => m.available_ml >= effectiveMin / 2)
                          .sort((a, b) => b.available_ml - a.available_ml);
       if (!avS.length || !avM.length) break;
 
       const spirit = avS[Math.floor(Math.random() * Math.min(3, avS.length))];
       const mixer  = avM[Math.floor(Math.random() * Math.min(3, avM.length))];
 
-      const total  = this.randInt(MIN_ML / 10, MAX_ML / 10) * 10;
-      const frac   = this.rand(0.25, 0.45);
-      const sMl    = Math.round(total * frac / 10) * 10;
-      const mMl    = total - sMl;
+      const total = this.randInt(Math.ceil(effectiveMin / 10), Math.floor(MAX_ML / 10)) * 10;
+      const frac  = this.rand(0.25, 0.45);
+      const sMl   = Math.max(10, Math.round(total * frac / 10) * 10);
+      const mMl   = total - sMl;
 
       if (spirit.available_ml < sMl || mixer.available_ml < mMl) continue;
 
@@ -126,35 +129,38 @@ export class DrinkGeneratorService {
       mixer.available_ml  -= mMl;
     }
 
-    // ── Phase 2: Straight-Drinks auf 20 auffüllen ─────────
-    // Pool: non-mixable zuerst, dann übrige spirits/mixers
+    // ── Phase 2: Straight-Drinks – immer bis TARGET auffüllen ─
     const straightPool: PoolEntry[] = [
       ...straight,
-      ...spirits.filter(s => s.available_ml >= MIN_ML),
-      ...mixers .filter(m => m.available_ml >= MIN_ML),
+      ...spirits,
+      ...mixers,
     ];
 
-    const remaining = TARGET - out.length;
-    for (let i = 0; i < remaining; i++) {
-      const avail = straightPool.filter(d => d.available_ml >= MIN_ML);
+    while (out.length < TARGET) {
+      const avail = straightPool.filter(d => d.available_ml > 0);
       if (!avail.length) break;
 
-      // Gewichtete Zufallsauswahl – mehr ml → öfter gewählt
+      // Verbleibende ml gleichmässig auf verbleibende Slots verteilen
+      const slotsLeft  = TARGET - out.length;
+      const totalLeft  = avail.reduce((s, d) => s + d.available_ml, 0);
+      const targetSize = Math.max(10, Math.floor(totalLeft / slotsLeft / 10) * 10);
+
+      // Gewichtete Zufallsauswahl
       const totalMl = avail.reduce((s, d) => s + d.available_ml, 0);
       let rnd   = Math.random() * totalMl;
       let drink = avail[avail.length - 1];
       for (const d of avail) { rnd -= d.available_ml; if (rnd <= 0) { drink = d; break; } }
 
-      const cap    = Math.min(drink.available_ml, MAX_ML);
-      const amount = this.randInt(MIN_ML / 10, cap / 10) * 10;
+      const amount = Math.max(10, Math.min(drink.available_ml, Math.min(targetSize, MAX_ML)));
+      const rounded = Math.floor(amount / 10) * 10 || 10;
 
       out.push({
         round_id: roundId, is_mix: false,
-        drink_parts: [{ id: drink.roundDrinkId, name: drink.name, amount, alc_percent: drink.alc_percent }],
-        total_ml: amount, mix_ratio: null,
+        drink_parts: [{ id: drink.roundDrinkId, name: drink.name, amount: rounded, alc_percent: drink.alc_percent }],
+        total_ml: rounded, mix_ratio: null,
         result_alc_percent: drink.alc_percent || null,
       });
-      drink.available_ml -= amount;
+      drink.available_ml -= rounded;
     }
 
     return out;

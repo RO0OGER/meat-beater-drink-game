@@ -18,26 +18,50 @@
     </div>
   }
 
-  <button class="btn btn--primary" (click)="createGame()">+ Neues Spiel</button>
+  <button class="btn btn--primary" (click)="createRound()">+ Neue Runde</button>
 
   <div class="dash-section">
-    <p class="section-title">Deine Spiele</p>
+    <p class="section-title">Deine Runden</p>
 
     @if (loading) {
       <div class="dash-loading">
         <p>Lädt...</p>
       </div>
-    } @else if (games.length === 0) {
+    } @else if (rounds.length === 0) {
       <div class="card dash-empty">
-        <p>Noch keine Spiele. Erstelle dein erstes!</p>
+        <p>Noch keine Runden. Erstelle deine erste!</p>
       </div>
     } @else {
-      <div class="dash-list">
-        @for (game of games; track game.id) {
-          <div class="list-item dash-game-item" (click)="openGame(game)">
-            <div class="dash-game-icon">🍺</div>
-            <span class="dash-game-name">{{ game.name }}</span>
-            <button class="btn btn--ghost btn--sm btn--icon" (click)="deleteGame(game, $event)">🗑</button>
+      <div class="dash-round-list">
+        @for (round of rounds; track round.id) {
+          <div class="card dash-round-card" [class.dash-round-card--ended]="round.status === 'ended'">
+
+            <div class="dash-round-header">
+              <div class="dash-round-teams">{{ round.team1_name }} <span>vs</span> {{ round.team2_name }}</div>
+              <span class="dash-round-status"
+                    [class.dash-round-status--playing]="round.status === 'playing'"
+                    [class.dash-round-status--ended]="round.status === 'ended'">
+                {{ statusLabel(round) }}
+              </span>
+            </div>
+
+            <div class="dash-round-meta">
+              <span class="dash-round-code">{{ round.round_code }}</span>
+              <span class="dash-round-hits">{{ round.team1_hits + round.team2_hits }} Hits</span>
+            </div>
+
+            @if (round.status === 'ended') {
+              <div class="dash-round-actions">
+                <button class="btn btn--danger btn--sm" (click)="deleteRound(round, $event)">🗑 Löschen</button>
+              </div>
+            } @else {
+              <div class="dash-round-actions">
+                <button class="btn btn--ghost btn--sm" (click)="deleteRound(round, $event)">🗑</button>
+                <button class="btn btn--ghost btn--sm" (click)="setupDrinks(round)">🍺 Drinks</button>
+                <button class="btn btn--primary btn--sm" (click)="openLobby(round)">▶ Lobby</button>
+              </div>
+            }
+
           </div>
         }
       </div>

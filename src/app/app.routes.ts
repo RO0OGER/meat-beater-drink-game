@@ -4,10 +4,11 @@ import { authGuard } from '../guards/auth.guard';
 // Auth
 import { AuthPage } from '../auth/auth-page/auth-page';
 
-// Dashboard & Game Management
+// Start screen
+import { StartScreen } from '../start-screen/start-screen';
+
+// Dashboard
 import { DashboardPage } from '../dashboard/dashboard';
-import { CreateGamePage } from '../game/create-game/create-game';
-import { GameOverviewPage } from '../game/game-overview/game-overview';
 
 // Round setup
 import { CreateRoundPage } from '../game/create-round-screen/create-round';
@@ -35,13 +36,11 @@ export const routes: Routes = [
   { path: 'round/:roundId/lobby',        component: RoundLobbyPage },
   { path: 'round/:roundId/personal',     component: PlayerGameView },
 
-  // Protected: default redirect
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+  // Start screen
+  { path: '', component: StartScreen, pathMatch: 'full' },
 
-  // Protected: Dashboard & game management
+  // Protected: Dashboard
   { path: 'dashboard',                   component: DashboardPage,    canActivate: [authGuard] },
-  { path: 'game/new',                    component: CreateGamePage,   canActivate: [authGuard] },
-  { path: 'game/:gameId',               component: GameOverviewPage, canActivate: [authGuard] },
 
   // Protected: Round setup
   { path: 'game/:gameId/round/new',                           component: CreateRoundPage,   canActivate: [authGuard] },

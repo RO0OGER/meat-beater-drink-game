@@ -71,6 +71,6 @@ export class CreateRoundPage implements OnInit {
   }
 
   back() {
-    this.router.navigate(['/game', this.gameId]);
+    this.router.navigate(['/dashboard']);
   }
 }

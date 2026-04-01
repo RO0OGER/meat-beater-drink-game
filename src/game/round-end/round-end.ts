@@ -35,7 +35,7 @@ export class RoundEnd implements OnInit {
   // Cascade-delete on round removes round_drinks + generated_drink_entries automatically
   async deleteEverything() {
     await this.roundService.deleteRoundById(this.roundId);
-    this.router.navigate(['/game', this.gameId]);
+    this.router.navigate(['/dashboard']);
   }
 
   async applyExtraTime() {

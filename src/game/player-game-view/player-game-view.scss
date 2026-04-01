@@ -268,19 +268,22 @@
 
 .pgv-counter-cups {
   display: flex;
-  gap: 7px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  max-width: 280px;
 }
 
 .pgv-counter-cup {
-  width: 14px;
-  height: 17px;
+  width: 10px;
+  height: 13px;
   clip-path: polygon(12% 0%, 88% 0%, 80% 100%, 20% 100%);
   background: rgba(255,255,255,0.08);
   transition: background 0.25s, box-shadow 0.25s;
 
   &--filled {
     background: linear-gradient(160deg, #f87171, #ef4444);
-    box-shadow: 0 2px 8px rgba(239,68,68,0.4);
+    box-shadow: 0 2px 6px rgba(239,68,68,0.4);
   }
 }
 
@@ -576,10 +579,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
   padding: 28px 20px 32px;
   gap: 20px;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .pgv-end-winner-block {
@@ -611,11 +613,78 @@
   color: var(--text-muted);
 }
 
-.pgv-end-loser-label {
-  font-size: 0.8rem;
+.pgv-end-loser-block {
+  width: 100%;
+  background: rgba(239,68,68,0.06);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.pgv-end-remaining-block {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 40vh;
+}
+
+.pgv-end-remaining-block .pgv-end-remaining-list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.pgv-end-loser-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 3px;
+  color: #ef4444;
+  line-height: 1;
+}
+
+.pgv-end-loser-sub {
+  font-size: 0.72rem;
   color: var(--text-muted);
-  margin-top: 4px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.pgv-end-penalty-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(245,158,11,0.06);
+  border-bottom: 1px solid var(--border);
+}
+
+.pgv-end-penalty-icon { font-size: 1rem; }
+
+.pgv-end-penalty-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 3px;
+  color: var(--accent);
+  flex: 1;
+}
+
+.pgv-end-penalty-count {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
   letter-spacing: 1px;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: 6px;
+  padding: 2px 8px;
 }
 
 .pgv-end-teams {
@@ -645,6 +714,10 @@
   &--loser {
     border-color: rgba(239,68,68,0.3);
     opacity: 0.7;
+  }
+
+  &--mine {
+    box-shadow: 0 0 0 2px var(--accent);
   }
 }
 
@@ -708,52 +781,65 @@
   &:hover { color: var(--text); border-color: var(--border); }
 }
 
-.pgv-end-remaining {
-  width: 100%;
-  background: rgba(239,68,68,0.08);
-  border: 1px solid rgba(239,68,68,0.3);
-  border-radius: var(--r);
-  padding: 14px 16px;
-  overflow-y: auto;
-  max-height: 35vh;
-  flex-shrink: 0;
-}
-
-.pgv-end-remaining-title {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #ef4444;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin: 0 0 10px;
-}
-
 .pgv-end-remaining-list {
+  width: 100%;
+  padding: 4px 16px 8px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0;
 }
 
 .pgv-end-remaining-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.85rem;
-  color: var(--text);
-  padding: 6px 0;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
   border-bottom: 1px solid rgba(239,68,68,0.15);
-  gap: 8px;
-  flex-wrap: wrap;
 
   &:last-child { border-bottom: none; }
+}
 
-  span { color: var(--text-muted); }
+.pgv-end-remaining-index {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  color: rgba(239,68,68,0.5);
+  min-width: 18px;
+  padding-top: 1px;
+}
+
+.pgv-end-remaining-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.pgv-end-remaining-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.pgv-end-remaining-name {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pgv-end-remaining-amount {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  color: var(--accent);
+  white-space: nowrap;
 }
 
 .pgv-end-remaining-abv {
-  color: var(--accent) !important;
-  font-weight: 600;
-  margin-left: auto;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
 }
 
 // ── GO button ────────────────────────────────────────────────────

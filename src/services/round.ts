@@ -21,6 +21,15 @@ export class RoundService {
     return data as Round;
   }
 
+  /** Returns all rounds for the current user (RLS filters by ownership). */
+  async getAllRounds(): Promise<Round[]> {
+    const { data } = await this.supabase.client
+      .from('rounds')
+      .select('*')
+      .order('created_at', { ascending: false });
+    return (data as Round[]) ?? [];
+  }
+
   async getRoundsByGameId(gameId: string): Promise<Round[]> {
     const { data, error } = await this.supabase.client
       .from('rounds')
@@ -213,10 +222,8 @@ export class RoundService {
   }
 
   async endGame(roundId: string, loserTeam?: 'team1' | 'team2'): Promise<boolean> {
-    const ok = await this.updateRound(roundId, { status: 'ended' });
-    if (ok && loserTeam) {
-      await this.updateRound(roundId, { loser_team: loserTeam });
-    }
-    return ok;
+    const update: Partial<Round> = { status: 'ended' };
+    if (loserTeam) update.loser_team = loserTeam;
+    return this.updateRound(roundId, update);
   }
 }
